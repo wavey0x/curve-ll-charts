@@ -30,8 +30,9 @@ function App() {
       };
     }
     // Remove the legend title
-    spec.encoding.color.legend = {
-      ...spec.encoding.color.legend,
+    console.log(spec);
+    spec.config.legend = {
+      ...spec.config.legend,
       title: null
     };
     return spec;
@@ -111,11 +112,11 @@ function App() {
         </label>
       </div>
       <div className="chart-section">
-        <h2>Weekly APRs</h2>
+        {/* <h2>Weekly APRs</h2> */}
         <div className="chart-container" ref={vegaRef} />
       </div>
       <div className="chart-section">
-        <h2>APR Since</h2>
+        {/* <h2>APR Since</h2> */}
         <div className="chart-container" ref={vegaRefSince} />
       </div>
     </div>

@@ -2,12 +2,14 @@ from brownie import Contract, chain
 import pandas as pd
 from datetime import datetime, timedelta
 import altair as alt
-from compounders_data import CURVE_LIQUID_LOCKER_COMPOUNDERS
+from compounders_info import CURVE_LIQUID_LOCKER_COMPOUNDERS
 import os
 import glob
 
 DAY = 60 * 60 * 24
 WEEK = DAY * 7
+YEAR = DAY * 365
+QUARTER = YEAR / 4
 DATE_FORMAT = '%m-%d'
 CLEAN_UP_CHARTS_OLDER_THAN_DAY = 10
 
@@ -33,7 +35,9 @@ def weekly_apr(adjust_for_peg=False):
     week_end = current_week + WEEK
     aprs = []
     peg = 1
-    for i in range(17):
+    sample_width = WEEK
+    chart_width = QUARTER
+    for i in range(1, chart_width // sample_width):
         week_end -= WEEK
         end_block, _ = get_block_and_ts(week_end)
         end_date = datetime.fromtimestamp(week_end)
@@ -56,8 +60,10 @@ def apr_since(adjust_for_peg=False):
     current_block, current_ts = get_block_and_ts(chain.time() - 1000)
     aprs = []
     peg = 1
-    for i in range(1, 130):
-        sample_block, sample_ts = get_block_and_ts(current_ts - (DAY * i))
+    sample_width = WEEK
+    chart_width = QUARTER
+    for i in range(1, chart_width // sample_width):
+        sample_block, sample_ts = get_block_and_ts(current_ts - (sample_width * i))
         elapsed_time = current_ts - sample_ts
         sample = {}
         dt_object = datetime.fromtimestamp(sample_ts)
@@ -70,7 +76,7 @@ def apr_since(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], current_block)
-            apr = gain / start_pps / (elapsed_time / (DAY * 365)) * peg
+            apr = gain / start_pps / (elapsed_time / YEAR) * peg
             sample[data['symbol']] = apr
         aprs.append(sample)
 
@@ -123,7 +129,33 @@ def plot_aprs(title, aprs):
         title=title,
         width='container',
         height=400  # Fixed height for responsiveness
-    ).configure_axis(
+    )
+
+    vertical_lines = pd.DataFrame({
+        'date': [datetime.utcfromtimestamp(1718236800), datetime.utcfromtimestamp(1718841600)],
+        'label': ['YBS migration week', 'YBS double rewards week start']
+    })
+    vlines = alt.Chart(vertical_lines).mark_rule(
+        color='red',
+        strokeDash=[5,5],
+        size=1
+    ).encode(
+        x='date:T',
+        color=alt.Color('color:N', legend=alt.Legend(title="Important Events")),
+        tooltip=['label:N']
+    )
+    # Add text for vertical lines
+    text = vlines.mark_text(
+        align='left',
+        baseline='bottom',
+        dx=7,  # move text to the right
+        dy=-7, # move text up
+        color='red'
+    ).encode(
+        text='label:N'
+    )
+
+    final_chart = alt.layer(chart, vlines).configure_axis(
         grid=True,
         gridOpacity=0.2,
         gridDash=[2, 2],
@@ -141,10 +173,11 @@ def plot_aprs(title, aprs):
         strokeOpacity=0
     ).interactive()
 
+
     # Save chart as JSON with date
-    date_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    date_str = datetime.now().strftime('%Y-%m-%d')
     filename = f"{title}_{date_str}.json"
-    chart.save(os.path.join('charts', filename))
+    final_chart.save(os.path.join('charts', filename))
 
     # Clean up old charts
     cleanup_old_charts(CLEAN_UP_CHARTS_OLDER_THAN_DAY)
@@ -156,7 +189,7 @@ def cleanup_old_charts(older_than_days):
         # Extract the date part from the filename
         file_date_str = '_'.join(file.split('_')[-2:]).replace('.png', '')
         try:
-            file_date = datetime.strptime(file_date_str, '%Y-%m-%d_%H-%M-%S')
+            file_date = datetime.strptime(file_date_str, '%Y-%m-%d_%H')
             if file_date < threshold_date:
                 os.remove(file)
         except ValueError:

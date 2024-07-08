@@ -4,7 +4,8 @@ import os
 import glob
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})  # Allow CORS for React app origin
+# CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})  # Allow CORS for React app origin
+CORS(app)  # This will enable CORS for all routes
 
 # Serve the most recent chart JSON
 @app.route('/charts/<chart_name>/<peg>')

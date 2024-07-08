@@ -30,7 +30,6 @@ function App() {
       };
     }
     // Remove the legend title
-    console.log(spec);
     spec.config.legend = {
       ...spec.config.legend,
       title: null
@@ -40,8 +39,10 @@ function App() {
 
   const fetchChart = async (chartType) => {
     try {
-      let url = `http://127.0.0.1:5000/charts/${chartType}/${peg}`;
-      const response = await axios.get(url);
+      // console.log()
+      // let url = `http://127.0.0.1:5000/charts/${chartType}/${peg}`;
+      
+      const response = await axiosInstance.get(`/charts/${chartType}/${peg}`);
       let spec = response.data;
       // Ensure autosize is set for the chart spec
       let baseTitle = chartType.replace(/_/g, ' ');

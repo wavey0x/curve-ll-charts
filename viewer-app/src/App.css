@@ -1,0 +1,77 @@
+.switch-container {
+  /* display: flex;
+  justify-content: center; */
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative; /* Needed for positioning the tooltip */
+}
+
+.switch-container label {
+  display: flex;
+  align-items: center;
+  font-size: 18px; /* Increase font size for better readability */
+  font-weight: 500; /* Make the font slightly bolder */
+  cursor: pointer; /* Change cursor to pointer for better UX */
+}
+
+.switch-container label span {
+  margin-right: 10px; /* Add space between the label text and the switch */
+}
+
+.react-switch {
+  position: relative; /* Needed for positioning the tooltip above the switch */
+  transform: scale(0.6); /* Scale down the switch size */
+}
+
+/* Tooltip styling */
+.tooltip {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%; /* Position the tooltip above the switch */
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px; /* Smaller font size for tooltip text */
+  white-space: normal; /* Ensure text wraps within the tooltip */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a slight shadow for better visibility */
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Adjust the position of the arrow */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.react-switch:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  height: 500px; /* Default height for larger screens */
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 300px; /* Adjusted height for mobile view */
+  }
+}

@@ -32,7 +32,6 @@ def main():
 def weekly_apr(adjust_for_peg=False):
     current_time = chain.time() - 5
     current_week = current_time // WEEK * WEEK
-    week_end = current_week + WEEK
     aprs = []
     peg = 1
     sample_width = WEEK
@@ -44,7 +43,6 @@ def weekly_apr(adjust_for_peg=False):
         end_date = datetime.fromtimestamp(week_end)
         sample = {'date': end_date}
         for address, data in CURVE_LIQUID_LOCKER_COMPOUNDERS.items():
-            vault = Contract(address)
             end_pps = get_pps(address, end_block)
             start_block = closest_block_before_timestamp(week_end - WEEK)
             start_pps = get_pps(address, start_block)
@@ -54,7 +52,6 @@ def weekly_apr(adjust_for_peg=False):
             apr = gain / start_pps / (WEEK / YEAR)
             apr *= peg
             sample[data['symbol']] = apr * peg
-        
         aprs.append(sample)
     return aprs
 
@@ -104,7 +101,7 @@ def get_pps(vault_address, block):
     
 
 def plot_aprs(title, aprs):
-    threshold_date = datetime.now() - timedelta(days=10)
+    threshold_date = datetime.now()
     df = pd.DataFrame(aprs)
     df['date'] = pd.to_datetime(df['date'])
 
@@ -119,7 +116,7 @@ def plot_aprs(title, aprs):
 
     # Define color mapping
     color_scale = alt.Scale(domain=['ucvxCRV', 'st-yCRV', 'asdCRV'],
-                            range=['orange', 'blue', 'black'])
+                            range=['orange', '#4D8CC8', 'black'])
 
     # Create an Altair chart
     chart = alt.Chart(melted_df).mark_line(point=True).encode(

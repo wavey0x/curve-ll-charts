@@ -1,11 +1,68 @@
 from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 import os
 import glob
+from config import Config
 
 app = Flask(__name__)
 # CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})  # Allow CORS for React app origin
 CORS(app)  # This will enable CORS for all routes
+
+# Configuration for the database
+app.config.from_object(Config)
+
+# Initialize the database
+db = SQLAlchemy(app)
+
+class CrvLlHarvest(db.Model):
+    __tablename__ = 'crv_ll_harvests'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    profit = db.Column(db.Numeric(30, 18))
+    timestamp = db.Column(db.Integer)
+    name = db.Column(db.String)
+    underlying = db.Column(db.String)
+    compounder = db.Column(db.String)
+    block = db.Column(db.Integer)
+    txn_hash = db.Column(db.String)
+    date_str = db.Column(db.String)
+
+# Endpoint to return records from the crv_ll_harvests table
+@app.route('/harvests', methods=['GET'])
+def get_harvests():
+    # Get query parameters for pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    
+    # Calculate the offset
+    offset = (page - 1) * per_page
+    
+    # Query the database with pagination
+    harvests = CrvLlHarvest.query.order_by(CrvLlHarvest.timestamp.desc()).offset(offset).limit(per_page).all()
+    
+    # Get the total number of records for pagination metadata
+    total = CrvLlHarvest.query.count()
+    
+    results = [
+        {
+            "id": harvest.id,
+            "profit": str(harvest.profit),
+            "timestamp": harvest.timestamp,
+            "name": harvest.name,
+            "underlying": harvest.underlying,
+            "compounder": harvest.compounder,
+            "block": harvest.block,
+            "txn_hash": harvest.txn_hash,
+            "date_str": harvest.date_str
+        } for harvest in harvests
+    ]
+    
+    return jsonify({
+        'page': page,
+        'per_page': per_page,
+        'total': total,
+        'data': results
+    })
 
 # Serve the most recent chart JSON
 @app.route('/charts/<chart_name>/<peg>')

@@ -1,6 +1,6 @@
 body {
   /* font-family: 'Source Code Pro', monospace; */
-  font-family: "Work Sans", sans-serif;
+  font-family: 'Work Sans', sans-serif;
 }
 
 .App {
@@ -9,7 +9,8 @@ body {
   color: black;
 }
 
-.intro, .info {
+.intro,
+.info {
   padding: 8px;
   padding-top: 0px;
   padding-right: 40px;
@@ -102,9 +103,14 @@ hr {
   }
 }
 
-.information-section, .harvest-data-section {
+.information-section,
+.harvest-data-section {
   margin-top: 20px;
   text-align: left;
+}
+
+.react-tabs {
+  padding-bottom: 20px;
 }
 
 .react-tabs__tab-list {

@@ -7,6 +7,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import HarvestTable from './components/HarvestTable';
 
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
@@ -104,13 +105,13 @@ function App() {
       <header>APR Charts for CRV Liquid Locker Auto-compounders</header>
       <hr />
       <div className="intro">
-      <ReactMarkdown>
-        {`Auto-compounders serve as a useful means for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
+        <ReactMarkdown>
+          {`Auto-compounders serve as a system for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
           
-All data on this page is gathered exclusively from on-chain. The code is fully open source. You may view or contribute via [my Github](https://github.com/wavey0x/curve-ll-charts).   
+All data on this page is gathered exclusively from on-chain calls and **zero** external data sources. The code is fully open source. You may view or contribute on [Github](https://github.com/wavey0x/curve-ll-charts).   
 
 `}
-      </ReactMarkdown>
+        </ReactMarkdown>
       </div>
 
       <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>
@@ -121,22 +122,22 @@ All data on this page is gathered exclusively from on-chain. The code is fully o
         </TabList>
 
         <TabPanel>
-        <div className="switch-container">
-        <label>
-          Denominate in CRV:
-          <div className="switch-wrapper">
-          <Switch
-            onChange={() => setPeg(!peg)}
-            checked={peg}
-            offColor="#ccc"  // Light gray for the off state
-            onColor="#ccc"   // White for the on state
-            uncheckedIcon={false}
-            checkedIcon={false}
-            className="react-switch"
-          />
+          <div className="switch-container">
+            <label>
+              Denominate in CRV:
+              <div className="switch-wrapper">
+                <Switch
+                  onChange={() => setPeg(!peg)}
+                  checked={peg}
+                  offColor="#ccc" // Light gray for the off state
+                  onColor="#ccc" // White for the on state
+                  uncheckedIcon={false}
+                  checkedIcon={false}
+                  className="react-switch"
+                />
+              </div>
+            </label>
           </div>
-        </label>
-      </div>
           <div className="chart-section">
             <div className="chart-container" ref={vegaRef} />
             <div className="chart-container" ref={vegaRefSince} />
@@ -151,18 +152,30 @@ All data on this page is gathered exclusively from on-chain. The code is fully o
         </TabPanel>
         <TabPanel>
           <div className="info harvest-data-section extra-class">
-            <ReactMarkdown>
+            <div>
+              <h1>Harvest History</h1>
+              <HarvestTable />
+            </div>
+            {/* <ReactMarkdown>
               {`TODO: Sortable table with harvest transactions for each auto-compounder.`}
-            </ReactMarkdown>
+            </ReactMarkdown> */}
           </div>
         </TabPanel>
       </Tabs>
 
       <footer>
-        <a href="https://github.com/wavey0x/curve-ll-charts/blob/master/scripts/apr_charts.py" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://github.com/wavey0x/curve-ll-charts/blob/master/scripts/apr_charts.py"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <i className="fab fa-github"></i> Chart Source
         </a>
-        <a href="https://twitter.com/wavey0x" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://twitter.com/wavey0x"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <i className="fab fa-twitter"></i> Contact
         </a>
       </footer>

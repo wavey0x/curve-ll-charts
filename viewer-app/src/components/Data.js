@@ -74,7 +74,7 @@ const Data = () => {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Symbol</th>
+            <th></th>
             <th>30 Day APR</th>
             <th>60 Day APR</th>
             <th>90 Day APR</th>
@@ -118,7 +118,7 @@ const Data = () => {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Symbol</th>
+            <th></th>
             <th>TVL</th>
             <th>Profit Unlock Period (Hours)</th>
             <th>Fee</th>

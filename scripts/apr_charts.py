@@ -76,6 +76,7 @@ def apr_since(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], sample_block)
+                peg *= get_peg(data['pool'], current_block)
             apr = gain / start_pps / (elapsed_time / YEAR) 
             apr *= peg
             sample[data['symbol']] = apr
@@ -85,7 +86,8 @@ def apr_since(adjust_for_peg=False):
 
 def get_peg(pool, block):
     pool = Contract(pool)
-    return pool.get_dy(1, 0, 1e18, block_identifier=block) / 1e18
+    amount = 10_000e18
+    return pool.get_dy(1, 0, amount, block_identifier=block) / amount
 
 def get_pps(vault_address, block):
     vault = Contract(vault_address)

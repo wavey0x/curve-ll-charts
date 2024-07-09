@@ -12,6 +12,7 @@
     "react-markdown": "^9.0.1",
     "react-scripts": "5.0.1",
     "react-switch": "^7.0.0",
+    "react-tabs": "^6.0.2",
     "react-vega": "^7.6.0",
     "vega": "^5.30.0",
     "vega-embed": "^6.26.0",
@@ -26,7 +27,6 @@
     "eject": "react-scripts eject",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,scss,md}\"",
     "format-check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,scss,md}\""
-  
   },
   "eslintConfig": {
     "extends": [

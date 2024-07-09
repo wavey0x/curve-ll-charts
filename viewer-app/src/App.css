@@ -1,5 +1,6 @@
 body {
-  font-family: 'Georgia', serif; /* Sophisticated font like the New York Times */
+  /* font-family: 'Source Code Pro', monospace; */
+  font-family: "Work Sans", sans-serif;
 }
 
 .App {
@@ -8,7 +9,14 @@ body {
   color: black;
 }
 
+.intro, .info {
+  padding: 8px;
+  padding-top: 0px;
+  padding-right: 40px;
+}
+
 header {
+  font-family: 'Arial', sans-serif; /* or whichever font you prefer for the header */
   padding: 20px;
   font-size: 1.75em;
 }
@@ -92,4 +100,34 @@ hr {
   .chart-container {
     height: 300px;
   }
+}
+
+.information-section, .harvest-data-section {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.react-tabs__tab-list {
+  border-bottom: 1px solid #ccc;
+  margin: 0;
+  padding: 0;
+}
+
+.react-tabs__tab {
+  display: inline-block;
+  border: 1px solid transparent;
+  border-bottom: none;
+  bottom: -1px;
+  position: relative;
+  list-style: none;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.react-tabs__tab--selected {
+  background: #fff;
+  border-color: #ccc;
+  border-radius: 5px 5px 0 0;
+  color: #333;
+  font-weight: bold;
 }

@@ -3,6 +3,8 @@ import axios from 'axios';
 import vegaEmbed from 'vega-embed';
 import Switch from 'react-switch';
 import ReactMarkdown from 'react-markdown';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 import './App.css';
 
 const axiosInstance = axios.create({
@@ -13,6 +15,8 @@ function App() {
   const [peg, setPeg] = useState(false);
   const [chartSpec, setChartSpec] = useState();
   const [chartSpecSince, setChartSpecSince] = useState();
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [forceRender, setForceRender] = useState(0); // State to force re-render
   const vegaRef = useRef(null);
   const vegaRefSince = useRef(null);
 
@@ -47,7 +51,7 @@ function App() {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-      spec.title = baseTitle + (peg ? ' (Adjusted For Peg)' : '');
+      spec.title = baseTitle + (peg ? ' (CRV denominated)' : '');
       spec.autosize = { type: 'fit', contains: 'padding' };
 
       spec = updateSpecForMobile(spec);
@@ -75,7 +79,7 @@ function App() {
         })
         .catch((error) => console.error(error));
     }
-  }, [chartSpec]);
+  }, [chartSpec, forceRender]); // Added forceRender to dependencies
 
   useEffect(() => {
     if (vegaRefSince.current && chartSpecSince) {
@@ -85,41 +89,73 @@ function App() {
         })
         .catch((error) => console.error(error));
     }
-  }, [chartSpecSince]);
+  }, [chartSpecSince, forceRender]); // Added forceRender to dependencies
+
+  const handleTabSelect = (index) => {
+    setActiveTabIndex(index);
+    if (index === 0) {
+      setForceRender(forceRender + 1); // Change state to force re-render
+    }
+  };
 
   return (
     <div className="App">
       <header>APR Charts for CRV Liquid Locker Auto-compounders</header>
       <hr />
+      <div className="intro">
       <ReactMarkdown>
         {`Auto-compounders serve as a useful means for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
           
-All data on this page is gathered from directly on-chain sources. The code is fully open source. You may view or contribute via [my Github](https://github.com/wavey0x/curve-ll-charts).   
+All data on this page is gathered exclusively from on-chain. The code is fully open source. You may view or contribute via [my Github](https://github.com/wavey0x/curve-ll-charts).   
 
 `}
       </ReactMarkdown>
-      <div className="switch-container">
+      </div>
+
+      <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>
+        <TabList>
+          <Tab>Charts</Tab>
+          <Tab>Information</Tab>
+          <Tab>Harvest Data</Tab>
+        </TabList>
+
+        <TabPanel>
+        <div className="switch-container">
         <label>
-          Adjust charts for peg:
+          Denominate in CRV:
           <div className="switch-wrapper">
-            <Switch
-              onChange={() => setPeg(!peg)}
-              checked={peg}
-              offColor="#888"
-              onColor="#0d6efd"
-              uncheckedIcon={false}
-              checkedIcon={false}
-              className="react-switch"
-            />
+          <Switch
+            onChange={() => setPeg(!peg)}
+            checked={peg}
+            offColor="#ccc"  // Light gray for the off state
+            onColor="#ccc"   // White for the on state
+            uncheckedIcon={false}
+            checkedIcon={false}
+            className="react-switch"
+          />
           </div>
         </label>
       </div>
-      <div className="chart-section">
-        <div className="chart-container" ref={vegaRef} />
-      </div>
-      <div className="chart-section">
-        <div className="chart-container" ref={vegaRefSince} />
-      </div>
+          <div className="chart-section">
+            <div className="chart-container" ref={vegaRef} />
+            <div className="chart-container" ref={vegaRefSince} />
+          </div>
+        </TabPanel>
+        <TabPanel>
+          <div className="info information-section">
+            <ReactMarkdown>
+              {`TODO: Populate with information about calculation methodology. Perf fees, profit unlocking duration, other config for each auto-compounder. Add contract addresses. Etc.`}
+            </ReactMarkdown>
+          </div>
+        </TabPanel>
+        <TabPanel>
+          <div className="info harvest-data-section">
+            <ReactMarkdown>
+              {`TODO: Sortable table with harvest transactions for each auto-compounder.`}
+            </ReactMarkdown>
+          </div>
+        </TabPanel>
+      </Tabs>
     </div>
   );
 }

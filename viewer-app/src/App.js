@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import './App.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
@@ -51,7 +52,7 @@ function App() {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-      spec.title = baseTitle + (peg ? ' (CRV denominated)' : '');
+      spec.title = baseTitle + (peg ? ' (Adjusted For Peg)' : '');
       spec.autosize = { type: 'fit', contains: 'padding' };
 
       spec = updateSpecForMobile(spec);
@@ -149,13 +150,22 @@ All data on this page is gathered exclusively from on-chain. The code is fully o
           </div>
         </TabPanel>
         <TabPanel>
-          <div className="info harvest-data-section">
+          <div className="info harvest-data-section extra-class">
             <ReactMarkdown>
               {`TODO: Sortable table with harvest transactions for each auto-compounder.`}
             </ReactMarkdown>
           </div>
         </TabPanel>
       </Tabs>
+
+      <footer>
+        <a href="https://github.com/wavey0x/curve-ll-charts/blob/master/scripts/apr_charts.py" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-github"></i> Chart Source
+        </a>
+        <a href="https://twitter.com/wavey0x" target="_blank" rel="noopener noreferrer">
+          <i className="fab fa-twitter"></i> Contact
+        </a>
+      </footer>
     </div>
   );
 }

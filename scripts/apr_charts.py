@@ -20,11 +20,11 @@ def main():
     aprs_weekly = weekly_apr(adjust_for_peg=False)
     plot_aprs('Weekly_APRs_False', aprs_weekly)
 
-    aprs_since = apr_since(adjust_for_peg=False)
-    plot_aprs('APR_Since_False', aprs_since)
-
     aprs_weekly_peg = weekly_apr(adjust_for_peg=True)
     plot_aprs('Weekly_APRs_True', aprs_weekly_peg)
+
+    aprs_since = apr_since(adjust_for_peg=False)
+    plot_aprs('APR_Since_False', aprs_since)
 
     aprs_since_peg = apr_since(adjust_for_peg=True)
     plot_aprs('APR_Since_True', aprs_since_peg)
@@ -38,8 +38,9 @@ def weekly_apr(adjust_for_peg=False):
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
-    for i in range(1, num_samples):
-        week_end -= WEEK
+    for i in range(0, num_samples):
+        print(i)
+        week_end = current_week - (WEEK * i)
         end_block, _ = get_block_and_ts(week_end)
         end_date = datetime.fromtimestamp(week_end)
         sample = {'date': end_date}
@@ -51,7 +52,8 @@ def weekly_apr(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], end_block)
-            apr = gain / start_pps / (1/52)
+            apr = gain / start_pps / (WEEK / YEAR)
+            apr *= peg
             sample[data['symbol']] = apr * peg
         
         aprs.append(sample)
@@ -64,7 +66,8 @@ def apr_since(adjust_for_peg=False):
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
-    for i in range(1, num_samples):
+    for i in range(0, num_samples):
+        print(i)
         sample_block, sample_ts = get_block_and_ts(current_ts - (sample_width * i))
         elapsed_time = current_ts - sample_ts
         sample = {}
@@ -77,8 +80,9 @@ def apr_since(adjust_for_peg=False):
             end_pps = get_pps(address, current_block)
             gain = end_pps - start_pps
             if adjust_for_peg:
-                peg = get_peg(data['pool'], current_block)
-            apr = gain / start_pps / (elapsed_time / YEAR) * peg
+                peg = get_peg(data['pool'], sample_block)
+            apr = gain / start_pps / (elapsed_time / YEAR) 
+            apr *= peg
             sample[data['symbol']] = apr
         aprs.append(sample)
 
@@ -99,9 +103,7 @@ def get_pps(vault_address, block):
         ts = vault.totalSupply(block_identifier=block)
         total_underlying = vault.totalUnderlying(block_identifier=block)
         return total_underlying / ts
-
-import glob
-from datetime import datetime
+    
 
 def plot_aprs(title, aprs):
     threshold_date = datetime.now() - timedelta(days=10)
@@ -131,7 +133,7 @@ def plot_aprs(title, aprs):
         title=title,
         width='container',
         height=400  # Fixed height for responsiveness
-    )
+    ).interactive(bind_x=False, bind_y=False)
 
     vertical_lines = pd.DataFrame({
         'date': [datetime.utcfromtimestamp(1718236800), datetime.utcfromtimestamp(1718841600)],

@@ -2,15 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import vegaEmbed from 'vega-embed';
 import Switch from 'react-switch';
+import ReactMarkdown from 'react-markdown';
 import './App.css';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL // Specify the Flask server URL and port
+  baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
 });
 
 function App() {
   const [peg, setPeg] = useState(false);
-  const [chartName, setChartName] = useState('Weekly_APRs');
   const [chartSpec, setChartSpec] = useState();
   const [chartSpecSince, setChartSpecSince] = useState();
   const vegaRef = useRef(null);
@@ -21,47 +21,44 @@ function App() {
     if (window.innerWidth <= 768) {
       spec.config.legend = {
         ...spec.config.legend,
-        orient: 'bottom' // Move legend to the bottom on mobile
+        orient: 'bottom', // Move legend to the bottom on mobile
       };
     } else {
       spec.config.legend = {
         ...spec.config.legend,
-        orient: 'right' // Default legend position
+        orient: 'right', // Default legend position
       };
     }
     // Remove the legend title
     spec.config.legend = {
       ...spec.config.legend,
-      title: null
+      title: null,
     };
     return spec;
   };
 
   const fetchChart = async (chartType) => {
     try {
-      // console.log()
-      // let url = `http://127.0.0.1:5000/charts/${chartType}/${peg}`;
-      
       const response = await axiosInstance.get(`/charts/${chartType}/${peg}`);
       let spec = response.data;
-      // Ensure autosize is set for the chart spec
       let baseTitle = chartType.replace(/_/g, ' ');
-      // Capitalize the first letter of each word
-      baseTitle = baseTitle.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      baseTitle = baseTitle
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 
-      // Set the chart title based on the peg value
       spec.title = baseTitle + (peg ? ' (Adjusted For Peg)' : '');
       spec.autosize = { type: 'fit', contains: 'padding' };
-      // Update spec for mobile
+
       spec = updateSpecForMobile(spec);
-      
+
       if (chartType === 'Weekly_APRs') {
         setChartSpec(spec);
       } else {
         setChartSpecSince(spec);
       }
     } catch (error) {
-      console.error("Error fetching chart:", error);
+      console.error('Error fetching chart:', error);
     }
   };
 
@@ -92,7 +89,14 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Liquid Locker Auto-compounders</h1>
+      <header>APR Charts for CRV Liquid Locker Auto-compounders</header>
+      <hr />
+      <ReactMarkdown>
+        {`All data on this page is gathered from directly on-chain sources.  
+It will always remain fully open source. You may view the code or contribute any time at [my Github](https://github.com/wavey0x/curve-ll-charts).   
+Auto-compounders serve as a useful comparisons between the variety of lockers and their unique mechanics
+`}
+      </ReactMarkdown>
       <div className="switch-container">
         <label>
           Adjust charts for peg:
@@ -106,18 +110,13 @@ function App() {
               checkedIcon={false}
               className="react-switch"
             />
-            <div className="tooltip">
-              This setting adjusts the chart data based on the peg value.
-            </div>
           </div>
         </label>
       </div>
       <div className="chart-section">
-        {/* <h2>Weekly APRs</h2> */}
         <div className="chart-container" ref={vegaRef} />
       </div>
       <div className="chart-section">
-        {/* <h2>APR Since</h2> */}
         <div className="chart-container" ref={vegaRefSince} />
       </div>
     </div>

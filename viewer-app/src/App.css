@@ -1,29 +1,48 @@
+body {
+  font-family: 'Georgia', serif; /* Sophisticated font like the New York Times */
+}
+
+.App {
+  /* text-align: center; */
+  background-color: white;
+  color: black;
+}
+
+header {
+  padding: 20px;
+  font-size: 1.75em;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: black;
+  margin: 20px 0;
+}
+
 .switch-container {
-  /* display: flex;
-  justify-content: center; */
   align-items: center;
   margin-bottom: 20px;
-  position: relative; /* Needed for positioning the tooltip */
+  position: relative;
 }
 
 .switch-container label {
   display: flex;
   align-items: center;
-  font-size: 18px; /* Increase font size for better readability */
-  font-weight: 500; /* Make the font slightly bolder */
-  cursor: pointer; /* Change cursor to pointer for better UX */
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .switch-container label span {
-  margin-right: 10px; /* Add space between the label text and the switch */
+  margin-right: 10px;
 }
 
 .react-switch {
-  position: relative; /* Needed for positioning the tooltip above the switch */
-  transform: scale(0.6); /* Scale down the switch size */
+  position: relative;
+  transform: scale(0.6);
 }
 
-/* Tooltip styling */
 .tooltip {
   visibility: hidden;
   width: 200px;
@@ -34,20 +53,20 @@
   padding: 5px;
   position: absolute;
   z-index: 1;
-  bottom: 150%; /* Position the tooltip above the switch */
+  bottom: 150%;
   left: 50%;
   margin-left: -100px;
   opacity: 0;
   transition: opacity 0.3s;
-  font-size: 12px; /* Smaller font size for tooltip text */
-  white-space: normal; /* Ensure text wraps within the tooltip */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a slight shadow for better visibility */
+  font-size: 12px;
+  white-space: normal;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .tooltip::after {
-  content: "";
+  content: '';
   position: absolute;
-  top: 100%; /* Adjust the position of the arrow */
+  top: 100%;
   left: 50%;
   margin-left: -5px;
   border-width: 5px;
@@ -66,12 +85,11 @@
   display: flex;
   justify-content: center;
   margin-top: 20px;
-  height: 500px; /* Default height for larger screens */
+  height: 500px;
 }
 
-/* Media query for mobile devices */
 @media (max-width: 768px) {
   .chart-container {
-    height: 300px; /* Adjusted height for mobile view */
+    height: 300px;
   }
 }

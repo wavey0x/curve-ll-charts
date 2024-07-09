@@ -136,7 +136,7 @@ def plot_aprs(title, aprs):
             # datetime.utcfromtimestamp(1718841600)
         ],
         'label': [
-            'YBS launch ', 
+            'Yearn YBS launch; Reward pause', 
             # 'YBS double rewards week start'
         ]
     })
@@ -144,10 +144,10 @@ def plot_aprs(title, aprs):
     vlines = alt.Chart(vertical_lines).mark_rule(
         color='gray',
         strokeDash=[5,5],
-        size=1
+        size=2
     ).encode(
         x='date:T',
-        tooltip=['label:N']
+        tooltip=[alt.Tooltip('label:N', title=None)]
     )
 
     final_chart = alt.layer(chart, vlines).configure_axis(

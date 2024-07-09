@@ -15,10 +15,11 @@ const Data = () => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.get('/info');
-        setData(response.data.ll_data);
+        setData(response.data.ll_data || {});
         setLoading(false);
       } catch (error) {
         console.error('Error fetching the data:', error);
+        setData({});
         setLoading(false);
       }
     };
@@ -28,6 +29,10 @@ const Data = () => {
 
   if (loading) {
     return <p>Loading...</p>;
+  }
+
+  if (!data || Object.keys(data).length === 0) {
+    return <p>Error fetching data.</p>;
   }
 
   const formatPercentage = (value) => `${(value * 100).toFixed(2)}%`;
@@ -55,9 +60,9 @@ const Data = () => {
       const locker = data[key];
       return {
         symbol: locker.symbol,
-        30: locker[field]['30'],
-        60: locker[field]['60'],
-        90: locker[field]['90'],
+        30: locker[field]?.['30'] || 0,
+        60: locker[field]?.['60'] || 0,
+        90: locker[field]?.['90'] || 0,
       };
     });
 
@@ -100,9 +105,9 @@ const Data = () => {
       const locker = data[key];
       return {
         symbol: locker.symbol,
-        tvl: locker.tvl,
-        profit_unlock_period: locker.profit_unlock_period,
-        fee: locker.fee_pct,
+        tvl: locker.tvl || 0,
+        profit_unlock_period: locker.profit_unlock_period || 0,
+        fee: locker.fee_pct || 0,
       };
     });
 

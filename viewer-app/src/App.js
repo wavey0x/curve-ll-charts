@@ -8,7 +8,7 @@ import 'react-tabs/style/react-tabs.css';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import HarvestTable from './components/HarvestTable';
-import Info from './components/Info';
+import Data from './components/Data';
 import Markdown from 'react-markdown';
 import AddressList from './components/AddressList';
 
@@ -111,13 +111,17 @@ function App() {
       </header>
       <hr />
       <div className="intro">
-        <Markdown>All code used to produce this app is fully open source. You may view or contribute on [Github](https://github.com/wavey0x/curve-ll-charts)</Markdown>
+        <Markdown>
+          *All code used to produce this app is fully open source. All data
+          comes directly from the chain. You may view or contribute on
+          [Github](https://github.com/wavey0x/curve-ll-charts)*
+        </Markdown>
       </div>
 
       <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>
         <TabList>
           <Tab>Charts</Tab>
-          <Tab>Information</Tab>
+          <Tab>Data</Tab>
           <Tab>Harvests</Tab>
           <Tab>About</Tab>
         </TabList>
@@ -145,8 +149,8 @@ function App() {
           </div>
         </TabPanel>
         <TabPanel>
-          <div className="info information-section">
-            <Info></Info>
+          <div className="data data-section">
+            <Data></Data>
           </div>
         </TabPanel>
         <TabPanel>
@@ -162,18 +166,17 @@ function App() {
         </TabPanel>
         <TabPanel>
           <div className="about about-section">
-            <ReactMarkdown>
-            </ReactMarkdown>
+            <ReactMarkdown></ReactMarkdown>
             <ReactMarkdown>
               {`## About  
 
-Transparency in DeFi is important. In fact, it is the essence of DeFi itself. The goal of this site is to help increase transparency to liquid lockers in the Curve ecosystem. 
+Transparency in DeFi is important. In fact, it is the essence of DeFi itself. The goal of this site is to help increase transparency of liquid locker data in the Curve ecosystem. 
 
-Don't trust blackbox website numbers, verify!
+Don't trust numbers from black-box websites, verify!
 
 All data on this page is gathered exclusively from on-chain calls and **zero** external data sources.  
 
-Auto-compounders serve as a system for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
+To start, I've selected auto-compounders to use as for APR comparisons between liquid locker products. They are useful because each liquid locker project has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
           
 
 ## Charts
@@ -185,7 +188,7 @@ Auto-compounders serve as a system for APR comparisons between liquid locker pro
 
 `}
             </ReactMarkdown>
-<AddressList></AddressList>
+            <AddressList></AddressList>
           </div>
         </TabPanel>
       </Tabs>

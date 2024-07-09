@@ -94,44 +94,46 @@ const HarvestTable = () => {
         <thead>
           <tr>
             <th>
-            <Select
-    value={uniqueNames.find(option => option.value === filterName)}
-    onChange={handleFilterChange}
-    options={uniqueNames}
-    isClearable
-    className="filter-select"
-    placeholder="All"
-    styles={{
-        control: (base) => ({
-            ...base,
-            borderColor: '#ccc',
-            '&:hover': { borderColor: '#aaa' },
-            boxShadow: 'none',
-        }),
-        option: (base, state) => ({
-            ...base,
-            backgroundColor: state.isFocused ? 'lightgray' : 'white',
-            color: 'black',
-            '&:hover': {
-                backgroundColor: 'lightgray',
-            },
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: 0,
-            width: 0,
-            visibility: 'hidden',
-        }),
-        clearIndicator: (base) => ({
-            ...base,
-            padding: 0,
-        }),
-        indicatorsContainer: (base) => ({
-            ...base,
-            padding: 0,
-        }),
-    }}
-/>
+              <Select
+                value={uniqueNames.find(
+                  (option) => option.value === filterName
+                )}
+                onChange={handleFilterChange}
+                options={uniqueNames}
+                isClearable
+                className="filter-select"
+                placeholder="All"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderColor: '#ccc',
+                    '&:hover': { borderColor: '#aaa' },
+                    boxShadow: 'none',
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? 'lightgray' : 'white',
+                    color: 'black',
+                    '&:hover': {
+                      backgroundColor: 'lightgray',
+                    },
+                  }),
+                  dropdownIndicator: (base) => ({
+                    ...base,
+                    padding: 0,
+                    width: 0,
+                    visibility: 'hidden',
+                  }),
+                  clearIndicator: (base) => ({
+                    ...base,
+                    padding: 0,
+                  }),
+                  indicatorsContainer: (base) => ({
+                    ...base,
+                    padding: 0,
+                  }),
+                }}
+              />
             </th>
             <th>Txn Hash</th>
             <th onClick={() => handleSort('profit')} className="sortable">

@@ -1,37 +1,37 @@
 .address-list {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: monospace;
 }
 
 .address-item {
-    display: flex;
-    align-items: center;
-    padding-left: 10px; /* Add left padding */
+  display: flex;
+  align-items: center;
+  padding-left: 10px; /* Add left padding */
 }
 
 .symbol {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .address-link {
-    color: black;
-    text-decoration: underline; /* Keep address underlined */
-    margin-right: 10px;
+  color: black;
+  text-decoration: underline; /* Keep address underlined */
+  margin-right: 10px;
 }
 
 .copy-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    transition: transform 0.2s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease-in-out;
 }
 
 .copy-button:active {
-    transform: scale(0.9);
+  transform: scale(0.9);
 }

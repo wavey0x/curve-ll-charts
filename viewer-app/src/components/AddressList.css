@@ -2,36 +2,37 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 5px;
   font-family: monospace;
 }
 
 .address-item {
   display: flex;
   align-items: center;
-  padding-left: 10px; /* Add left padding */
+  padding-left: 5px; /* Add left padding */
 }
 
 .symbol {
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .address-link {
   color: black;
   text-decoration: underline; /* Keep address underlined */
-  margin-right: 10px;
+  margin-right: 5px;
+  font-size: 11px;
 }
 
 .copy-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 2px;
   display: flex;
   align-items: center;
   transition: transform 0.2s ease-in-out;
 }
 
 .copy-button:active {
-  transform: scale(0.9);
+  transform: scale(0.7);
 }

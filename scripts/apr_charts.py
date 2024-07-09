@@ -94,7 +94,7 @@ def get_pps(vault_address, block):
     symbol = CURVE_LIQUID_LOCKER_COMPOUNDERS[vault_address]['symbol']
     if symbol == 'asdCRV':
         return vault.convertToAssets(1e18, block_identifier=block) / 1e18
-    elif symbol == 'st-yCRV':
+    elif symbol == 'yvyCRV':
         return vault.pricePerShare(block_identifier=block) / 1e18
     elif symbol == 'ucvxCRV':
         ts = vault.totalSupply(block_identifier=block)
@@ -111,17 +111,17 @@ def plot_aprs(title, aprs):
     df = df[df['date'] < threshold_date]
 
     # Melt the dataframe for Altair
-    melted_df = df.melt(id_vars=['date'], value_vars=['asdCRV', 'st-yCRV', 'ucvxCRV'], var_name='symbol', value_name='apr')
+    melted_df = df.melt(id_vars=['date'], value_vars=['asdCRV', 'yvyCRV', 'ucvxCRV'], var_name='symbol', value_name='apr')
 
     # Adjust APR values by multiplying by 100
     melted_df['apr'] = melted_df['apr'] * 100
 
     # Define color mapping
-    color_scale = alt.Scale(domain=['ucvxCRV', 'st-yCRV', 'asdCRV'],
+    color_scale = alt.Scale(domain=['ucvxCRV', 'yvyCRV', 'asdCRV'],
                             range=['orange', '#4D8CC8', 'black'])
 
-    # Create an Altair chart
-    chart = alt.Chart(melted_df).mark_line(point=True).encode(
+    # Create an Altair chart with smoothed lines using 'monotone' interpolation
+    chart = alt.Chart(melted_df).mark_line(point=True, interpolate='monotone').encode(
         x=alt.X('date:T', title='Date', axis=alt.Axis(labelAngle=-45)),
         y=alt.Y('apr:Q', title='% APR', scale=alt.Scale(domain=[0, 70])),
         color=alt.Color('symbol:N', scale=color_scale),
@@ -145,7 +145,7 @@ def plot_aprs(title, aprs):
 
     vlines = alt.Chart(vertical_lines).mark_rule(
         color='gray',
-        strokeDash=[5,5],
+        strokeDash=[5, 5],
         size=2
     ).encode(
         x='date:T',
@@ -170,14 +170,13 @@ def plot_aprs(title, aprs):
         strokeOpacity=0
     ).interactive()
 
-
     # Save chart as JSON with date
     date_str = datetime.now().strftime('%Y-%m-%d')
     filename = f"{title}_{date_str}.json"
     final_chart.save(os.path.join('charts', filename))
-
+    print(os.path.join('charts', filename))
     # Clean up old charts
-    cleanup_old_charts(CLEAN_UP_CHARTS_OLDER_THAN_DAY)
+    # cleanup_old_charts(CLEAN_UP_CHARTS_OLDER_THAN_DAY)
 
 def cleanup_old_charts(older_than_days):
     threshold_date = datetime.now() - timedelta(days=older_than_days)

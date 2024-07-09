@@ -10,7 +10,7 @@ CURVE_LIQUID_LOCKER_COMPOUNDERS = {
     },
     '0x27B5739e22ad9033bcBf192059122d163b60349D': {
         'name': 'Staked Yearn CRV',
-        'symbol': 'st-yCRV',
+        'symbol': 'yvyCRV',
         'underlying': '0xFCc5c47bE19d06BF83eB04298b026F81069ff65b',
         'pool': '0x99f5aCc8EC2Da2BC0771c32814EFF52b712de1E5',
         'color': 'blue'

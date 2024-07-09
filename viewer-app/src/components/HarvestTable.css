@@ -1,54 +1,59 @@
 .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .arrow {
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0 10px;
-    color: black;
-    text-decoration: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 10px;
+  color: black;
+  text-decoration: none;
 }
 
 .arrow:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .page-number {
-    margin: 0 10px;
+  margin: 0 10px;
 }
 
 .harvest-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.harvest-table th, .harvest-table td {
-    padding: 8px;
-    text-align: left;
+.harvest-table th,
+.harvest-table td {
+  padding: 8px;
+  text-align: left;
 }
 
 .sortable {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .sortable:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+.css-1xc3v61-indicatorContainer{
+    padding: 0px;
 }
 
 .filter-select {
-    margin-top: 5px;
-    width: 150px;
-    font-size: 12px;
+  margin-top: 5px;
+  width: 100px;
+  font-size: 12px;
 }
 
 .link {
-    color: black;
+  color: black;
 }
 
 .link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

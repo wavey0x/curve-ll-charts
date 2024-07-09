@@ -8,6 +8,9 @@ import 'react-tabs/style/react-tabs.css';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import HarvestTable from './components/HarvestTable';
+import Info from './components/Info';
+import Markdown from 'react-markdown';
+import AddressList from './components/AddressList';
 
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
@@ -102,23 +105,21 @@ function App() {
 
   return (
     <div className="App">
-      <header>APR Charts for CRV Liquid Locker Auto-compounders</header>
+      <header>
+        <h1 className="main-header">APR Transparency</h1>
+        <h3 className="sub-header">CRV Liquid Locker Auto-compounders</h3>
+      </header>
       <hr />
       <div className="intro">
-        <ReactMarkdown>
-          {`Auto-compounders serve as a system for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
-          
-All data on this page is gathered exclusively from on-chain calls and **zero** external data sources. The code is fully open source. You may view or contribute on [Github](https://github.com/wavey0x/curve-ll-charts).   
-
-`}
-        </ReactMarkdown>
+        <Markdown>All code used to produce this app is fully open source. You may view or contribute on [Github](https://github.com/wavey0x/curve-ll-charts)</Markdown>
       </div>
 
       <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>
         <TabList>
           <Tab>Charts</Tab>
           <Tab>Information</Tab>
-          <Tab>Harvest Data</Tab>
+          <Tab>Harvests</Tab>
+          <Tab>About</Tab>
         </TabList>
 
         <TabPanel>
@@ -139,19 +140,17 @@ All data on this page is gathered exclusively from on-chain calls and **zero** e
             </label>
           </div>
           <div className="chart-section">
-            <div className="chart-container" ref={vegaRef} />
             <div className="chart-container" ref={vegaRefSince} />
+            <div className="chart-container" ref={vegaRef} />
           </div>
         </TabPanel>
         <TabPanel>
           <div className="info information-section">
-            <ReactMarkdown>
-              {`TODO: Populate with information about calculation methodology. Perf fees, profit unlocking duration, other config for each auto-compounder. Add contract addresses. Etc.`}
-            </ReactMarkdown>
+            <Info></Info>
           </div>
         </TabPanel>
         <TabPanel>
-          <div className="info harvest-data-section extra-class">
+          <div className="harvest-data-section extra-class">
             <div>
               <h1>Harvest History</h1>
               <HarvestTable />
@@ -159,6 +158,34 @@ All data on this page is gathered exclusively from on-chain calls and **zero** e
             {/* <ReactMarkdown>
               {`TODO: Sortable table with harvest transactions for each auto-compounder.`}
             </ReactMarkdown> */}
+          </div>
+        </TabPanel>
+        <TabPanel>
+          <div className="about about-section">
+            <ReactMarkdown>
+            </ReactMarkdown>
+            <ReactMarkdown>
+              {`## About  
+
+Transparency in DeFi is important. In fact, it is the essence of DeFi itself. The goal of this site is to help increase transparency to liquid lockers in the Curve ecosystem. 
+
+Don't trust blackbox website numbers, verify!
+
+All data on this page is gathered exclusively from on-chain calls and **zero** external data sources.  
+
+Auto-compounders serve as a system for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
+          
+
+## Charts
+- The "APR Since" chart on the charts tab measures APR from any given point on the chart until today's date.
+- The "Weekly APRs" chart measures the APR between any point and the point immediately prior to it.
+- Enable or disable the "Denominate in CRV" switch at the top to adjust the charts based on the liquid locker's performance to peg. E.g. a portion of Yearn's high APR can be attributed to it being below peg in early 2024. This toggle normalizes for that.
+
+## Contracts
+
+`}
+            </ReactMarkdown>
+<AddressList></AddressList>
           </div>
         </TabPanel>
       </Tabs>
@@ -169,7 +196,7 @@ All data on this page is gathered exclusively from on-chain calls and **zero** e
           target="_blank"
           rel="noopener noreferrer"
         >
-          <i className="fab fa-github"></i> Chart Source
+          <i className="fab fa-github"></i> Source
         </a>
         <a
           href="https://twitter.com/wavey0x"

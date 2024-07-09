@@ -1,16 +1,15 @@
 from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-import os
-import glob
+import os, json, glob
 from config import Config
 
 app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})  # Allow CORS for React app origin
-CORS(app)  # This will enable CORS for all routes
 
 # Configuration for the database
 app.config.from_object(Config)
+
+CORS(app)  # This will enable CORS for all routes
 
 # Initialize the database
 db = SQLAlchemy(app)
@@ -64,6 +63,17 @@ def get_harvests():
         'data': results
     })
 
+@app.route('/info')
+def ll_info():
+    try:
+        # Open the JSON file and load its contents
+        with open('./data/ll_info.json', 'r') as file:
+            data = json.load(file)
+        # Return the JSON data as a response
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 # Serve the most recent chart JSON
 @app.route('/charts/<chart_name>/<peg>')
 def get_chart(chart_name, peg):

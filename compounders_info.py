@@ -1,7 +1,7 @@
 # compounders_data.py
 
 CURVE_LIQUID_LOCKER_COMPOUNDERS = {
-    '0xde2bef0a01845257b4aef2a2eaa48f6eaeafa8b7': {
+    '0xde2bEF0A01845257b4aEf2A2EAa48f6EAeAfa8B7': {
         'name': 'Union Convex CRV',
         'symbol': 'ucvxCRV',
         'underlying': '0x62B9c7356A2Dc64a1969e19C23e4f579F9810Aa7',

@@ -18,8 +18,8 @@ body {
 
 header {
   font-family: 'Arial', sans-serif; /* or whichever font you prefer for the header */
-  padding: 20px;
-  font-size: 1.75em;
+  /* padding: 20px; */
+  font-size: 1em;
 }
 
 hr {
@@ -32,15 +32,17 @@ hr {
 .switch-container {
   align-items: center;
   margin-bottom: 20px;
+  margin-top: 20px;
   position: relative;
 }
 
 .switch-container label {
   display: flex;
   align-items: center;
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 14px;
+  /* font-weight: 500; */
   cursor: pointer;
+  margin-left: 10px;
 }
 
 .switch-container label span {
@@ -111,6 +113,7 @@ hr {
 
 .react-tabs {
   padding-bottom: 20px;
+  margin-left: 10px;
 }
 
 .react-tabs__tab-list {
@@ -160,4 +163,14 @@ footer a {
 
 footer a i {
   margin-right: 8px;
+}
+
+.main-header {
+  text-align: center;
+  margin-bottom: 0; /* Remove bottom margin */
+}
+
+.sub-header {
+  text-align: center;
+  margin-top: 5px; /* Reduce space between header and sub-header */
 }

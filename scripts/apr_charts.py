@@ -39,7 +39,6 @@ def weekly_apr(adjust_for_peg=False):
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
     for i in range(0, num_samples):
-        print(i)
         week_end = current_week - (WEEK * i)
         end_block, _ = get_block_and_ts(week_end)
         end_date = datetime.fromtimestamp(week_end)
@@ -67,7 +66,6 @@ def apr_since(adjust_for_peg=False):
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
     for i in range(0, num_samples):
-        print(i)
         sample_block, sample_ts = get_block_and_ts(current_ts - (sample_width * i))
         elapsed_time = current_ts - sample_ts
         sample = {}

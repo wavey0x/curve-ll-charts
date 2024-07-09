@@ -92,9 +92,10 @@ function App() {
       <header>APR Charts for CRV Liquid Locker Auto-compounders</header>
       <hr />
       <ReactMarkdown>
-        {`All data on this page is gathered from directly on-chain sources.  
-It will always remain fully open source. You may view the code or contribute any time at [my Github](https://github.com/wavey0x/curve-ll-charts).   
-Auto-compounders serve as a useful comparisons between the variety of lockers and their unique mechanics
+        {`Auto-compounders serve as a useful means for APR comparisons between liquid locker products. Each locker product has one, and while they all differ in some respects, they are great for abstracting complex reward mechanics and simplifying yield calculations.  
+          
+All data on this page is gathered from directly on-chain sources. The code is fully open source. You may view or contribute via [my Github](https://github.com/wavey0x/curve-ll-charts).   
+
 `}
       </ReactMarkdown>
       <div className="switch-container">

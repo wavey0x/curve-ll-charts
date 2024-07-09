@@ -131,27 +131,23 @@ def plot_aprs(title, aprs):
     ).interactive(bind_x=False, bind_y=False)
 
     vertical_lines = pd.DataFrame({
-        'date': [datetime.utcfromtimestamp(1718236800), datetime.utcfromtimestamp(1718841600)],
-        'label': ['YBS migration week', 'YBS double rewards week start']
+        'date': [
+            datetime.utcfromtimestamp(1718236800), 
+            # datetime.utcfromtimestamp(1718841600)
+        ],
+        'label': [
+            'YBS launch ', 
+            # 'YBS double rewards week start'
+        ]
     })
+
     vlines = alt.Chart(vertical_lines).mark_rule(
-        color='red',
+        color='gray',
         strokeDash=[5,5],
         size=1
     ).encode(
         x='date:T',
-        color=alt.Color('color:N', legend=alt.Legend(title="Important Events")),
         tooltip=['label:N']
-    )
-    # Add text for vertical lines
-    text = vlines.mark_text(
-        align='left',
-        baseline='bottom',
-        dx=7,  # move text to the right
-        dy=-7, # move text up
-        color='red'
-    ).encode(
-        text='label:N'
     )
 
     final_chart = alt.layer(chart, vlines).configure_axis(

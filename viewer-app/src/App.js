@@ -110,11 +110,6 @@ function App() {
       </header>
       <hr />
       <div className="intro">
-        <Markdown>
-          *All code used to produce this app is fully open source. All data
-          comes directly from the chain. You may view or contribute on
-          [Github](https://github.com/wavey0x/curve-ll-charts)*
-        </Markdown>
       </div>
 
       <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>

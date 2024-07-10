@@ -11,6 +11,7 @@ const HarvestTable = () => {
   const [harvests, setHarvests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // Total number of pages
   const [filterName, setFilterName] = useState('');
   const [sortField, setSortField] = useState('timestamp');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -18,11 +19,13 @@ const HarvestTable = () => {
 
   useEffect(() => {
     const fetchHarvests = async () => {
+      setLoading(true);
       try {
         const response = await axiosInstance.get(
           `/harvests?page=${page}&per_page=${perPage}`
         );
         setHarvests(response.data.data);
+        setTotalPages(Math.ceil(response.data.total / perPage)); // Assuming response.data.total gives the total number of items
         setLoading(false);
       } catch (error) {
         console.error('Error fetching the harvests:', error);
@@ -33,11 +36,22 @@ const HarvestTable = () => {
     fetchHarvests();
   }, [page]);
 
-  const handleNextPage = () => setPage(page + 1);
-  const handlePreviousPage = () => setPage(page - 1);
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
   const handleFilterChange = (selectedOption) => {
     setFilterName(selectedOption ? selectedOption.value : '');
   };
+
   const handleSort = (field) => {
     const order = sortField === field && sortOrder === 'desc' ? 'asc' : 'desc';
     setSortField(field);
@@ -82,11 +96,21 @@ const HarvestTable = () => {
   return (
     <div>
       <div className="pagination">
-        <span className="arrow" onClick={handlePreviousPage}>
+        <span
+          className="arrow"
+          onClick={handlePreviousPage}
+          disabled={page <= 1}
+        >
           &lt;
         </span>
-        <span className="page-number">{page}</span>
-        <span className="arrow" onClick={handleNextPage}>
+        <span className="page-number">
+          {page}/{totalPages}
+        </span>
+        <span
+          className="arrow"
+          onClick={handleNextPage}
+          disabled={page >= totalPages}
+        >
           &gt;
         </span>
       </div>

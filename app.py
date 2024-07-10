@@ -31,7 +31,9 @@ class CrvLlHarvest(db.Model):
 def get_harvests():
     # Get query parameters for pagination
     page = request.args.get('page', 1, type=int)
+    page = 1 if page < 1 else page
     per_page = request.args.get('per_page', 20, type=int)
+    per_page = 20 if per_page < 1 or per_page > 100 else per_page
     
     # Calculate the offset
     offset = (page - 1) * per_page

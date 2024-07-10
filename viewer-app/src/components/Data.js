@@ -75,9 +75,9 @@ const Data = () => {
         <thead>
           <tr>
             <th></th>
-            <th>30 Day APR</th>
-            <th>60 Day APR</th>
-            <th>90 Day APR</th>
+            <th>30D APR</th>
+            <th>60D APR</th>
+            <th>90D APR</th>
           </tr>
         </thead>
         <tbody>
@@ -120,7 +120,7 @@ const Data = () => {
           <tr>
             <th></th>
             <th>TVL</th>
-            <th>Profit Unlock Period (Hours)</th>
+            <th>PUP (Hrs)</th>
             <th>Fee</th>
           </tr>
         </thead>

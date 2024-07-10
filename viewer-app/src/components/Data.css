@@ -7,13 +7,22 @@
 .data-table th,
 .data-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 4px 8px;
   text-align: left;
 }
 
 .data-table th {
-  background-color: #f2f2f2;
+  font-weight: 100;
+  color: black !important; /* Ensures the text color is black */
+  white-space: nowrap; /* Prevents wrapping */
 }
+
+.data-table thead th {
+  font-weight: 100;
+  color: black !important; /* Ensures the text color is black */
+  white-space: nowrap; /* Prevents wrapping */
+}
+
 
 .bold {
   font-weight: bold;
@@ -69,6 +78,7 @@
   font-size: 14px;
   padding-right: 10px;
 }
+
 .toggle-switch .slider {
   background-color: #ccc; /* Gray color for the off state */
 }

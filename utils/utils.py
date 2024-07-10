@@ -1,5 +1,5 @@
 from brownie import ZERO_ADDRESS, Contract, web3, accounts, chain
-import requests, json
+import requests, json, os
 from datetime import datetime
 from functools import lru_cache
 from utils.cache import memory
@@ -188,6 +188,12 @@ def load_from_json(file_path):
 # Saving the dictionary to a JSON file
 # Should add .json file extension to the end
 def cache_to_json(file_path, data_dict):
+    directory = os.path.dirname(file_path)
+    
+    # Check if the directory exists, and create it if it doesn't
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     with open(file_path, 'w') as file:
         json.dump(data_dict, file, indent=4)
 

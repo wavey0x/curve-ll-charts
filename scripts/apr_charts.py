@@ -5,6 +5,7 @@ import altair as alt
 from compounders_info import CURVE_LIQUID_LOCKER_COMPOUNDERS
 import os
 import glob
+from scripts.compounder_info import update_info
 
 DAY = 60 * 60 * 24
 WEEK = DAY * 7
@@ -14,6 +15,7 @@ DATE_FORMAT = '%m-%d'
 CLEAN_UP_CHARTS_OLDER_THAN_DAY = 10
 
 def main():
+    update_info()
     if not os.path.exists('charts'):
         os.makedirs('charts')
 

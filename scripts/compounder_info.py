@@ -12,7 +12,7 @@ CLEAN_UP_CHARTS_OLDER_THAN_DAY = 10
 height = chain.height
 ts = chain.time()
 
-def main():
+def update_info():
     data = CURVE_LIQUID_LOCKER_COMPOUNDERS
     crv = '0xD533a949740bb3306d119CC777fa900bA034cd52'
     crv_price = utils.get_prices([crv])[crv]

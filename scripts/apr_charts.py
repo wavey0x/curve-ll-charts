@@ -14,6 +14,7 @@ QUARTER = YEAR / 4
 DATE_FORMAT = '%m-%d'
 CLEAN_UP_CHARTS_OLDER_THAN_DAY = 10
 
+
 def main():
     update_info()
     if not os.path.exists('charts'):

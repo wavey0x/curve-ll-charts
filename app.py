@@ -14,6 +14,47 @@ CORS(app)  # This will enable CORS for all routes
 # Initialize the database
 db = SQLAlchemy(app)
 
+class UserInfo(db.Model):
+    __tablename__ = 'user_info'
+
+    account = db.Column(db.String, primary_key=True)
+    week_id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String)
+    weight = db.Column(db.Numeric(30, 18))
+    balance = db.Column(db.Numeric(30, 18))
+    boost = db.Column(db.Numeric(30, 18))
+    map = db.Column(db.JSON)
+    rewards_earned = db.Column(db.Numeric(30, 18))
+    ybs = db.Column(db.String)
+    def to_dict(self):
+        return {
+            'account': self.account,
+            'week_id': self.week_id,
+            'token': self.token,
+            'weight': float(self.weight),
+            'balance': float(self.balance),
+            'boost': float(self.boost),
+            'map': self.map,
+            'rewards_earned': float(self.rewards_earned),
+            'ybs': self.ybs
+        }
+
+# Endpoint to return records from the crv_ll_harvests table
+@app.route('/user_info', methods=['GET'])
+def get_user_info():
+    # Query the database with pagination
+    account = request.args.get('account', 1, type=str)
+    week_id = request.args.get('week_id', 1, type=int)
+    print(account)
+    print(week_id)
+    results = UserInfo.query.filter_by(account=account, week_id=week_id).all()
+    
+    if not results:
+        return jsonify([])
+    
+    results_json = [user_info.to_dict() for user_info in results]
+    return jsonify(results_json)
+
 class CrvLlHarvest(db.Model):
     __tablename__ = 'crv_ll_harvests'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -87,15 +128,6 @@ def get_chart(chart_name, peg):
     latest_file = max(files, key=os.path.getctime)
     return send_from_directory(os.path.dirname(latest_file), os.path.basename(latest_file))
 
-# Handle description saving
-@app.route('/description', methods=['POST'])
-def save_description():
-    data = request.get_json()
-    filename = data['filename']
-    description = data['description']
-    with open(f"charts/{filename}.txt", 'w') as f:
-        f.write(description)
-    return jsonify({'message': 'Description saved'})
 
 if __name__ == '__main__':
     if not os.path.exists('charts'):

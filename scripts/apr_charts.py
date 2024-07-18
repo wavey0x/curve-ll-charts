@@ -27,10 +27,10 @@ def main():
     plot_aprs('Weekly_APRs_True', aprs_weekly_peg)
 
     aprs_since = apr_since(adjust_for_peg=False)
-    plot_aprs('APR_Since_False', aprs_since)
+    plot_aprs('APR_Since_False', aprs_since[1:])
 
     aprs_since_peg = apr_since(adjust_for_peg=True)
-    plot_aprs('APR_Since_True', aprs_since_peg)
+    plot_aprs('APR_Since_True', aprs_since_peg[1:])
 
 def weekly_apr(adjust_for_peg=False):
     current_time = chain.time() - 5

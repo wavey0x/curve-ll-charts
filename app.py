@@ -14,6 +14,48 @@ CORS(app)  # This will enable CORS for all routes
 # Initialize the database
 db = SQLAlchemy(app)
 
+class UserWeekInfo(db.Model):
+    __tablename__ = 'user_week_info'
+
+    account = db.Column(db.String, primary_key=True)
+    week_id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String)
+    user_weight = db.Column(db.Numeric(30, 18))
+    user_balance = db.Column(db.Numeric(30, 18))
+    user_boost = db.Column(db.Numeric(30, 18))
+    user_stake_map = db.Column(db.JSON)
+    user_rewards_earned = db.Column(db.Numeric(30, 18))
+    ybs = db.Column(db.String)
+    global_weight = db.Column(db.Numeric(30, 18))
+    global_stake_map = db.Column(db.JSON)
+    start_ts = db.Column(db.Integer)
+    start_block = db.Column(db.Integer)
+    end_ts = db.Column(db.Integer)
+    end_block = db.Column(db.Integer)
+    start_time_str = db.Column(db.String)
+    end_time_str = db.Column(db.String)
+
+    def to_dict(self):
+        return {
+            'account': self.account,
+            'week_id': self.week_id,
+            'token': self.token,
+            'user_weight': float(self.user_weight),
+            'user_balance': float(self.user_balance),
+            'user_boost': float(self.user_boost),
+            'user_stake_map': self.user_stake_map,
+            'rewards_earned': float(self.user_rewards_earned),
+            'ybs': self.ybs,
+            'global_weight': float(self.global_weight),
+            'global_stake_map': self.global_stake_map,
+            'start_ts': self.start_ts,
+            'start_block': self.start_block,
+            'end_ts': self.end_ts,
+            'end_block': self.end_block,
+            'start_time_str': self.start_time_str,
+            'end_time_str': self.end_time_str,
+        }
+    
 class UserInfo(db.Model):
     __tablename__ = 'user_info'
 
@@ -39,7 +81,8 @@ class UserInfo(db.Model):
             'ybs': self.ybs
         }
 
-# Endpoint to return records from the crv_ll_harvests table
+
+
 @app.route('/user_info', methods=['GET'])
 def get_user_info():
     # Query the database with pagination
@@ -47,7 +90,7 @@ def get_user_info():
     week_id = request.args.get('week_id', 1, type=int)
     print(account)
     print(week_id)
-    results = UserInfo.query.filter_by(account=account, week_id=week_id).all()
+    results = UserWeekInfo.query.filter_by(account=account, week_id=week_id).all()
     
     if not results:
         return jsonify([])

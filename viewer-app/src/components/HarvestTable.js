@@ -22,7 +22,7 @@ const HarvestTable = () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get(
-          `/harvests?page=${page}&per_page=${perPage}`
+          `/crvlol/harvests?page=${page}&per_page=${perPage}`
         );
         setHarvests(response.data.data);
         setTotalPages(Math.ceil(response.data.total / perPage)); // Assuming response.data.total gives the total number of items

@@ -47,7 +47,7 @@ function App() {
 
   const fetchChart = async (chartType) => {
     try {
-      const response = await axiosInstance.get(`/charts/${chartType}/${peg}`);
+      const response = await axiosInstance.get(`/crvlol/charts/${chartType}/${peg}`);
       let spec = response.data;
       let baseTitle = chartType.replace(/_/g, ' ');
       baseTitle = baseTitle

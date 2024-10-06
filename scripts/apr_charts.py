@@ -124,10 +124,14 @@ def plot_aprs(title, aprs):
     color_scale = alt.Scale(domain=['ucvxCRV', 'yvyCRV', 'asdCRV'],
                             range=['orange', '#4D8CC8', 'black'])
 
+    # Dynamically set Y-axis based on the maximum APR value, with a bit of padding
+    max_apr = melted_df['apr'].max()
+    y_scale = alt.Scale(domain=[0, max_apr * 1.1])  # Add 10% padding to the top
+    
     # Create an Altair chart with smoothed lines using 'monotone' interpolation
     chart = alt.Chart(melted_df).mark_line(point=True, interpolate='monotone').encode(
         x=alt.X('date:T', title='Date', axis=alt.Axis(labelAngle=-45)),
-        y=alt.Y('apr:Q', title='% APR', scale=alt.Scale(domain=[0, 70])),
+        y=alt.Y('apr:Q', title='% APR', scale=y_scale),  # Apply dynamic Y-scale
         color=alt.Color('symbol:N', scale=color_scale),
         tooltip=['date:T', 'symbol:N', alt.Tooltip('apr:Q', format='.2f')]
     ).properties(

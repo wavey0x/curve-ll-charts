@@ -50,7 +50,7 @@ const GaugeVotes = () => {
 
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL}/crvlol/gauge_votes`,
+          `${process.env.REACT_APP_API_BASE_URL}crvlol/gauge_votes`,
           {
             params: { gauge: gaugeAddress, page },
           }

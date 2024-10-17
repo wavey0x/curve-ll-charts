@@ -27,6 +27,13 @@ const GaugeVotes = () => {
     fetchAllGauges();
   }, []);
 
+  const formatAddress = (address) => {
+    if (address.length > 10) {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+    return address;
+  };
+
   const fetchVoteData = useCallback(
     async (page = 1) => {
       setLoading(true);
@@ -55,9 +62,15 @@ const GaugeVotes = () => {
             params: { gauge: gaugeAddress, page },
           }
         );
-        setVoteData(response.data.data);
-        setTotalPages(Math.ceil(response.data.total / response.data.per_page));
-        setCurrentPage(page);
+        if (response.data.data.length === 0) {
+          setError('Provided input has no results');
+        } else {
+          setVoteData(response.data.data);
+          setTotalPages(
+            Math.ceil(response.data.total / response.data.per_page)
+          );
+          setCurrentPage(page);
+        }
       } catch (error) {
         setError('Error fetching vote data. Please try again.');
       } finally {
@@ -132,39 +145,42 @@ const GaugeVotes = () => {
         <div className="loading">Loading...</div>
       ) : voteData.length > 0 ? (
         <>
-          <table className="vote-table">
-            <thead>
-              <tr>
-                <th>Account</th>
-                <th className="amount-column">Amount</th>
-                <th>Date</th>
-                <th className="weight-column">Weight</th>
-              </tr>
-            </thead>
-            <tbody>
-              {voteData.map((vote) => (
-                <tr key={vote.id}>
-                  <td className="account-column">
-                    <a
-                      href={getEtherscanLink(vote.account)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="black-link"
-                    >
-                      {vote.account_alias || vote.account}
-                    </a>
-                  </td>
-                  <td className="amount-column monospace">
-                    {formatNumber(vote.amount)}
-                  </td>
-                  <td>{formatDate(vote.date_str)}</td>
-                  <td className="weight-column monospace">
-                    {formatWeight(vote.weight)}
-                  </td>
+          <div className="table-container">
+            <table className="vote-table">
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th>Date</th>
+                  <th className="weight-column">Weight</th>
+                  <th className="amount-column">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {voteData.map((vote) => (
+                  <tr key={vote.id}>
+                    <td className="account-column">
+                      <a
+                        href={getEtherscanLink(vote.account)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="black-link"
+                      >
+                        {formatAddress(vote.account_alias || vote.account)}
+                      </a>
+                    </td>
+
+                    <td>{formatDate(vote.date_str)}</td>
+                    <td className="weight-column monospace">
+                      {formatWeight(vote.weight)}
+                    </td>
+                    <td className="amount-column monospace">
+                      {formatNumber(vote.amount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="pagination">
             <button
               disabled={currentPage === 1}

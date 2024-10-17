@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import axios from 'axios';
 import vegaEmbed from 'vega-embed';
 import Switch from 'react-switch';
@@ -10,12 +11,13 @@ import HarvestTable from './components/HarvestTable';
 import Data from './components/Data';
 import Markdown from 'react-markdown';
 import About from './components/About';
+import GaugeVotes from './components/GaugeVotes';
 
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
 });
 
-function App() {
+function MainContent() {
   const [peg, setPeg] = useState(false);
   const [chartSpec, setChartSpec] = useState();
   const [chartSpecSince, setChartSpecSince] = useState();
@@ -47,7 +49,9 @@ function App() {
 
   const fetchChart = async (chartType) => {
     try {
-      const response = await axiosInstance.get(`/crvlol/charts/${chartType}/${peg}`);
+      const response = await axiosInstance.get(
+        `/crvlol/charts/${chartType}/${peg}`
+      );
       let spec = response.data;
       let baseTitle = chartType.replace(/_/g, ' ');
       baseTitle = baseTitle
@@ -109,8 +113,7 @@ function App() {
         <h3 className="sub-header">CRV Liquid Locker Auto-compounders</h3>
       </header>
       <hr />
-      <div className="intro">
-      </div>
+      <div className="intro"></div>
 
       <Tabs selectedIndex={activeTabIndex} onSelect={handleTabSelect}>
         <TabList>
@@ -178,8 +181,20 @@ function App() {
         >
           <i className="fab fa-twitter"></i> Contact
         </a>
+        <Link to="/gauge_votes">Gauge Votes</Link>
       </footer>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainContent />} />
+        <Route path="/gauge_votes" element={<GaugeVotes />} />
+      </Routes>
+    </Router>
   );
 }
 

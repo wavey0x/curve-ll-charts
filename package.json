@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "axios": "^1.7.7",
+    "react-router-dom": "^6.27.0",
     "react-vega": "^7.6.0",
     "vega": "^5.30.0",
     "vega-embed": "^6.26.0",

@@ -181,7 +181,7 @@ function MainContent() {
         >
           <i className="fab fa-twitter"></i> Contact
         </a>
-        <Link to="/gauge_votes">Gauge Votes</Link>
+        {/* <Link to="/gauge_votes">Gauge Votes</Link> */}
       </footer>
     </div>
   );

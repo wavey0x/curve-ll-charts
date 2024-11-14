@@ -14,7 +14,10 @@ import About from './components/About';
 import GaugeVotes from './components/GaugeVotes';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
+  baseURL:
+    process.env.NODE_ENV === 'production'
+      ? `${process.env.REACT_APP_API_BASE_URL}/crvlol`
+      : process.env.REACT_APP_API_BASE_URL,
 });
 
 function MainContent() {
@@ -49,9 +52,7 @@ function MainContent() {
 
   const fetchChart = async (chartType) => {
     try {
-      const response = await axiosInstance.get(
-        `/crvlol/charts/${chartType}/${peg}`
-      );
+      const response = await axiosInstance.get(`charts/${chartType}/${peg}`);
       let spec = response.data;
       let baseTitle = chartType.replace(/_/g, ' ');
       baseTitle = baseTitle

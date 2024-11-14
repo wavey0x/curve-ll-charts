@@ -4,7 +4,10 @@ import Select from 'react-select';
 import './HarvestTable.css';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
+  baseURL:
+    process.env.NODE_ENV === 'production'
+      ? `${process.env.REACT_APP_API_BASE_URL}/crvlol`
+      : process.env.REACT_APP_API_BASE_URL,
 });
 
 const HarvestTable = () => {
@@ -22,7 +25,7 @@ const HarvestTable = () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get(
-          `/crvlol/harvests?page=${page}&per_page=${perPage}`
+          `/harvests?page=${page}&per_page=${perPage}`
         );
         setHarvests(response.data.data);
         setTotalPages(Math.ceil(response.data.total / perPage)); // Assuming response.data.total gives the total number of items

@@ -3,7 +3,10 @@ import axios from 'axios';
 import './Data.css';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL, // Specify the Flask server URL and port
+  baseURL:
+    process.env.NODE_ENV === 'production'
+      ? `${process.env.REACT_APP_API_BASE_URL}/crvlol`
+      : process.env.REACT_APP_API_BASE_URL,
 });
 
 const Data = () => {
@@ -14,7 +17,7 @@ const Data = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get('/crvlol/info');
+        const response = await axiosInstance.get('/info');
         setData(response.data.ll_data || {});
         setLoading(false);
       } catch (error) {
@@ -66,9 +69,17 @@ const Data = () => {
       };
     });
 
-    const highest30 = findHighestValue(rows.map((row) => row['30']));
-    const highest60 = findHighestValue(rows.map((row) => row['60']));
-    const highest90 = findHighestValue(rows.map((row) => row['90']));
+    // Calculate the average APR for each row and sort by it
+    const sortedRows = rows
+      .map((row) => ({
+        ...row,
+        average: (row['30'] + row['60'] + row['90']) / 3,
+      }))
+      .sort((a, b) => b.average - a.average);
+
+    const highest30 = findHighestValue(sortedRows.map((row) => row['30']));
+    const highest60 = findHighestValue(sortedRows.map((row) => row['60']));
+    const highest90 = findHighestValue(sortedRows.map((row) => row['90']));
 
     return (
       <table className="data-table">
@@ -81,7 +92,7 @@ const Data = () => {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
+          {sortedRows.map((row, index) => (
             <tr key={index}>
               <td>{row.symbol}</td>
               <td className={getBoldClass(row['30'] === highest30)}>

@@ -94,7 +94,9 @@ def apr_since(locker, days_ago, adjust_for_peg=False):
         data = CURVE_LIQUID_LOCKER_COMPOUNDERS[locker]
         peg_start = get_peg(data['pool'], sample_block)
         peg_end = get_peg(data['pool'], current_block)
-        apr *= peg_start * peg_end
+        peg = peg_end / peg_start
+        peg_apr = (peg - 1) / (elapsed_time / YEAR)
+        apr += peg_apr
 
     return apr
 

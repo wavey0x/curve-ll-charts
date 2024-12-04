@@ -52,7 +52,7 @@ def weekly_apr(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], end_block)
-                peg *= get_peg(data['pool'], start_block)
+                peg /= get_peg(data['pool'], start_block)
                 peg_apr = (peg - 1) / (WEEK / YEAR)
             apr = gain / start_pps / (WEEK / YEAR)
             apr += peg_apr
@@ -80,8 +80,8 @@ def apr_since(adjust_for_peg=False):
             end_pps = get_pps(address, current_block)
             gain = end_pps - start_pps
             if adjust_for_peg:
-                peg = get_peg(data['pool'], sample_block)
-                peg /= get_peg(data['pool'], current_block)
+                peg = get_peg(data['pool'], current_block)
+                peg /= get_peg(data['pool'], sample_block)
                 peg_apr = (peg - 1) / (elapsed_time / YEAR)
             apr = gain / start_pps / (elapsed_time / YEAR) 
             apr += peg_apr

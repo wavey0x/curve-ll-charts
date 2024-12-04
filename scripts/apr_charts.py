@@ -36,7 +36,7 @@ def weekly_apr(adjust_for_peg=False):
     current_time = chain.time() - 5
     current_week = current_time // WEEK * WEEK
     aprs = []
-    peg_apr = 0
+    peg = 1
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
@@ -52,18 +52,18 @@ def weekly_apr(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], end_block)
-                peg /= get_peg(data['pool'], start_block)
-                peg_apr = (peg - 1) / (WEEK / YEAR)
+                peg *= get_peg(data['pool'], start_block)
             apr = gain / start_pps / (WEEK / YEAR)
-            apr += peg_apr
-            sample[data['symbol']] = apr
+            apr *= peg
+            sample[data['symbol']] = apr * peg
         aprs.append(sample)
     return aprs
 
 def apr_since(adjust_for_peg=False):
+    current_week = chain.time() // WEEK * WEEK
     current_block, current_ts = get_block_and_ts(chain.time() - 1000)
     aprs = []
-    peg_apr = 0
+    peg = 1
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
@@ -80,11 +80,10 @@ def apr_since(adjust_for_peg=False):
             end_pps = get_pps(address, current_block)
             gain = end_pps - start_pps
             if adjust_for_peg:
-                peg = get_peg(data['pool'], current_block)
-                peg /= get_peg(data['pool'], sample_block)
-                peg_apr = (peg - 1) / (elapsed_time / YEAR)
+                peg = get_peg(data['pool'], sample_block)
+                peg *= get_peg(data['pool'], current_block)
             apr = gain / start_pps / (elapsed_time / YEAR) 
-            apr += peg_apr
+            apr *= peg
             sample[data['symbol']] = apr
         aprs.append(sample)
 

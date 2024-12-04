@@ -56,7 +56,7 @@ def weekly_apr(adjust_for_peg=False):
                 peg_apr = (peg - 1) / (WEEK / YEAR)
             apr = gain / start_pps / (WEEK / YEAR)
             apr += peg_apr
-            sample[data['symbol']] = apr * peg
+            sample[data['symbol']] = apr
         aprs.append(sample)
     return aprs
 

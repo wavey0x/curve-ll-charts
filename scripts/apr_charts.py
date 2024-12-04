@@ -52,6 +52,7 @@ def weekly_apr(adjust_for_peg=False):
             gain = end_pps - start_pps
             if adjust_for_peg:
                 peg = get_peg(data['pool'], end_block)
+                peg *= get_peg(data['pool'], start_block)
             apr = gain / start_pps / (WEEK / YEAR)
             apr *= peg
             sample[data['symbol']] = apr * peg

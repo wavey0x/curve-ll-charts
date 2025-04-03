@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -25,11 +25,63 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>APR Transparency</title>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" as="style">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap"
+      as="style"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Test API directly -->
+    <script>
+      window.testCurveAPI = function () {
+        console.log('Testing Curve API directly...');
+        fetch('https://api.curve.fi/api/getAllGauges')
+          .then((response) => {
+            console.log('API status:', response.status);
+            return response.json();
+          })
+          .then((data) => {
+            console.log('API data received!');
+            console.log('Success:', data.success);
+            console.log('Data keys:', Object.keys(data.data || {}).length);
+
+            // Check if we can find the gauge address we're looking for
+            const address =
+              '0x09F62a6777032329C0d49F1FD4fBe9b3468CDa56'.toLowerCase();
+            let found = false;
+
+            if (data.data) {
+              Object.entries(data.data).forEach(([key, gauge]) => {
+                const gaugeAddress = (
+                  gauge.gauge ||
+                  gauge.gauge_address ||
+                  ''
+                ).toLowerCase();
+                if (gaugeAddress === address) {
+                  console.log('Found the gauge!', key, gauge);
+                  found = true;
+                }
+              });
+            }
+
+            if (!found) {
+              console.log('Gauge not found in API response');
+            }
+          })
+          .catch((error) => {
+            console.error('API test error:', error);
+          });
+      };
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

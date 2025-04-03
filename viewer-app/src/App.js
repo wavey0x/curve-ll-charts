@@ -12,6 +12,7 @@ import Data from './components/Data';
 import Markdown from 'react-markdown';
 import About from './components/About';
 import GaugeVotes from './components/GaugeVotes';
+import GaugeSearch from './components/GaugeSearch';
 
 const axiosInstance = axios.create({
   baseURL:
@@ -76,8 +77,12 @@ function MainContent() {
   };
 
   useEffect(() => {
-    fetchChart('Weekly_APRs');
-    fetchChart('APR_Since');
+    const fetchCharts = () => {
+      fetchChart('Weekly_APRs');
+      fetchChart('APR_Since');
+    };
+    fetchCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [peg]);
 
   useEffect(() => {
@@ -122,6 +127,9 @@ function MainContent() {
           <Tab>Data</Tab>
           <Tab>Harvests</Tab>
           <Tab>About</Tab>
+          <Tab>
+            <i className="fas fa-search"></i> Gauge Search
+          </Tab>
         </TabList>
 
         <TabPanel>
@@ -165,6 +173,9 @@ function MainContent() {
         <TabPanel>
           <About />
         </TabPanel>
+        <TabPanel>
+          <GaugeSearch />
+        </TabPanel>
       </Tabs>
 
       <footer>
@@ -182,6 +193,9 @@ function MainContent() {
         >
           <i className="fab fa-twitter"></i> Contact
         </a>
+        <Link to="/gauge_search">
+          <i className="fas fa-search"></i> Gauge Search
+        </Link>
         {/* <Link to="/gauge_votes">Gauge Votes</Link> */}
       </footer>
     </div>
@@ -194,6 +208,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainContent />} />
         <Route path="/gauge_votes" element={<GaugeVotes />} />
+        <Route path="/gauge_search" element={<GaugeSearch />} />
       </Routes>
     </Router>
   );

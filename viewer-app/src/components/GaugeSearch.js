@@ -70,9 +70,9 @@ const GaugeSearch = () => {
   const getBoostColor = (boostValue) => {
     const boost = parseFloat(boostValue);
 
-    if (boost >= 2.5) return '#4caf50'; // Green for 2.5x
-    if (boost >= 1.75) return '#ffc107'; // Yellow for 1.75x
-    return '#ff9800'; // Orange for lower values
+    if (boost >= 2.0) return '#4caf50'; // Green for 2.0-2.5+
+    if (boost >= 1.5) return '#ffc107'; // Yellow for 1.5-2.0
+    return '#ff9800'; // Orange for 1.0-1.5
   };
 
   // Function to fetch gauge details - wrapped in useCallback to prevent infinite re-renders

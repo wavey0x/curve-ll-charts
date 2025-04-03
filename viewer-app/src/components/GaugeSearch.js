@@ -1,5 +1,6 @@
 /* global BigInt */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './GaugeSearch.css';
 
@@ -9,11 +10,12 @@ const GaugeSearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showError, setShowError] = useState(false);
+  const initialLoadDone = useRef(false);
 
-  // Validate Ethereum address format
-  const isValidAddress = (value) => {
+  // Validate Ethereum address format - wrapped in useCallback to avoid recreating on each render
+  const isValidAddress = useCallback((value) => {
     return /^0x[a-fA-F0-9]{40}$/.test(value);
-  };
+  }, []);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -73,48 +75,80 @@ const GaugeSearch = () => {
     return '#ff9800'; // Orange for lower values
   };
 
+  // Function to fetch gauge details - wrapped in useCallback to prevent infinite re-renders
+  const fetchGaugeDetails = useCallback(
+    async (gaugeAddress) => {
+      if (!isValidAddress(gaugeAddress)) {
+        setError(
+          'Please enter a valid Ethereum address (0x... format with 42 characters)'
+        );
+        setShowError(true);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        setShowError(false);
+
+        // Use environment variable for API base URL, with a fallback
+        const apiBaseUrl =
+          process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
+        console.log(`Using API base URL: ${apiBaseUrl}`);
+        console.log(`Fetching gauge details for address: ${gaugeAddress}`);
+
+        // Call the API endpoint with the base URL from environment variable
+        const response = await axios.get(
+          `${apiBaseUrl}/api/gauge?gauge=${gaugeAddress}`
+        );
+
+        if (response.data) {
+          console.log('Successfully retrieved gauge details:', response.status);
+          setGaugeDetails(response.data);
+        } else {
+          throw new Error('No data returned from API');
+        }
+      } catch (err) {
+        setError(`Failed to fetch gauge details: ${err.message}`);
+        setShowError(true);
+        console.error('Error fetching gauge details:', err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isValidAddress]
+  );
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate the address format
-    if (!isValidAddress(address)) {
-      setError(
-        'Please enter a valid Ethereum address (0x... format with 42 characters)'
-      );
-      setShowError(true);
-      return;
+    // Update URL with the gauge address
+    if (address) {
+      const url = new URL(window.location);
+      url.searchParams.set('gauge', address);
+      window.history.pushState({}, '', url);
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      setShowError(false);
-
-      // Use environment variable for API base URL, with a fallback
-      const apiBaseUrl =
-        process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
-      console.log(`Using API base URL: ${apiBaseUrl}`);
-      console.log(`Fetching gauge details for address: ${address}`);
-
-      // Call the API endpoint with the base URL from environment variable
-      const response = await axios.get(
-        `${apiBaseUrl}/api/gauge?gauge=${address}`
-      );
-
-      if (response.data) {
-        console.log('Successfully retrieved gauge details:', response.status);
-        setGaugeDetails(response.data);
-      } else {
-        throw new Error('No data returned from API');
-      }
-    } catch (err) {
-      setError(`Failed to fetch gauge details: ${err.message}`);
-      setShowError(true);
-      console.error('Error fetching gauge details:', err);
-    } finally {
-      setLoading(false);
-    }
+    await fetchGaugeDetails(address);
   };
+
+  // Check for gauge address in URL on component mount - only run once
+  useEffect(() => {
+    // Skip if we've already processed the URL parameters
+    if (initialLoadDone.current) return;
+
+    const queryParams = new URLSearchParams(window.location.search);
+    const gaugeAddress = queryParams.get('gauge');
+
+    if (gaugeAddress) {
+      setAddress(gaugeAddress);
+      fetchGaugeDetails(gaugeAddress);
+    }
+
+    // Mark that we've processed the URL parameters
+    initialLoadDone.current = true;
+  }, [fetchGaugeDetails]);
 
   return (
     <div className="gauge-search-container">
@@ -254,6 +288,12 @@ const GaugeSearch = () => {
           </div>
         </div>
       )}
+
+      <div className="gauge-voting-link">
+        <Link to="/gauge_votes">
+          <i className="fas fa-vote-yea"></i> Gauge Voting
+        </Link>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import axios from 'axios';
 import vegaEmbed from 'vega-embed';
 import Switch from 'react-switch';
@@ -9,7 +9,6 @@ import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import HarvestTable from './components/HarvestTable';
 import Data from './components/Data';
-import Markdown from 'react-markdown';
 import About from './components/About';
 import GaugeVotes from './components/GaugeVotes';
 import GaugeSearch from './components/GaugeSearch';
@@ -29,6 +28,17 @@ function MainContent() {
   const [forceRender, setForceRender] = useState(0); // State to force re-render
   const vegaRef = useRef(null);
   const vegaRefSince = useRef(null);
+
+  // Check for gauge parameter in URL on component mount
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const gaugeAddress = queryParams.get('gauge');
+
+    // If gauge parameter exists, set the active tab to Gauge Search (index 4)
+    if (gaugeAddress) {
+      setActiveTabIndex(4);
+    }
+  }, []);
 
   const updateSpecForMobile = (spec) => {
     spec.config = spec.config || {};
@@ -127,9 +137,7 @@ function MainContent() {
           <Tab>Data</Tab>
           <Tab>Harvests</Tab>
           <Tab>About</Tab>
-          <Tab>
-            <i className="fas fa-search"></i> Gauge Search
-          </Tab>
+          <Tab>Gauges</Tab>
         </TabList>
 
         <TabPanel>
@@ -193,10 +201,6 @@ function MainContent() {
         >
           <i className="fab fa-twitter"></i> Contact
         </a>
-        <Link to="/gauge_search">
-          <i className="fas fa-search"></i> Gauge Search
-        </Link>
-        {/* <Link to="/gauge_votes">Gauge Votes</Link> */}
       </footer>
     </div>
   );

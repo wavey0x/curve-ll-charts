@@ -332,3 +332,30 @@
   color: #666;
   font-style: italic;
 }
+
+/* Gauge voting link */
+.gauge-voting-link {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.gauge-voting-link a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.gauge-voting-link a:hover {
+  background-color: #e0e0e0;
+}
+
+.gauge-voting-link i {
+  margin-right: 8px;
+}

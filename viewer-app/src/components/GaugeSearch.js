@@ -102,14 +102,26 @@ const GaugeSearch = () => {
           `${apiBaseUrl}/api/gauge?gauge=${gaugeAddress}`
         );
 
-        if (response.data) {
+        // Check if response contains valid gauge data
+        if (
+          response.data &&
+          response.data.data &&
+          Object.keys(response.data.data).length > 0
+        ) {
           console.log('Successfully retrieved gauge details:', response.status);
           setGaugeDetails(response.data);
         } else {
-          throw new Error('No data returned from API');
+          // API returned successfully but no gauge data was found
+          console.log('API response contained no gauge data');
+          throw new Error('Not a valid gauge address');
         }
       } catch (err) {
-        setError(`Failed to fetch gauge details: ${err.message}`);
+        const errorMessage =
+          err.message === 'Not a valid gauge address'
+            ? 'Not a valid gauge address'
+            : `Failed to fetch gauge details: ${err.message}`;
+
+        setError(errorMessage);
         setShowError(true);
         console.error('Error fetching gauge details:', err);
       } finally {
@@ -153,9 +165,6 @@ const GaugeSearch = () => {
   return (
     <div className="gauge-search-container">
       <h1>Curve Gauge Search</h1>
-      <p className="search-instructions">
-        Enter a valid gauge address to view its details
-      </p>
 
       <form onSubmit={handleSubmit} className="search-form">
         <input

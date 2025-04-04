@@ -5,7 +5,7 @@ import './Data.css';
 const axiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'production'
-      ? `${process.env.REACT_APP_API_BASE_URL}/api/crvlol`
+      ? `${process.env.REACT_APP_API_BASE_URL}/crvlol`
       : process.env.REACT_APP_API_BASE_URL,
 });
 
@@ -17,7 +17,7 @@ const Data = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get('/api/crvlol/info');
+        const response = await axiosInstance.get('api/crvlol/info');
         setData(response.data.ll_data || {});
         setLoading(false);
       } catch (error) {

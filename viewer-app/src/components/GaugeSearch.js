@@ -210,7 +210,7 @@ const GaugeSearch = () => {
       try {
         const apiBaseUrl =
           process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
-        const requestUrl = `${apiBaseUrl}/crvlol/gauge_votes`;
+        const requestUrl = `${apiBaseUrl}api/crvlol/gauge_votes`;
 
         console.log(`Making vote data API request to: ${requestUrl}`);
         console.log(`With parameters:`, {

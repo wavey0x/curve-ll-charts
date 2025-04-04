@@ -15,7 +15,7 @@ import GaugeSearch from './components/GaugeSearch';
 const axiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'production'
-      ? `${process.env.REACT_APP_API_BASE_URL}/api/crvlol`
+      ? `${process.env.REACT_APP_API_BASE_URL}`
       : process.env.REACT_APP_API_BASE_URL,
 });
 

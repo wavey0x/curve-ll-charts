@@ -17,7 +17,7 @@ const Data = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get('/info');
+        const response = await axiosInstance.get('/api/crvlol/info');
         setData(response.data.ll_data || {});
         setLoading(false);
       } catch (error) {

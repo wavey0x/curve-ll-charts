@@ -15,7 +15,7 @@ import GaugeSearch from './components/GaugeSearch';
 const axiosInstance = axios.create({
   baseURL:
     process.env.NODE_ENV === 'production'
-      ? `${process.env.REACT_APP_API_BASE_URL}/crvlol`
+      ? `${process.env.REACT_APP_API_BASE_URL}/api/crvlol`
       : process.env.REACT_APP_API_BASE_URL,
 });
 
@@ -62,7 +62,9 @@ function MainContent() {
 
   const fetchChart = async (chartType) => {
     try {
-      const response = await axiosInstance.get(`charts/${chartType}/${peg}`);
+      const response = await axiosInstance.get(
+        `api/crvlol/charts/${chartType}/${peg}`
+      );
       let spec = response.data;
       let baseTitle = chartType.replace(/_/g, ' ');
       baseTitle = baseTitle

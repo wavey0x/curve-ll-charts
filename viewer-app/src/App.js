@@ -10,7 +10,6 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import HarvestTable from './components/HarvestTable';
 import Data from './components/Data';
 import About from './components/About';
-import GaugeVotes from './components/GaugeVotes';
 import GaugeSearch from './components/GaugeSearch';
 
 const axiosInstance = axios.create({
@@ -211,7 +210,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<MainContent />} />
-        <Route path="/gauge_votes" element={<GaugeVotes />} />
         <Route path="/gauge_search" element={<GaugeSearch />} />
       </Routes>
     </Router>

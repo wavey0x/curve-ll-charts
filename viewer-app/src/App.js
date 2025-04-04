@@ -189,7 +189,7 @@ function MainContent() {
 
       <footer>
         <a
-          href="https://github.com/wavey0x/curve-ll-charts/blob/master/scripts/apr_charts.py"
+          href="https://github.com/wavey0x/curve-ll-charts/"
           target="_blank"
           rel="noopener noreferrer"
         >

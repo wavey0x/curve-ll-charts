@@ -413,7 +413,7 @@ const GaugeSearch = () => {
             </div>
 
             <div className="detail-card weights">
-              <h3>Gauge Weights</h3>
+              <h3>Emissions</h3>
 
               <div className="weight-section">
                 <h4 className="section-header">Current</h4>

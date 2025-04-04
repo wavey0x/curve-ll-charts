@@ -1,6 +1,5 @@
 /* global BigInt */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './GaugeSearch.css';
 
@@ -436,7 +435,7 @@ const GaugeSearch = () => {
                 </div>
                 {gaugeDetails.data.apy_data?.gauge_crv_apy && (
                   <div className="detail-item">
-                    <span className="label">APY:</span>
+                    <span className="label">APR:</span>
                     <span className="value">
                       {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
                         2
@@ -464,7 +463,7 @@ const GaugeSearch = () => {
                 </div>
                 {gaugeDetails.data.apy_data?.gauge_future_crv_apy && (
                   <div className="detail-item">
-                    <span className="label">APY:</span>
+                    <span className="label">APR:</span>
                     <span className="value">
                       {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
                         2

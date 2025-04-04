@@ -30,18 +30,23 @@
 }
 
 .search-button {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
   padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  white-space: nowrap;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover {
+  background-color: #e0e0e0;
 }
 
 .search-button:disabled {
-  background-color: #cccccc;
+  background-color: #f0f0f0;
+  color: #999;
   cursor: not-allowed;
 }
 

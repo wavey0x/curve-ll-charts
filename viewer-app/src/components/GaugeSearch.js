@@ -144,8 +144,8 @@ const GaugeSearch = () => {
     // Convert from wei to CRV (divide by 10^18)
     const gaugeInflationRateCRV = gaugeInflationRateWei / Number(total);
 
-    // Format with appropriate precision
-    return gaugeInflationRateCRV.toFixed(8) + ' CRV/sec';
+    // Format with 4 decimal places instead of 8
+    return gaugeInflationRateCRV.toFixed(4) + ' CRV/sec';
   };
 
   // Format percentage from wei

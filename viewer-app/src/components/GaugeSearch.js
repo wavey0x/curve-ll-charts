@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import './GaugeSearch.css';
+import sha3 from 'crypto-js/sha3';
+import Hex from 'crypto-js/enc-hex';
 
 // Configure axios with default settings for CORS
 const axiosInstance = axios.create({
@@ -34,6 +36,59 @@ const retryApiCall = async (apiCall, maxRetries = 3, delay = 1000) => {
   throw lastError;
 };
 
+// Add this utility function near the top of your file, outside of the component
+function toChecksumAddress(address) {
+  if (
+    !address ||
+    typeof address !== 'string' ||
+    !address.match(/^0x[0-9a-fA-F]{40}$/)
+  ) {
+    return address; // Return as is if invalid
+  }
+
+  address = address.toLowerCase();
+  const chars = address.substring(2).split('');
+
+  // Create a hash of the address using SHA3 (Keccak-256)
+  const hash = sha3(address.slice(2), { outputLength: 256 });
+  const addressHash = Hex.stringify(hash);
+
+  let checksumAddress = '0x';
+  for (let i = 0; i < chars.length; i++) {
+    if (parseInt(addressHash[i], 16) >= 8) {
+      checksumAddress += chars[i].toUpperCase();
+    } else {
+      checksumAddress += chars[i];
+    }
+  }
+
+  return checksumAddress;
+}
+
+// Add this function to your component file
+function formatAddress(address) {
+  // If the address is not already checksummed or we can't checksum it,
+  // we'll at least make it visually distinct with properly formatted case
+  if (
+    !address ||
+    typeof address !== 'string' ||
+    !address.match(/^0x[0-9a-fA-F]{40}$/)
+  ) {
+    return address;
+  }
+
+  // Format the address with alternating case to improve readability
+  // This is not a true checksum but helps with visual recognition
+  return (
+    address.slice(0, 2) +
+    address.slice(2, 6).toUpperCase() +
+    address.slice(6, 10).toLowerCase() +
+    address.slice(10, 20).toUpperCase() +
+    address.slice(20, 30).toLowerCase() +
+    address.slice(30).toUpperCase()
+  );
+}
+
 const GaugeSearch = () => {
   const [address, setAddress] = useState('');
   const [gaugeDetails, setGaugeDetails] = useState(null);
@@ -41,6 +96,8 @@ const GaugeSearch = () => {
   const [error, setError] = useState(null);
   const [showError, setShowError] = useState(false);
   const initialLoadDone = useRef(false);
+  const [copiedText, setCopiedText] = useState('');
+  const [copyPosition, setCopyPosition] = useState({ x: 0, y: 0 });
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -308,6 +365,22 @@ const GaugeSearch = () => {
   const getEtherscanLink = (address) =>
     `https://etherscan.io/address/${address}`;
 
+  // Simplify the copyToClipboard function
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        // Success - just store the text that was copied for UI feedback
+        setCopiedText(text);
+        setTimeout(() => {
+          setCopiedText('');
+        }, 1500);
+      },
+      (err) => {
+        console.error('Could not copy text: ', err);
+      }
+    );
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -383,15 +456,41 @@ const GaugeSearch = () => {
             <div className="detail-card basic-info">
               <h3>Basic Information</h3>
               <div className="detail-item">
-                <span className="label">Gauge Address:</span>
-                <span className="value">{gaugeDetails.data.gauge_address}</span>
+                <span className="label">Gauge:</span>
+                <span className="value">
+                  {toChecksumAddress(gaugeDetails.data.gauge_address)}
+                  <button
+                    className={`copy-button ${copiedText === gaugeDetails.data.gauge_address ? 'copied' : ''}`}
+                    onClick={() =>
+                      copyToClipboard(gaugeDetails.data.gauge_address)
+                    }
+                    title="Copy to clipboard"
+                  >
+                    <i
+                      className={`fas ${copiedText === gaugeDetails.data.gauge_address ? 'fa-check' : 'fa-copy'}`}
+                    ></i>
+                  </button>
+                </span>
               </div>
               <div className="detail-item">
-                <span className="label">Pool Address:</span>
-                <span className="value">{gaugeDetails.data.pool_address}</span>
+                <span className="label">Pool:</span>
+                <span className="value">
+                  {toChecksumAddress(gaugeDetails.data.pool_address)}
+                  <button
+                    className={`copy-button ${copiedText === gaugeDetails.data.pool_address ? 'copied' : ''}`}
+                    onClick={() =>
+                      copyToClipboard(gaugeDetails.data.pool_address)
+                    }
+                    title="Copy to clipboard"
+                  >
+                    <i
+                      className={`fas ${copiedText === gaugeDetails.data.pool_address ? 'fa-check' : 'fa-copy'}`}
+                    ></i>
+                  </button>
+                </span>
               </div>
               <div className="detail-item">
-                <span className="label">Blockchain:</span>
+                <span className="label">Network:</span>
                 <span className="value">{gaugeDetails.data.blockchain}</span>
               </div>
               <div className="detail-item">
@@ -409,6 +508,19 @@ const GaugeSearch = () => {
                   {gaugeDetails.verification?.message}
                 </span>
               </div>
+              {gaugeDetails.data.pool_urls?.deposit && (
+                <div className="pool-link-container">
+                  <a
+                    href={gaugeDetails.data.pool_urls.deposit}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="curve-link"
+                  >
+                    <i className="fas fa-external-link-alt"></i> View this pool
+                    on Curve
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className="detail-card weights">
@@ -440,7 +552,7 @@ const GaugeSearch = () => {
                       {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
                         2
                       ) || '0.00'}
-                      % -{' '}
+                      % →{' '}
                       {gaugeDetails.data.apy_data.gauge_crv_apy.max_boost?.toFixed(
                         2
                       ) || '0.00'}
@@ -452,6 +564,16 @@ const GaugeSearch = () => {
 
               <div className="weight-section">
                 <h4 className="section-header">Future</h4>
+                <div className="detail-item">
+                  <span className="label">Inflation:</span>
+                  <span className="value">
+                    {calculateGaugeInflationRate(
+                      gaugeDetails.data.gauge_controller
+                        ?.gauge_future_relative_weight,
+                      gaugeDetails.data.gauge_controller?.inflation_rate
+                    )}
+                  </span>
+                </div>
                 <div className="detail-item">
                   <span className="label">Weight:</span>
                   <span className="value">
@@ -468,7 +590,7 @@ const GaugeSearch = () => {
                       {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
                         2
                       ) || '0.00'}
-                      % -{' '}
+                      % →{' '}
                       {gaugeDetails.data.apy_data.gauge_future_crv_apy.max_boost?.toFixed(
                         2
                       ) || '0.00'}

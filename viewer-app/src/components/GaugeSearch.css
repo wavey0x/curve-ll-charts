@@ -522,3 +522,57 @@
     font-size: 0.9rem;
   }
 }
+
+/* Updated minimalist copy button styles */
+.value {
+  display: flex;
+  align-items: center;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 12px;
+  padding: 3px;
+  margin-left: 6px;
+  transition: color 0.2s;
+}
+
+.copy-button:hover {
+  color: #666;
+}
+
+.copy-button.copied {
+  color: #4caf50;
+}
+
+.copy-button i {
+  font-size: 12px;
+}
+
+/* Curve link style */
+.curve-link {
+  color: #3f51b5;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.curve-link:hover {
+  text-decoration: underline;
+}
+
+.curve-link i {
+  margin-right: 5px;
+}
+
+/* Pool link container at the bottom of basic info card */
+.pool-link-container {
+  margin-top: 15px;
+  text-align: center;
+  border-top: 1px dashed #eee;
+  padding-top: 15px;
+}

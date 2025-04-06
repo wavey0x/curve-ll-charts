@@ -554,11 +554,11 @@
 
 /* Curve link style */
 .curve-link {
-  color: #3f51b5;
+  color: #333;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .curve-link:hover {

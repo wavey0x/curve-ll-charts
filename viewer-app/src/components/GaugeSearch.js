@@ -609,7 +609,18 @@ const GaugeSearch = () => {
                     {Object.entries(gaugeDetails.data.provider_boosts).map(
                       ([provider, boostData]) => (
                         <div className="boost-item" key={provider}>
-                          <div className="provider-name">{provider}</div>
+                          <div className="provider-name">
+                            {provider}
+                            {boostData.pct_of_total_supply && (
+                              <span className="tooltip-container">
+                                <span className="info-tooltip">ℹ</span>
+                                <span className="tooltip-text">
+                                  {boostData.pct_of_total_supply.toFixed(2)}% of
+                                  staked
+                                </span>
+                              </span>
+                            )}
+                          </div>
                           <div
                             className="boost-value"
                             style={{

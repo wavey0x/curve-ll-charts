@@ -118,8 +118,10 @@ const Dao = () => {
           </ul>
         )}
       </div>
-      This page shows the active proposals and their status. Data is fetched on
-      chain from my{' '}
+      This page shows all active Curve governance proposals. If a proposal
+      contains actions to add gauge(s) to the gauge controller, those addresses
+      are validated to ensure they've been deployed by a trusted factory. Data
+      is fetched on chain from my{' '}
       <a
         href="https://etherscan.io/address/0x60272833edd3f340f6436a8aaa83290c61524c44#code"
         target="_blank"

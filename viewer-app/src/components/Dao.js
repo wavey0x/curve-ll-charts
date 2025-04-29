@@ -12,8 +12,10 @@ const axiosInstance = axios.create({
 });
 
 // Helper function to retry API calls
-const retryApiCall = async (apiCall, maxRetries = 3, delay = 1000) => {
+const retryApiCall = async (apiCall, maxRetries = 3, initialDelay = 1000) => {
   let lastError = null;
+  let delay = initialDelay;
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await apiCall();
@@ -100,6 +102,7 @@ const Dao = () => {
                 </div>
                 {vote.gauges.length > 0 && (
                   <div className="gauges-list">
+                    <div className="gauges-label">Gauges:</div>
                     {vote.gauges.map((gauge) => (
                       <a
                         key={gauge}

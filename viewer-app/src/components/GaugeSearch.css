@@ -633,3 +633,58 @@
   border-top: 1px dashed #eee;
   padding-top: 15px;
 }
+
+/* Governance Votes Section */
+.governance-votes-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.governance-votes-section h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.governance-votes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.governance-vote-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.governance-vote-item.empty {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.governance-vote-link {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.governance-vote-link:hover {
+  text-decoration: underline;
+}
+
+.valid-emoji,
+.invalid-emoji {
+  font-size: 1.2rem;
+  margin-left: 10px;
+}

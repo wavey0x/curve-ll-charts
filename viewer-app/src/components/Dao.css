@@ -1,0 +1,115 @@
+.dao-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dao-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Governance Votes Section */
+.governance-votes-section {
+  margin-bottom: 30px;
+}
+
+.governance-votes-section h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.governance-votes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.governance-vote-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #eee;
+}
+
+.governance-vote-item.empty {
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.governance-vote-item:not(.empty) {
+  border: 2px solid #e8f5e9;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
+}
+
+.governance-vote-item:not(.empty):not(:has(.valid-emoji)) {
+  border: 2px solid #ffebee;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.1);
+}
+
+.governance-vote-link {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.governance-vote-link:hover {
+  text-decoration: underline;
+}
+
+.valid-emoji,
+.invalid-emoji {
+  font-size: 1.2rem;
+  margin-left: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  text-align: center;
+  color: #d32f2f;
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.proposal-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.gauges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  padding-left: 4px;
+}
+
+.gauge-link {
+  font-size: 0.85rem;
+  color: #666;
+  text-decoration: none;
+  padding: 2px 6px;
+  background-color: #f5f5f5;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.gauge-link:hover {
+  color: #333;
+  background-color: #e0e0e0;
+  text-decoration: none;
+}

@@ -44,7 +44,7 @@
     <script>
       window.testCurveAPI = function () {
         console.log('Testing Curve API directly...');
-        fetch('https://api.curve.fi/api/getAllGauges')
+        fetch('https://api.curve.finance/api/getAllGauges')
           .then((response) => {
             console.log('API status:', response.status);
             return response.json();

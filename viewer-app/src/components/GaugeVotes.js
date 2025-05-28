@@ -17,7 +17,7 @@ const GaugeVotes = () => {
     const fetchAllGauges = async () => {
       try {
         const response = await axios.get(
-          'https://api.curve.fi/api/getAllGauges'
+          'https://api.curve.finance/api/getAllGauges'
         );
         setAllGauges(response.data.data);
       } catch (error) {

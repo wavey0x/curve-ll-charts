@@ -85,7 +85,7 @@ const Dao = () => {
               >
                 <div className="proposal-main">
                   <a
-                    href={`https://staging-dao.curve.finance/#/ethereum/proposals/${vote.id}-OWNERSHIP`}
+                    href={`https://www.curve.finance/dao/ethereum/proposals/${vote.id}-ownership`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="governance-vote-link"

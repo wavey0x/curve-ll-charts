@@ -64,48 +64,43 @@ const Charts = () => {
   const [sinceData, setSinceData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchChartData = async () => {
-      try {
-        setLoading(true);
-        const response = await axiosInstance.get('api/crvlol/info');
-        
-        // Extract chart data from the response
-        const { weekly_data, since_data } = response.data;
-        
-        // Process weekly data
-        if (weekly_data) {
-          const weeklyChartData = weekly_data
-            .map((item) => ({
-              date: new Date(item.date).getTime(),
-              asdCRV: item.asdCRV,
-              yvyCRV: item.yvyCRV,
-              ucvxCRV: item.ucvxCRV,
-            }))
-            .sort((a, b) => a.date - b.date);
-          setWeeklyData(weeklyChartData);
-        }
-        
-        // Process since data
-        if (since_data) {
-          const sinceChartData = since_data
-            .map((item) => ({
-              date: new Date(item.date).getTime(),
-              asdCRV: item.asdCRV,
-              yvyCRV: item.yvyCRV,
-              ucvxCRV: item.ucvxCRV,
-            }))
-            .sort((a, b) => a.date - b.date);
-          setSinceData(sinceChartData);
-        }
-      } catch (error) {
-        console.error('Error fetching chart data:', error);
-      } finally {
-        setLoading(false);
+  const fetchChartData = async (chartType) => {
+    try {
+      const url = `api/crvlol/chart-data/${chartType}/false`;
+      const response = await axiosInstance.get(url);
+
+      console.log(`${chartType} response:`, response.data);
+
+      // The response now contains clean data
+      const chartData = response.data
+        .map((item) => ({
+          date: new Date(item.date).getTime(),
+          asdCRV: item.asdCRV,
+          yvyCRV: item.yvyCRV,
+          ucvxCRV: item.ucvxCRV,
+        }))
+        .sort((a, b) => a.date - b.date); // Sort by date ascending (oldest to newest)
+
+      if (chartType === 'Weekly_APRs') {
+        setWeeklyData(chartData);
+      } else {
+        setSinceData(chartData);
       }
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchChartData('Weekly_APRs'),
+        fetchChartData('APR_Since'),
+      ]);
+      setLoading(false);
     };
-    
-    fetchChartData();
+    fetchAllData();
   }, []);
 
   return (

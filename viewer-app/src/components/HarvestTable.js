@@ -88,7 +88,7 @@ const HarvestTable = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <div className="loading-centered">Loading...</div>;
   }
 
   // Get unique names for the dropdown filter
@@ -97,7 +97,7 @@ const HarvestTable = () => {
   );
 
   return (
-    <div>
+    <div className="harvest-container">
       <div className="pagination">
         <span
           className="arrow"

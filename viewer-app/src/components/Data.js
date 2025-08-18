@@ -12,7 +12,6 @@ const axiosInstance = axios.create({
 const Data = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showCrvApr, setShowCrvApr] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +30,7 @@ const Data = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <div className="loading-centered">Loading...</div>;
   }
 
   if (!data || Object.keys(data).length === 0) {
@@ -45,10 +44,6 @@ const Data = () => {
     seconds ? (seconds / 3600).toFixed(2) : '0';
 
   const getBoldClass = (isBold) => (isBold ? 'bold' : '');
-
-  const extractData = (field) => {
-    return Object.values(data).map((locker) => locker[field]);
-  };
 
   const findHighestValue = (values) => {
     return Math.max(...values);
@@ -154,22 +149,9 @@ const Data = () => {
   };
 
   return (
-    <div>
-      <div className="toggle-switch">
-        <label>
-          <span className="label-text">Denominate in CRV</span>
-          <input
-            type="checkbox"
-            checked={showCrvApr}
-            onChange={() => setShowCrvApr(!showCrvApr)}
-          />
-          <span className="slider"></span>
-        </label>
-      </div>
-      <h4>APRs {showCrvApr ? '(CRV Denominated)' : ''}</h4>
-      {!showCrvApr && renderTable('aprs')}
-
-      {showCrvApr && renderTable('aprs_adjusted')}
+    <div className="data-container">
+      <h4>APRs</h4>
+      {renderTable('aprs')}
       <h4>Other</h4>
       {renderTvlTable()}
     </div>

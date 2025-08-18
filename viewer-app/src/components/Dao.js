@@ -22,7 +22,8 @@ const retryApiCall = async (apiCall, maxRetries = 3, initialDelay = 1000) => {
     } catch (error) {
       lastError = error;
       if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        const currentDelay = delay;
+        await new Promise((resolve) => setTimeout(resolve, currentDelay));
         delay *= 1.5; // Exponential backoff
       }
     }

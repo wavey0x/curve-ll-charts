@@ -19,11 +19,7 @@
     "react-select": "^5.8.0",
     "react-switch": "^7.0.0",
     "react-tabs": "^6.0.2",
-    "react-vega": "^7.6.0",
-    "vega": "^5.30.0",
-    "vega-embed": "^6.26.0",
-    "vega-lite": "^5.19.0",
-    "vega-tooltip": "^0.34.0",
+    "recharts": "^3.1.2",
     "web-vitals": "^2.1.4",
     "web3": "^4.16.0"
   },
@@ -53,5 +49,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:8000"
 }

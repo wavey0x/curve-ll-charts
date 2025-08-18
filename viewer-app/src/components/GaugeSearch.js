@@ -5,6 +5,8 @@ import './GaugeSearch.css';
 import sha3 from 'crypto-js/sha3';
 import Hex from 'crypto-js/enc-hex';
 
+import FavoritesTable from './FavoritesTable';
+
 // Configure axios with default settings for CORS
 const axiosInstance = axios.create({
   timeout: 10000, // 10 seconds timeout
@@ -15,8 +17,9 @@ const axiosInstance = axios.create({
 });
 
 // Helper function to retry API calls
-const retryApiCall = async (apiCall, maxRetries = 3, delay = 1000) => {
+const retryApiCall = async (apiCall, maxRetries = 3, initialDelay = 1000) => {
   let lastError = null;
+  let delay = initialDelay;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await apiCall();
@@ -25,7 +28,8 @@ const retryApiCall = async (apiCall, maxRetries = 3, delay = 1000) => {
 
       // Don't wait on the last attempt
       if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        const currentDelay = delay;
+        await new Promise((resolve) => setTimeout(resolve, currentDelay));
         // Increase delay for next retry (exponential backoff)
         delay *= 1.5;
       }
@@ -65,31 +69,12 @@ function toChecksumAddress(address) {
   return checksumAddress;
 }
 
-// Add this function to your component file
-function formatAddress(address) {
-  // If the address is not already checksummed or we can't checksum it,
-  // we'll at least make it visually distinct with properly formatted case
-  if (
-    !address ||
-    typeof address !== 'string' ||
-    !address.match(/^0x[0-9a-fA-F]{40}$/)
-  ) {
-    return address;
-  }
-
-  // Format the address with alternating case to improve readability
-  // This is not a true checksum but helps with visual recognition
-  return (
-    address.slice(0, 2) +
-    address.slice(2, 6).toUpperCase() +
-    address.slice(6, 10).toLowerCase() +
-    address.slice(10, 20).toUpperCase() +
-    address.slice(20, 30).toLowerCase() +
-    address.slice(30).toUpperCase()
-  );
-}
-
-const GaugeSearch = () => {
+const GaugeSearch = ({
+  favorites,
+  toggleFavorite,
+  isFavorite,
+  removeFavorite,
+}) => {
   const [address, setAddress] = useState('');
   const [gaugeDetails, setGaugeDetails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -97,7 +82,6 @@ const GaugeSearch = () => {
   const [showError, setShowError] = useState(false);
   const initialLoadDone = useRef(false);
   const [copiedText, setCopiedText] = useState('');
-  const [copyPosition, setCopyPosition] = useState({ x: 0, y: 0 });
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -399,6 +383,19 @@ const GaugeSearch = () => {
     await fetchGaugeDetails(address);
   };
 
+  // Handle gauge click from favorites table
+  const handleGaugeClick = (gaugeAddress) => {
+    setAddress(gaugeAddress);
+
+    // Update URL
+    const url = new URL(window.location);
+    url.searchParams.set('gauge', gaugeAddress);
+    window.history.pushState({}, '', url);
+
+    // Fetch gauge details
+    fetchGaugeDetails(gaugeAddress);
+  };
+
   // Check for gauge address in URL on component mount - only run once
   useEffect(() => {
     // Skip if we've already processed the URL parameters
@@ -418,7 +415,7 @@ const GaugeSearch = () => {
 
   return (
     <div className="gauge-search-container">
-      <h1>Curve Gauge Search</h1>
+      <h1 style={{ textAlign: 'center' }}>Curve Gauge Search</h1>
 
       <form onSubmit={handleSubmit} className="search-form">
         <input
@@ -439,17 +436,42 @@ const GaugeSearch = () => {
 
       {showError && error && <div className="error">{error}</div>}
 
-      {loading && <div className="loading">Loading gauge details...</div>}
+      {/* Favorites Table */}
+      <FavoritesTable
+        favorites={favorites}
+        onGaugeClick={handleGaugeClick}
+        onRemoveFavorite={removeFavorite}
+      />
+
+      {loading && <div className="loading-centered">Loading gauge details...</div>}
 
       {gaugeDetails && !loading && gaugeDetails.data && (
         <div className="gauge-details">
-          <h2>
-            {gaugeDetails.data.pool_name || 'Gauge Details'}
-            <span
-              className={`verification-badge ${gaugeDetails.verification?.is_valid ? 'valid' : 'invalid'}`}
-            >
-              {gaugeDetails.verification?.is_valid ? '✓ Valid' : '✗ Invalid'}
-            </span>
+          <h2 className="gauge-header">
+            <div className="gauge-header-left">
+              <button
+                className={`favorite-button ${isFavorite(gaugeDetails.data.gauge_address) ? 'favorited' : ''}`}
+                onClick={() => toggleFavorite(gaugeDetails)}
+                title={
+                  isFavorite(gaugeDetails.data.gauge_address)
+                    ? 'Remove from favorites'
+                    : 'Add to favorites'
+                }
+              >
+                <i
+                  className={`fas fa-star ${isFavorite(gaugeDetails.data.gauge_address) ? 'filled' : ''}`}
+                ></i>
+              </button>
+              <span
+                className={`verification-badge ${gaugeDetails.verification?.is_valid ? 'valid' : 'invalid'}`}
+              >
+                {gaugeDetails.verification?.is_valid ? '✓ Valid' : '✗ Invalid'}
+              </span>
+            </div>
+            <div className="gauge-header-center">
+              {gaugeDetails.data.pool_name || 'Gauge Details'}
+            </div>
+            <div className="gauge-header-right"></div>
           </h2>
 
           <div className="details-grid">
@@ -505,7 +527,10 @@ const GaugeSearch = () => {
                 <span
                   className={`value ${gaugeDetails.verification?.is_valid ? 'valid-text' : 'invalid-text'}`}
                 >
-                  {gaugeDetails.verification?.message}
+                  {gaugeDetails.verification?.message?.replace(
+                    'This is a verified factory deployed LP gauge.',
+                    'Verified factory deployed'
+                  )}
                 </span>
               </div>
               {gaugeDetails.data.pool_urls?.deposit && (
@@ -516,8 +541,7 @@ const GaugeSearch = () => {
                     rel="noopener noreferrer"
                     className="curve-link"
                   >
-                    <i className="fas fa-external-link-alt"></i> View this pool
-                    on Curve
+                    <i className="fas fa-external-link-alt"></i>
                   </a>
                 </div>
               )}
@@ -652,7 +676,7 @@ const GaugeSearch = () => {
                 <h3>Gauge Votes</h3>
 
                 {voteLoading ? (
-                  <div className="loading">Loading vote data...</div>
+                  <div className="loading-centered">Loading vote data...</div>
                 ) : voteError ? (
                   <div className="error">{voteError}</div>
                 ) : voteData.length > 0 ? (

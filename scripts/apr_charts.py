@@ -1,11 +1,12 @@
 from brownie import Contract, chain
 import pandas as pd
 from datetime import datetime, timedelta
-import altair as alt
 from compounders_info import CURVE_LIQUID_LOCKER_COMPOUNDERS
 import os
 import glob
+import json
 from scripts.compounder_info import update_info
+import utils.utils as utils
 
 DAY = 60 * 60 * 24
 WEEK = DAY * 7
@@ -20,16 +21,19 @@ def main():
     if not os.path.exists('charts'):
         os.makedirs('charts')
 
+    # Generate chart data
     aprs_weekly = weekly_apr(adjust_for_peg=False)
-    plot_aprs('Weekly_APRs_False', aprs_weekly)
-
     aprs_weekly_peg = weekly_apr(adjust_for_peg=True)
-    plot_aprs('Weekly_APRs_True', aprs_weekly_peg)
-
     aprs_since = apr_since(adjust_for_peg=False)
-    plot_aprs('APR_Since_False', aprs_since[1:])
-
     aprs_since_peg = apr_since(adjust_for_peg=True)
+
+    # Save raw chart data to ll_info.json
+    save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg)
+
+    # Generate Altair charts (keeping existing functionality)
+    plot_aprs('Weekly_APRs_False', aprs_weekly)
+    plot_aprs('Weekly_APRs_True', aprs_weekly_peg)
+    plot_aprs('APR_Since_False', aprs_since[1:])
     plot_aprs('APR_Since_True', aprs_since_peg[1:])
 
 def weekly_apr(adjust_for_peg=False):
@@ -191,6 +195,44 @@ def plot_aprs(title, aprs):
     print(os.path.join('charts', filename))
     # Clean up old charts
     # cleanup_old_charts(CLEAN_UP_CHARTS_OLDER_THAN_DAY)
+
+def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg):
+    """
+    Save raw chart data to ll_info.json cache for use with Recharts
+    """
+    # Load existing cache
+    cache_data = utils.load_from_json('data/ll_info.json')
+    if not cache_data:
+        cache_data = {'ll_data': {}, 'last_updated': chain.time()}
+    
+    # Convert datetime objects to ISO strings for JSON serialization
+    def convert_data_for_json(data_list):
+        converted = []
+        for item in data_list:
+            converted_item = {}
+            for key, value in item.items():
+                if isinstance(value, datetime):
+                    converted_item[key] = value.isoformat()
+                else:
+                    converted_item[key] = value
+            converted.append(converted_item)
+        return converted
+    
+    # Prepare chart data
+    chart_data = {
+        'weekly_aprs': convert_data_for_json(aprs_weekly),
+        'weekly_aprs_peg': convert_data_for_json(aprs_weekly_peg),
+        'apr_since': convert_data_for_json(aprs_since[1:] if len(aprs_since) > 1 else aprs_since),
+        'apr_since_peg': convert_data_for_json(aprs_since_peg[1:] if len(aprs_since_peg) > 1 else aprs_since_peg),
+        'last_updated': chain.time()
+    }
+    
+    # Add chart data to cache
+    cache_data['chart_data'] = chart_data
+    
+    # Save updated cache
+    utils.cache_to_json('data/ll_info.json', cache_data)
+    print(f"Chart data saved to ll_info.json at {datetime.now()}")
 
 def cleanup_old_charts(older_than_days):
     threshold_date = datetime.now() - timedelta(days=older_than_days)

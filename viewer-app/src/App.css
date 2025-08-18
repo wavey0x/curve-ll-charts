@@ -3,6 +3,77 @@ body {
   font-family: 'Work Sans', sans-serif;
 }
 
+/* Navigation Styles */
+.navigation {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.nav-item {
+  margin-right: 2px;
+}
+
+.nav-link {
+  display: block;
+  padding: 6px 16px;
+  text-decoration: none;
+  color: #666;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.nav-link:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.nav-link.active {
+  background: white;
+  color: #333;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+  border-bottom: 1px solid white;
+  margin-bottom: -1px;
+}
+
+/* About Page Styles */
+.about-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.about-content h2 {
+  text-align: center;
+}
+
+/* Centered loading indicators */
+.loading-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+
 .App {
   /* text-align: center; */
   background-color: white;
@@ -173,4 +244,20 @@ footer a i {
 .sub-header {
   text-align: center;
   margin-top: 5px; /* Reduce space between header and sub-header */
+}
+
+.charts-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .charts-container {
+    padding: 0 10px;
+    max-width: 100%;
+  }
 }

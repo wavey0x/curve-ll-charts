@@ -1,5 +1,16 @@
+.data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.data-container h4 {
+  text-align: center;
+}
+
 .data-table {
   width: 100%;
+  max-width: 700px;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
@@ -23,66 +34,7 @@
   white-space: nowrap; /* Prevents wrapping */
 }
 
-
 .bold {
   font-weight: bold;
 }
 
-.toggle-switch {
-  margin-bottom: 20px;
-  margin-top: 10px;
-}
-
-.toggle-switch label {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  display: none;
-}
-
-.toggle-switch .slider {
-  position: relative;
-  width: 50px;
-  height: 24px;
-  background-color: #ccc;
-  border-radius: 12px;
-  margin-right: 10px;
-  transition: 0.4s;
-  transform: scale(0.7);
-}
-
-.toggle-switch .slider::before {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: white;
-  top: 2px;
-  left: 2px;
-  transition: 0.4s;
-}
-
-.toggle-switch input:checked + .slider {
-  background-color: #2196f3;
-}
-
-.toggle-switch input:checked + .slider::before {
-  transform: translateX(26px);
-}
-
-.toggle-switch .label-text {
-  font-size: 14px;
-  padding-right: 10px;
-}
-
-.toggle-switch .slider {
-  background-color: #ccc; /* Gray color for the off state */
-}
-
-.toggle-switch input:checked + .slider {
-  background-color: #888; /* Darker gray color for the on state */
-}

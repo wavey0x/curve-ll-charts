@@ -4,7 +4,7 @@ import AddressList from './AddressList';
 
 const About = () => {
   return (
-    <div className="about about-section">
+    <div className="about about-section about-content">
       <ReactMarkdown>
         {`## About  
 
@@ -13,7 +13,6 @@ All code used to produce this app is fully open source. All data comes directly 
 ## Charts
 - The "APR Since" chart on the charts tab measures APR from any given point on the chart until today's date.
 - The "Weekly APRs" chart measures the APR between any point and the point immediately prior to it.
-- Enable or disable the "Denominate in CRV" switch at the top to adjust the charts based on the liquid locker's performance to peg. E.g. a portion of Yearn's high APR can be attributed to it being below peg in early 2024. This toggle normalizes for that.
 
 ## Contracts
 

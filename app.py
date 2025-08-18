@@ -171,6 +171,60 @@ def get_chart(chart_name, peg):
     latest_file = max(files, key=os.path.getctime)
     return send_from_directory(os.path.dirname(latest_file), os.path.basename(latest_file))
 
+# Serve raw chart data for Recharts
+@app.route('/api/crvlol/chart-data/<chart_type>/<peg>')
+def get_chart_data(chart_type, peg):
+    try:
+        # Load the cached data
+        with open('./data/ll_info.json', 'r') as file:
+            cache_data = json.load(file)
+        
+        if 'chart_data' not in cache_data:
+            return jsonify({"error": "Chart data not found in cache"}), 404
+        
+        chart_data = cache_data['chart_data']
+        
+        # Map chart types to cache keys
+        chart_mapping = {
+            'Weekly_APRs': 'weekly_aprs' if peg.lower() == 'false' else 'weekly_aprs_peg',
+            'APR_Since': 'apr_since' if peg.lower() == 'false' else 'apr_since_peg'
+        }
+        
+        if chart_type not in chart_mapping:
+            return jsonify({"error": "Invalid chart type"}), 400
+        
+        data_key = chart_mapping[chart_type]
+        if data_key not in chart_data:
+            return jsonify({"error": f"Chart data for {chart_type} not found"}), 404
+        
+        # Convert ISO date strings back to timestamps for Recharts
+        raw_data = chart_data[data_key]
+        formatted_data = []
+        
+        for item in raw_data:
+            # Convert ISO date string to timestamp
+            if isinstance(item['date'], str):
+                from datetime import datetime
+                date_obj = datetime.fromisoformat(item['date'].replace('Z', '+00:00'))
+                timestamp = int(date_obj.timestamp() * 1000)  # Convert to milliseconds
+            else:
+                timestamp = item['date']
+                
+            formatted_item = {
+                'date': timestamp,
+                'asdCRV': float(item.get('asdCRV', 0)) * 100,  # Convert to percentage
+                'yvyCRV': float(item.get('yvyCRV', 0)) * 100,
+                'ucvxCRV': float(item.get('ucvxCRV', 0)) * 100,
+            }
+            formatted_data.append(formatted_item)
+        
+        return jsonify(formatted_data)
+        
+    except FileNotFoundError:
+        return jsonify({"error": "Cache file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     if not os.path.exists('charts'):

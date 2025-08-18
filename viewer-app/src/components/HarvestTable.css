@@ -29,7 +29,7 @@
 }
 
 .harvest-table th {
-  background: #f8f8f8;
+  background: #ffffff;
   text-align: center;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -79,7 +79,7 @@
 }
 
 .sortable:hover {
-  color: #A260E8;
+  color: #666666;
   text-decoration: underline;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .link:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 /* React Select component overrides */

@@ -7,6 +7,8 @@
   padding: 24px;
   margin-bottom: 24px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
 }
 
 .gauge-search-container h1 {
@@ -23,6 +25,13 @@
   color: #555555;
   text-align: center;
   font-size: 14px;
+}
+
+.search-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+  margin: 16px 0;
 }
 
 .search-form {
@@ -44,7 +53,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #A260E8;
+  border-color: #666666;
 }
 
 .search-button {
@@ -132,7 +141,7 @@
 }
 
 .gauge-details {
-  margin-top: 12px;
+  margin-top: 24px;
   padding: 24px;
   background-color: #ffffff;
 }
@@ -231,7 +240,7 @@
 }
 
 .link:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .curve-link {
@@ -292,11 +301,11 @@
 }
 
 .copy-button:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .copy-button.copied {
-  color: #A260E8;
+  color: #666666;
 }
 
 /* Boost Providers Section */
@@ -471,7 +480,7 @@
 }
 
 .vote-table th {
-  background: #f8f8f8;
+  background: #ffffff;
   font-weight: 700;
   color: #000000;
   font-size: 12px;

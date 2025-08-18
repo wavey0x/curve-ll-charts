@@ -451,6 +451,15 @@ const GaugeSearch = ({
 
   return (
     <div className="gauge-search-container">
+      {/* Favorites Table - moved to top */}
+      <FavoritesTable
+        favorites={favorites}
+        onGaugeClick={handleGaugeClick}
+        onRemoveFavorite={removeFavorite}
+      />
+
+      <div className="search-divider"></div>
+
       <form onSubmit={handleSubmit} className="search-form">
         <input
           type="text"
@@ -469,13 +478,6 @@ const GaugeSearch = ({
       </form>
 
       {showError && error && <div className="error">{error}</div>}
-
-      {/* Favorites Table */}
-      <FavoritesTable
-        favorites={favorites}
-        onGaugeClick={handleGaugeClick}
-        onRemoveFavorite={removeFavorite}
-      />
 
       {loading && (
         <div className="loading-animated">

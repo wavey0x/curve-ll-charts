@@ -1,7 +1,7 @@
 /* FavoritesTable Component - Following Style Guide */
 .favorites-section {
   background: #ffffff;
-  margin: 16px 0;
+  margin: 8px 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -9,14 +9,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 0;
+  padding: 6px 0;
   background: #ffffff;
   cursor: pointer;
   transition: color 0.1s ease;
 }
 
 .favorites-header:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .favorites-header h3 {
@@ -70,7 +70,7 @@
 }
 
 .favorites-table th {
-  background: #f8f8f8;
+  background: #ffffff;
   padding: 4px 8px;
   text-align: center;
   font-weight: 700;
@@ -140,7 +140,7 @@
 }
 
 .gauge-link-button:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .address-cell {
@@ -182,11 +182,11 @@
 }
 
 .copy-button:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .copy-button.copied {
-  color: #A260E8;
+  color: #666666;
 }
 
 .link-cell {
@@ -208,7 +208,7 @@
 }
 
 .curve-link:hover {
-  color: #A260E8;
+  color: #666666;
 }
 
 .delete-cell {

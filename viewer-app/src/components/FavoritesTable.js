@@ -72,11 +72,11 @@ const FavoritesTable = ({ favorites, onGaugeClick, onRemoveFavorite }) => {
             <table className="favorites-table">
               <thead>
                 <tr>
-                  <th>Gauge Name</th>
+                  <th>Name</th>
                   <th>Gauge</th>
                   <th>Pool</th>
-                  <th>Curve</th>
-                  <th>Delete</th>
+                  <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>

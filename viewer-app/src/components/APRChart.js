@@ -30,14 +30,17 @@ const APRChart = ({ data, title, height = 400 }) => {
     },
   };
 
-  // Helper function to calculate icon positions to avoid overlap
+  // Helper function to position icons at the end of their respective lines
   const calculateIconPosition = (cx, cy, dataKey) => {
     if (!data || data.length === 0) return { x: cx - 9, y: cy - 9 };
 
     const lastPoint = data[data.length - 1];
-    const iconWidth = 18; // Width of one icon
+    
+    // Check if this protocol has data at the last point
+    const hasValue = lastPoint[dataKey] !== null && lastPoint[dataKey] !== undefined;
+    if (!hasValue) return { x: cx - 9, y: cy - 9 };
 
-    // Get all data keys and their final values
+    // Get all protocols with values at the last point and sort by value
     const finalValues = Object.keys(protocolIcons)
       .map(key => ({
         key,
@@ -45,26 +48,27 @@ const APRChart = ({ data, title, height = 400 }) => {
         hasValue: lastPoint[key] !== null && lastPoint[key] !== undefined
       }))
       .filter(item => item.hasValue)
-      .sort((a, b) => b.value - a.value); // Sort by value descending
+      .sort((a, b) => b.value - a.value);
 
     const currentIndex = finalValues.findIndex(item => item.key === dataKey);
     if (currentIndex === -1) return { x: cx - 9, y: cy - 9 };
 
-    // Simple logic: if this is not the first icon and values are close, shift right by one icon width
-    let adjustedX = cx - 9;
+    // Position icon at the line endpoint, with slight vertical stacking if values are very close
+    let adjustedY = cy - 9;
     
+    // If multiple protocols have very similar values, stack them vertically slightly
     if (currentIndex > 0) {
       const currentValue = finalValues[currentIndex].value;
       const previousValue = finalValues[currentIndex - 1].value;
       const valueDiff = Math.abs(currentValue - previousValue);
       
-      // If values are very close (likely to overlap visually), shift right by exactly one icon width
-      if (valueDiff < 0.5) {
-        adjustedX = cx - 9 + iconWidth;
+      // If values are very close (within 0.3%), stack vertically
+      if (valueDiff < 0.3) {
+        adjustedY = cy - 9 + (currentIndex * 8); // Stack downward
       }
     }
 
-    return { x: adjustedX, y: cy - 9 };
+    return { x: cx - 9, y: adjustedY };
   };
 
   // Custom dot component for final points
@@ -208,7 +212,7 @@ const APRChart = ({ data, title, height = 400 }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        marginLeft: '-30px', // Offset to compensate for asymmetric spacing
+        margin: '0 auto', // Center the chart container
       }}
     >
       <h3
@@ -233,7 +237,7 @@ const APRChart = ({ data, title, height = 400 }) => {
           data={data}
           margin={{
             top: 16,
-            right: window.innerWidth <= 768 ? 16 : 24,
+            right: window.innerWidth <= 768 ? 40 : 50,
             left: window.innerWidth <= 768 ? 16 : 24,
             bottom: 16,
           }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useLocation, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -19,14 +19,29 @@ const axiosInstance = axios.create({
   baseURL: 'https://api.wavey.info/',
 });
 
+// Component to handle gauge parameter routing
+const GaugeParamHandler = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const gaugeParam = searchParams.get('gauge');
+  
+  // If gauge parameter exists, redirect to /gauges with the parameter
+  if (gaugeParam && location.pathname === '/') {
+    return <Navigate to={`/gauges?gauge=${gaugeParam}`} replace />;
+  }
+  
+  // Otherwise render the Data component
+  return <div className="data data-section"><Data /></div>;
+};
+
 // Navigation component
 const Navigation = () => {
   const location = useLocation();
   
   const navItems = [
     { path: '/', label: 'LL Data' },
-    { path: '/dao', label: 'DAO' },
     { path: '/gauges', label: 'Gauges' },
+    { path: '/dao', label: 'DAO' },
   ];
 
   return (
@@ -185,7 +200,7 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<div className="data data-section"><Data /></div>} />
+          <Route path="/" element={<GaugeParamHandler />} />
           <Route path="/dao" element={<div className="data data-section"><Dao /></div>} />
           <Route path="/gauges" element={<Gauges />} />
         </Routes>

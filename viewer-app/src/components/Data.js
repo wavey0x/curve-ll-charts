@@ -82,8 +82,10 @@ const Data = () => {
   }
 
   const formatPercentage = (value) => `${(value * 100).toFixed(2)}%`;
-  const formatCurrency = (value) =>
-    `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (value) => {
+    const millions = value / 1000000;
+    return `$${millions.toFixed(2)}M`;
+  };
   const formatHours = (seconds) =>
     seconds ? (seconds / 3600).toFixed(2) : '0';
 

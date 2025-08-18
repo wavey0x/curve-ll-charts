@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import APRChart from './APRChart';
+import HarvestTable from './HarvestTable';
 import './Data.css';
 
 const axiosInstance = axios.create({
@@ -8,17 +10,62 @@ const axiosInstance = axios.create({
 
 const Data = () => {
   const [data, setData] = useState(null);
+  const [sinceData, setSinceData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [harvestsCollapsed, setHarvestsCollapsed] = useState(true);
+
+  // Protocol mapping for icons (same as APRChart)
+  const protocolIcons = {
+    asdCRV: {
+      name: 'asdCRV',
+      iconUrl: 'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
+    },
+    yvyCRV: {
+      name: 'yvyCRV', 
+      iconUrl: 'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
+    },
+    ucvxCRV: {
+      name: 'ucvxCRV',
+      iconUrl: 'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
+    },
+  };
+
+  // Helper function to get protocol icon from symbol
+  const getProtocolIcon = (symbol) => {
+    // Find matching protocol based on symbol
+    for (const [key, protocol] of Object.entries(protocolIcons)) {
+      if (symbol.toLowerCase().includes(key.toLowerCase())) {
+        return protocol;
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstance.get('api/crvlol/info');
         setData(response.data.ll_data || {});
+        
+        // Process chart data
+        const chartData = response.data.chart_data;
+        if (chartData && chartData.apr_since && Array.isArray(chartData.apr_since)) {
+          const sinceChartData = chartData.apr_since
+            .map((item) => ({
+              date: new Date(item.date).getTime(),
+              asdCRV: item.asdCRV * 100,
+              yvyCRV: item.yvyCRV * 100,
+              ucvxCRV: item.ucvxCRV * 100,
+            }))
+            .sort((a, b) => a.date - b.date);
+          setSinceData(sinceChartData);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error fetching the data:', error);
         setData({});
+        setSinceData([]);
         setLoading(false);
       }
     };
@@ -50,14 +97,17 @@ const Data = () => {
     return Math.min(...values);
   };
 
-  const renderTable = (field) => {
+  const renderCombinedTable = () => {
     const rows = Object.keys(data).map((key) => {
       const locker = data[key];
       return {
         symbol: locker.symbol,
-        30: locker[field]?.['30'] || 0,
-        60: locker[field]?.['60'] || 0,
-        90: locker[field]?.['90'] || 0,
+        apr30: locker.aprs?.['30'] || 0,
+        apr60: locker.aprs?.['60'] || 0,
+        apr90: locker.aprs?.['90'] || 0,
+        tvl: locker.tvl || 0,
+        fee: locker.fee_pct || 0,
+        pup: locker.profit_unlock_period || 0,
       };
     });
 
@@ -65,92 +115,106 @@ const Data = () => {
     const sortedRows = rows
       .map((row) => ({
         ...row,
-        average: (row['30'] + row['60'] + row['90']) / 3,
+        averageAPR: (row.apr30 + row.apr60 + row.apr90) / 3,
       }))
-      .sort((a, b) => b.average - a.average);
+      .sort((a, b) => b.averageAPR - a.averageAPR);
 
-    const highest30 = findHighestValue(sortedRows.map((row) => row['30']));
-    const highest60 = findHighestValue(sortedRows.map((row) => row['60']));
-    const highest90 = findHighestValue(sortedRows.map((row) => row['90']));
+    // Find highest/best values for highlighting
+    const highest30 = findHighestValue(sortedRows.map((row) => row.apr30));
+    const highest60 = findHighestValue(sortedRows.map((row) => row.apr60));
+    const highest90 = findHighestValue(sortedRows.map((row) => row.apr90));
+    const highestTvl = findHighestValue(sortedRows.map((row) => row.tvl));
+    const lowestFee = findLowestValue(sortedRows.map((row) => row.fee));
 
     return (
-      <table className="data-table">
+      <table className="data-table combined-table">
         <thead>
           <tr>
-            <th></th>
+            <th>Protocol</th>
             <th>30D APR</th>
             <th>60D APR</th>
             <th>90D APR</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedRows.map((row, index) => (
-            <tr key={index}>
-              <td>{row.symbol}</td>
-              <td className={getBoldClass(row['30'] === highest30)}>
-                {formatPercentage(row['30'])}
-              </td>
-              <td className={getBoldClass(row['60'] === highest60)}>
-                {formatPercentage(row['60'])}
-              </td>
-              <td className={getBoldClass(row['90'] === highest90)}>
-                {formatPercentage(row['90'])}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-
-  const renderTvlTable = () => {
-    const rows = Object.keys(data).map((key) => {
-      const locker = data[key];
-      return {
-        symbol: locker.symbol,
-        tvl: locker.tvl || 0,
-        profit_unlock_period: locker.profit_unlock_period || 0,
-        fee: locker.fee_pct || 0,
-      };
-    });
-
-    const highestTvl = findHighestValue(rows.map((row) => row.tvl));
-    const lowestFee = findLowestValue(rows.map((row) => row.fee));
-
-    return (
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th></th>
             <th>TVL</th>
-            <th>PUP (Hrs)</th>
             <th>Fee</th>
+            <th>PUP (Hrs)</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={index}>
-              <td>{row.symbol}</td>
-              <td className={getBoldClass(row.tvl === highestTvl)}>
-                {formatCurrency(row.tvl)}
-              </td>
-              <td>{formatHours(row.profit_unlock_period)}</td>
-              <td className={getBoldClass(row.fee === lowestFee)}>
-                {formatPercentage(row.fee / 100)}
-              </td>
-            </tr>
-          ))}
+          {sortedRows.map((row, index) => {
+            const protocolIcon = getProtocolIcon(row.symbol);
+            return (
+              <tr key={index}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {protocolIcon && (
+                      <img
+                        src={protocolIcon.iconUrl}
+                        alt={protocolIcon.name}
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          border: '1px solid #e0e0e0',
+                          objectFit: 'cover',
+                          flexShrink: 0,
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    {row.symbol}
+                  </div>
+                </td>
+                <td className={getBoldClass(row.apr30 === highest30)}>
+                  {formatPercentage(row.apr30)}
+                </td>
+                <td className={getBoldClass(row.apr60 === highest60)}>
+                  {formatPercentage(row.apr60)}
+                </td>
+                <td className={getBoldClass(row.apr90 === highest90)}>
+                  {formatPercentage(row.apr90)}
+                </td>
+                <td className={getBoldClass(row.tvl === highestTvl)}>
+                  {formatCurrency(row.tvl)}
+                </td>
+                <td className={getBoldClass(row.fee === lowestFee)}>
+                  {formatPercentage(row.fee / 100)}
+                </td>
+                <td>{formatHours(row.pup)}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     );
   };
+
 
   return (
     <div className="data-container">
-      <h4>APRs</h4>
-      {renderTable('aprs')}
-      <h4>Other</h4>
-      {renderTvlTable()}
+      <APRChart data={sinceData} title="APR Since" height={400} />
+      
+      <div className="table-divider"></div>
+      
+      {renderCombinedTable()}
+      
+      <div className="harvest-section">
+        <div 
+          className="harvest-header"
+          onClick={() => setHarvestsCollapsed(!harvestsCollapsed)}
+        >
+          <h3>
+            Harvest History
+            <i className={`fas fa-chevron-down collapse-arrow ${harvestsCollapsed ? 'collapsed' : ''}`}></i>
+          </h3>
+        </div>
+        {!harvestsCollapsed && (
+          <div className="harvest-content">
+            <HarvestTable />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

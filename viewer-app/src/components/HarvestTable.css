@@ -1,66 +1,158 @@
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.arrow {
-  cursor: pointer;
-  font-size: 18px;
-  padding: 0 10px;
-  color: black;
-  text-decoration: none;
-}
-
-.arrow:hover {
-  text-decoration: underline;
-}
-
-.page-number {
-  margin: 0 10px;
-}
-
+/* HarvestTable Component Styles - Following Style Guide */
 .harvest-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 100%;
 }
 
 .harvest-table {
   width: 100%;
-  max-width: 700px;
+  max-width: 600px;
+  margin: 0 auto 24px auto;
   border-collapse: collapse;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #e0e0e0;
 }
 
 .harvest-table th,
 .harvest-table td {
-  padding: 8px;
+  padding: 4px 8px;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.harvest-table th {
+  background: #f8f8f8;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.harvest-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Column width constraints */
+.harvest-table th:nth-child(1),
+.harvest-table td:nth-child(1) {
+  width: 30%;
+}
+
+.harvest-table th:nth-child(2),
+.harvest-table td:nth-child(2) {
+  width: 25%;
+}
+
+.harvest-table th:nth-child(3),
+.harvest-table td:nth-child(3) {
+  width: 25%;
+  text-align: right;
+}
+
+.harvest-table th:nth-child(4),
+.harvest-table td:nth-child(4) {
+  width: 20%;
+}
+
+.harvest-table th {
+  background-color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.harvest-table td {
+  font-weight: 400;
+  color: #000000;
 }
 
 .sortable {
   cursor: pointer;
+  transition: color 0.1s ease;
 }
 
 .sortable:hover {
+  color: #A260E8;
   text-decoration: underline;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.arrow {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 10px;
+  color: #000000;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.1s ease;
+}
+
+.arrow:hover {
+  color: #666666;
+  text-decoration: underline;
+}
+
+.page-number {
+  margin: 0 12px;
+  font-weight: 600;
+  color: #000000;
+  font-size: 14px;
+}
+
+.filter-select {
+  margin-top: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.link {
+  color: #000000;
+  text-decoration: underline;
+  transition: color 0.1s ease;
+}
+
+.link:hover {
+  color: #A260E8;
+}
+
+/* React Select component overrides */
 .css-1xc3v61-indicatorContainer {
   padding: 0px;
 }
 
-.filter-select {
-  margin-top: 5px;
-  width: 100px;
-  font-size: 12px;
-}
-
-.link {
-  color: black;
-}
-
-.link:hover {
-  text-decoration: underline;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .harvest-table th,
+  .harvest-table td {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+  
+  .arrow {
+    font-size: 14px;
+    padding: 6px 8px;
+  }
+  
+  .page-number {
+    margin: 0 12px;
+  }
 }

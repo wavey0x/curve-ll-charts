@@ -20,6 +20,41 @@ const HarvestTable = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const perPage = 30;
 
+  // Protocol mapping for icons (same as APRChart)
+  const protocolIcons = {
+    asdCRV: {
+      name: 'asdCRV',
+      iconUrl: 'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
+    },
+    yvyCRV: {
+      name: 'yvyCRV', 
+      iconUrl: 'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
+    },
+    ucvxCRV: {
+      name: 'ucvxCRV',
+      iconUrl: 'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
+    },
+  };
+
+  // Helper function to get protocol icon from harvest name
+  const getProtocolIcon = (harvestName) => {
+    // Map harvest names to protocol keys
+    const nameMapping = {
+      'asdCRV': 'asdCRV',
+      'yvyCRV': 'yvyCRV', 
+      'ucvxCRV': 'ucvxCRV',
+    };
+    
+    // Find matching protocol
+    for (const [key, protocol] of Object.entries(protocolIcons)) {
+      if (harvestName.toLowerCase().includes(key.toLowerCase())) {
+        return protocol;
+      }
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     const fetchHarvests = async () => {
       setLoading(true);
@@ -98,25 +133,6 @@ const HarvestTable = () => {
 
   return (
     <div className="harvest-container">
-      <div className="pagination">
-        <span
-          className="arrow"
-          onClick={handlePreviousPage}
-          disabled={page <= 1}
-        >
-          &lt;
-        </span>
-        <span className="page-number">
-          {page}/{totalPages}
-        </span>
-        <span
-          className="arrow"
-          onClick={handleNextPage}
-          disabled={page >= totalPages}
-        >
-          &gt;
-        </span>
-      </div>
       <table className="harvest-table">
         <thead>
           <tr>
@@ -133,9 +149,12 @@ const HarvestTable = () => {
                 styles={{
                   control: (base) => ({
                     ...base,
-                    borderColor: '#ccc',
-                    '&:hover': { borderColor: '#aaa' },
+                    border: 'none',
+                    borderColor: 'transparent',
+                    '&:hover': { borderColor: 'transparent' },
                     boxShadow: 'none',
+                    backgroundColor: 'transparent',
+                    minHeight: 'auto',
                   }),
                   option: (base, state) => ({
                     ...base,
@@ -174,18 +193,39 @@ const HarvestTable = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredHarvests.map((harvest) => (
-            <tr key={harvest.id}>
-              <td>
-                <a
-                  href={`https://etherscan.io/address/${harvest.compounder}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link"
-                >
-                  {harvest.name}
-                </a>
-              </td>
+          {filteredHarvests.map((harvest) => {
+            const protocolIcon = getProtocolIcon(harvest.name);
+            return (
+              <tr key={harvest.id}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {protocolIcon && (
+                      <img
+                        src={protocolIcon.iconUrl}
+                        alt={protocolIcon.name}
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          border: '1px solid #e0e0e0',
+                          objectFit: 'cover',
+                          flexShrink: 0,
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <a
+                      href={`https://etherscan.io/address/${harvest.compounder}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link"
+                    >
+                      {harvest.name}
+                    </a>
+                  </div>
+                </td>
               <td>
                 <a
                   href={`https://etherscan.io/tx/${harvest.txn_hash}`}
@@ -199,9 +239,28 @@ const HarvestTable = () => {
               <td>{formatProfit(harvest.profit)}</td>
               <td>{new Date(harvest.timestamp * 1000).toLocaleDateString()}</td>
             </tr>
-          ))}
+          );})}
         </tbody>
       </table>
+      <div className="pagination">
+        <span
+          className="arrow"
+          onClick={handlePreviousPage}
+          disabled={page <= 1}
+        >
+          &lt;
+        </span>
+        <span className="page-number">
+          {page}/{totalPages}
+        </span>
+        <span
+          className="arrow"
+          onClick={handleNextPage}
+          disabled={page >= totalPages}
+        >
+          &gt;
+        </span>
+      </div>
     </div>
   );
 };

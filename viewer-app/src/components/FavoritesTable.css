@@ -1,47 +1,41 @@
+/* FavoritesTable Component - Following Style Guide */
 .favorites-section {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin: 15px 0;
-  overflow: hidden;
+  background: #ffffff;
+  margin: 16px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .favorites-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 0;
+  background: #ffffff;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+
+.favorites-header:hover {
+  color: #A260E8;
 }
 
 .favorites-header h3 {
   margin: 0;
   font-size: 16px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.favorites-header h3 i {
-  color: #666;
+.collapse-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
 }
 
-.collapse-button {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.collapse-button:hover {
-  background: #e9ecef;
-  color: #333;
+.collapse-arrow.collapsed {
+  transform: rotate(-90deg);
 }
 
 .favorites-content {
@@ -52,7 +46,7 @@
 .no-favorites {
   padding: 20px 16px;
   text-align: center;
-  color: #666;
+  color: #555555;
   font-size: 13px;
 }
 
@@ -64,63 +58,69 @@
 .favorites-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
-  background: #fff;
+  font-size: 12px;
+  background: #ffffff;
+  table-layout: auto;
+  min-width: 500px;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  table-layout: fixed;
-  min-width: 650px;
+  box-shadow: 0 0 0 1px #e0e0e0;
 }
 
 .favorites-table th {
-  background: transparent;
-  padding: 6px 12px;
-  text-align: left;
-  font-weight: 400;
-  color: #666;
-  border-bottom: 1px solid #e9ecef;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  background: #f8f8f8;
+  padding: 4px 8px;
+  text-align: center;
+  font-weight: 700;
+  color: #000000;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .favorites-table th:nth-child(1) {
   width: 35%;
-  min-width: 180px;
-} /* Gauge Name */
+  min-width: 140px;
+}
 .favorites-table th:nth-child(2) {
   width: 22%;
-  min-width: 120px;
-} /* Gauge Address */
+  min-width: 100px;
+}
 .favorites-table th:nth-child(3) {
   width: 22%;
-  min-width: 120px;
-} /* Pool Address */
+  min-width: 100px;
+}
 .favorites-table th:nth-child(4) {
   width: 10%;
-  min-width: 60px;
-} /* Link to Curve */
+  min-width: 50px;
+}
 .favorites-table th:nth-child(5) {
   width: 11%;
-  min-width: 60px;
-} /* Delete */
+  min-width: 50px;
+}
 
 .favorites-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #e9ecef;
+  padding: 4px 8px;
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden;
+  color: #000000;
+  text-align: left;
+}
+
+.favorites-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .favorite-row:hover {
-  background: #f8f9fa;
+  background: #f8f8f8;
 }
 
 .gauge-name {
-  font-weight: 500;
-  color: #333;
+  font-weight: 400;
+  color: #000000;
   white-space: normal;
   word-wrap: break-word;
   overflow: visible;
@@ -129,30 +129,29 @@
 .gauge-link-button {
   background: none;
   border: none;
-  color: #007bff;
+  color: #000000;
   cursor: pointer;
-  font-weight: 500;
-  text-decoration: none;
+  font-weight: 400;
+  text-decoration: underline;
   padding: 0;
   font-size: inherit;
-  transition: color 0.2s ease;
+  transition: color 0.1s ease;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .gauge-link-button:hover {
-  color: #0056b3;
-  text-decoration: underline;
+  color: #A260E8;
 }
 
 .address-cell {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: #000000;
 }
 
 .address-wrapper {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -163,105 +162,147 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #000;
+  color: #000000;
 }
 
 .copy-button {
   background: none;
   border: none;
-  color: #666;
+  color: #555555;
   cursor: pointer;
-  font-size: 12px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  font-size: 10px;
+  padding: 2px;
+  transition: color 0.1s ease;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .copy-button:hover {
-  background: #e9ecef;
-  color: #333;
+  color: #A260E8;
 }
 
 .copy-button.copied {
-  color: #28a745;
+  color: #A260E8;
 }
 
 .link-cell {
   text-align: center;
   min-width: 60px;
-  padding: 12px 8px;
+  padding: 4px 8px;
 }
 
 .curve-link {
-  color: #666;
+  color: #000000;
   text-decoration: none;
-  font-size: 14px;
-  transition: color 0.2s ease;
+  font-size: 12px;
+  transition: color 0.1s ease;
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   text-align: center;
-  line-height: 20px;
+  line-height: 16px;
 }
 
 .curve-link:hover {
-  color: #333; /* Changed from #0056b3 to darker gray */
+  color: #A260E8;
 }
 
 .delete-cell {
   text-align: center;
   min-width: 60px;
-  padding: 12px 8px;
+  padding: 4px 8px;
 }
 
 .delete-button {
   background: none;
   border: none;
-  color: #666;
+  color: #000000;
   cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  width: 20px;
-  height: 20px;
+  font-size: 12px;
+  padding: 2px;
+  transition: background-color 0.1s ease;
+  width: 16px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-weight: 700;
 }
 
 .delete-button:hover {
-  background: #dc3545; /* Keep red background on hover */
-  color: #fff;
+  background: #f8f8f8;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .favorites-table {
-    font-size: 12px;
+    font-size: 10px;
+    min-width: 400px;
   }
 
   .favorites-table th,
   .favorites-table td {
-    padding: 8px 12px;
+    padding: 2px 4px;
+  }
+
+  .favorites-table th:nth-child(1) {
+    min-width: 120px;
+  }
+  .favorites-table th:nth-child(2) {
+    min-width: 80px;
+  }
+  .favorites-table th:nth-child(3) {
+    min-width: 80px;
+  }
+  .favorites-table th:nth-child(4) {
+    min-width: 40px;
+  }
+  .favorites-table th:nth-child(5) {
+    min-width: 40px;
   }
 
   .address-text {
-    font-size: 11px;
+    font-size: 9px;
+    width: 70px;
   }
 
-  .gauge-name {
-    min-width: 120px;
+  .gauge-link-button {
+    font-size: 10px;
   }
 
-  .link-cell,
-  .delete-cell {
-    min-width: 50px;
+  .copy-button {
+    width: 12px;
+    height: 12px;
+    font-size: 9px;
+  }
+
+  .curve-link {
+    font-size: 10px;
+  }
+
+  .delete-button {
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorites-table {
+    min-width: 350px;
+    font-size: 9px;
+  }
+
+  .favorites-table th,
+  .favorites-table td {
+    padding: 2px 3px;
+  }
+
+  .address-text {
+    width: 60px;
   }
 }

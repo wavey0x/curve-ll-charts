@@ -29,16 +29,16 @@ const FavoritesTable = ({ favorites, onGaugeClick, onRemoveFavorite }) => {
   if (favorites.length === 0) {
     return (
       <div className="favorites-section">
-        <div className="favorites-header">
+        <div 
+          className="favorites-header"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
           <h3>
-            <i className="fas fa-star"></i> Favorites
+            Favorites
+            <span className={`collapse-arrow ${isCollapsed ? 'collapsed' : ''}`}>
+              ▼
+            </span>
           </h3>
-          <button
-            className="collapse-button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            <i className={`fas fa-chevron-${isCollapsed ? 'down' : 'up'}`}></i>
-          </button>
         </div>
         {!isCollapsed && (
           <div className="no-favorites">
@@ -54,16 +54,16 @@ const FavoritesTable = ({ favorites, onGaugeClick, onRemoveFavorite }) => {
 
   return (
     <div className="favorites-section">
-      <div className="favorites-header">
+      <div 
+        className="favorites-header"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
         <h3>
-          <i className="fas fa-star"></i> Favorites ({favorites.length})
+          Favorites ({favorites.length})
+          <span className={`collapse-arrow ${isCollapsed ? 'collapsed' : ''}`}>
+            ▼
+          </span>
         </h3>
-        <button
-          className="collapse-button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <i className={`fas fa-chevron-${isCollapsed ? 'down' : 'up'}`}></i>
-        </button>
       </div>
 
       {!isCollapsed && (
@@ -145,7 +145,7 @@ const FavoritesTable = ({ favorites, onGaugeClick, onRemoveFavorite }) => {
                         onClick={() => onRemoveFavorite(favorite.gauge_address)}
                         title="Remove from favorites"
                       >
-                        <i className="fas fa-trash"></i>
+                        ×
                       </button>
                     </td>
                   </tr>

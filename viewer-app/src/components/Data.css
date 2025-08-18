@@ -1,40 +1,169 @@
+/* Data Component Styles - Following Style Guide */
 .data-container {
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+.data-container > div:first-child {
+  margin-bottom: 24px;
+}
+
+/* Visual divider between chart and table */
+.table-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+  margin: 24px 0;
+}
+
+/* Combined table styling */
+.combined-table {
+  width: 100%;
+  max-width: none;
+}
+
+.combined-table th:nth-child(1) { width: 20%; } /* Protocol */
+.combined-table th:nth-child(2),
+.combined-table th:nth-child(3),
+.combined-table th:nth-child(4) { width: 12%; } /* APR columns */
+.combined-table th:nth-child(5) { width: 18%; } /* TVL */
+.combined-table th:nth-child(6) { width: 10%; } /* Fee */
+.combined-table th:nth-child(7) { width: 14%; } /* PUP */
+
+/* Right-align numeric columns */
+.combined-table th:nth-child(2),
+.combined-table th:nth-child(3),
+.combined-table th:nth-child(4),
+.combined-table th:nth-child(5),
+.combined-table th:nth-child(6),
+.combined-table th:nth-child(7),
+.combined-table td:nth-child(2),
+.combined-table td:nth-child(3),
+.combined-table td:nth-child(4),
+.combined-table td:nth-child(5),
+.combined-table td:nth-child(6),
+.combined-table td:nth-child(7) {
+  text-align: right;
+}
+
 .data-container h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 0;
   text-align: center;
+  letter-spacing: 0.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .data-table {
-  width: 100%;
-  max-width: 700px;
+  width: auto;
+  max-width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin: 0 auto 32px auto;
+  font-size: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #e0e0e0;
 }
 
 .data-table th,
 .data-table td {
-  border: 1px solid #ddd;
   padding: 4px 8px;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .data-table th {
-  font-weight: 100;
-  color: black !important; /* Ensures the text color is black */
-  white-space: nowrap; /* Prevents wrapping */
+  background: #f8f8f8;
+  font-weight: 700;
+  font-size: 14px;
+  color: #000000;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.data-table thead th {
-  font-weight: 100;
-  color: black !important; /* Ensures the text color is black */
-  white-space: nowrap; /* Prevents wrapping */
+.data-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.bold {
-  font-weight: bold;
+.data-table td {
+  font-weight: 400;
+  color: #000000;
 }
 
+.data-table .bold {
+  font-weight: 700;
+  background-color: #f8fdf8;
+  position: relative;
+}
+
+.data-table .bold::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #10b981;
+  opacity: 0.3;
+}
+
+/* Harvest Section */
+.harvest-section {
+  width: 100%;
+  margin-top: 32px;
+}
+
+.harvest-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+
+.harvest-header:hover {
+  color: #666666;
+}
+
+.harvest-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.collapse-arrow {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.collapse-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.harvest-content {
+  padding: 0;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .data-table th,
+  .data-table td {
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+}

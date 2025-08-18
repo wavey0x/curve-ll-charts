@@ -24,10 +24,8 @@ const Navigation = () => {
   const location = useLocation();
   
   const navItems = [
-    { path: '/', label: 'Charts' },
-    { path: '/data', label: 'Data' },
-    { path: '/harvests', label: 'Harvests' },
-    { path: '/about', label: 'About' },
+    { path: '/', label: 'LL Data' },
+    { path: '/dao', label: 'DAO' },
     { path: '/gauges', label: 'Gauges' },
   ];
 
@@ -139,7 +137,7 @@ const Gauges = () => {
   const { favorites, toggleFavorite, isFavorite, removeFavorite } = useFavorites();
   
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="gauge-section">
       <GaugeSearch
         favorites={favorites}
         toggleFavorite={toggleFavorite}
@@ -154,11 +152,8 @@ const Gauges = () => {
 const Layout = ({ children }) => (
   <div className="App">
     <header>
-      <h1 className="main-header">APR Transparency</h1>
-      <h3 className="sub-header">CRV Liquid Locker Auto-compounders</h3>
+      <h1 className="main-header">CRV.LOL</h1>
     </header>
-    <hr />
-    <div className="intro"></div>
     <Navigation />
     <main>{children}</main>
     <Footer />
@@ -190,12 +185,9 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<Charts />} />
-          <Route path="/data" element={<div className="data data-section"><Data /></div>} />
-          <Route path="/harvests" element={<Harvests />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/" element={<div className="data data-section"><Data /></div>} />
+          <Route path="/dao" element={<div className="data data-section"><Dao /></div>} />
           <Route path="/gauges" element={<Gauges />} />
-          <Route path="/dao" element={<Dao />} />
         </Routes>
       </Layout>
     </Router>

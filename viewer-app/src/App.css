@@ -1,11 +1,43 @@
-body {
-  /* font-family: 'Source Code Pro', monospace; */
-  font-family: 'Work Sans', sans-serif;
+/* Global Reset and Typography */
+* {
+  box-sizing: border-box;
 }
 
-/* Navigation Styles */
+body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #000000;
+  line-height: 1.4;
+}
+
+/* Main App Layout */
+.App {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+/* Headers */
+header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.main-header {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation */
 .navigation {
-  margin: 20px 0;
+  margin: 24px 0 0 0;
   display: flex;
   justify-content: center;
 }
@@ -15,249 +47,250 @@ body {
   list-style: none;
   padding: 0;
   margin: 0;
-  border-bottom: 1px solid #ddd;
+  gap: 0;
 }
 
 .nav-item {
-  margin-right: 2px;
+  margin: 0;
 }
 
 .nav-link {
   display: block;
-  padding: 6px 16px;
+  padding: 8px 16px;
   text-decoration: none;
-  color: #666;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  color: #000000;
+  background: #f0f0f0;
+  border: 1px solid #000000;
   border-bottom: none;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.2s ease;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  font-weight: normal;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.1s ease;
+  position: relative;
+  margin-right: -1px;
 }
 
 .nav-link:hover {
-  background: #e9ecef;
-  color: #333;
+  background-color: #e0e0e0;
 }
 
 .nav-link.active {
-  background: white;
-  color: #333;
-  font-weight: bold;
-  position: relative;
+  background-color: #ffffff;
+  border-bottom: none;
+  font-weight: 700;
   z-index: 1;
-  border-bottom: 1px solid white;
-  margin-bottom: -1px;
 }
 
-/* About Page Styles */
-.about-content {
-  max-width: 700px;
-  margin: 0 auto;
-  text-align: left;
+/* Card Layout - Connected to Navigation */
+.card {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  margin-top: 0;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.about-content h2 {
+.chart-section {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  margin-top: 0;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Data Section */
+.data-section {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  margin-top: 0;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.data-container {
+  max-width: 100%;
+}
+
+.data-container h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 0;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
-/* Centered loading indicators */
+/* Tables - Compact */
+/* Data table styles moved to component-specific CSS files */
+
+/* Harvest Section */
+.harvest-data-section {
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  margin-top: 0;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.harvest-data-section h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 12px 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Loading States */
 .loading-centered {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px;
+  padding: 48px;
   text-align: center;
-  color: #666;
-  font-size: 16px;
-}
-
-.App {
-  /* text-align: center; */
-  background-color: white;
-  color: black;
-}
-
-.intro,
-.info {
-  padding: 8px;
-  padding-top: 0px;
-  padding-right: 40px;
-}
-
-header {
-  font-family: 'Arial', sans-serif; /* or whichever font you prefer for the header */
-  /* padding: 20px; */
-  font-size: 1em;
-}
-
-hr {
-  border: 0;
-  height: 1px;
-  background: black;
-  margin: 20px 0;
-}
-
-.switch-container {
-  align-items: center;
-  margin-bottom: 20px;
-  margin-top: 20px;
-  position: relative;
-}
-
-.switch-container label {
-  display: flex;
-  align-items: center;
+  color: #555555;
   font-size: 14px;
-  /* font-weight: 500; */
-  cursor: pointer;
-  margin-left: 10px;
+  font-weight: 400;
 }
 
-.switch-container label span {
-  margin-right: 10px;
+/* Gauge Section */
+.gauge-section {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.react-switch {
-  position: relative;
-  transform: scale(0.6);
+/* About Section */
+.about-content {
+  max-width: 650px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  padding: 24px;
 }
 
-.tooltip {
-  visibility: hidden;
-  width: 200px;
-  background-color: #555;
-  color: #fff;
+.about-content h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 0;
   text-align: center;
-  border-radius: 6px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 150%;
-  left: 50%;
-  margin-left: -100px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
-  white-space: normal;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
 }
 
-.tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
+.about-content p {
+  font-family: Inter, Roboto, "SF Pro Text", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #000000;
+  margin-bottom: 16px;
 }
 
-.react-switch:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
-
-.chart-container {
-  width: 100%;
-  max-width: 1000px;
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  height: 500px;
-}
-
-@media (max-width: 768px) {
-  .chart-container {
-    height: 300px;
-  }
-}
-
-.information-section,
-.harvest-data-section {
-  margin-top: 20px;
-  text-align: left;
-}
-
-.react-tabs {
-  padding-bottom: 20px;
-  margin-left: 10px;
-}
-
-.react-tabs__tab-list {
-  border-bottom: 1px solid #ccc;
-  margin: 0;
-  padding: 0;
-}
-
-.react-tabs__tab {
-  display: inline-block;
-  border: 1px solid transparent;
-  border-bottom: none;
-  bottom: -1px;
-  position: relative;
-  list-style: none;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.react-tabs__tab--selected {
-  background: #fff;
-  border-color: #ccc;
-  border-radius: 5px 5px 0 0;
-  color: #333;
-  font-weight: bold;
-}
-
+/* Footer */
 footer {
   position: fixed;
   bottom: 0;
-  width: 100%;
-  background-color: #f1f1f1;
+  left: 0;
+  right: 0;
+  background-color: #f8f8f8;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
-  padding: 5px 0;
-  /* box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); */
-  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.528); /* Slight dark shadow */
+  padding: 6px 0;
+  font-size: 12px;
 }
 
 footer a {
-  margin: 0 5px;
-  color: #333;
+  margin: 0 16px;
+  color: #000000;
   text-decoration: none;
-  font-size: 15px;
+  font-weight: 400;
   display: inline-flex;
   align-items: center;
+  transition: color 0.1s ease;
+}
+
+footer a:hover {
+  color: #666666;
+  text-decoration: underline;
+}
+
+/* Global link styles */
+a {
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #666666;
 }
 
 footer a i {
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
-.main-header {
-  text-align: center;
-  margin-bottom: 0; /* Remove bottom margin */
-}
-
-.sub-header {
-  text-align: center;
-  margin-top: 5px; /* Reduce space between header and sub-header */
-}
-
-.charts-container {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .charts-container {
-    padding: 0 10px;
-    max-width: 100%;
+  .App {
+    padding: 16px;
   }
+  
+  .card,
+  .chart-section,
+  .data-section,
+  .harvest-data-section {
+    padding: 16px;
+  }
+  
+  .main-header {
+    font-size: 24px;
+  }
+  
+  .sub-header {
+    font-size: 14px;
+  }
+  
+  .nav-link {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.font-sans {
+  font-family: Inter, Roboto, "SF Pro Text", system-ui, sans-serif;
 }

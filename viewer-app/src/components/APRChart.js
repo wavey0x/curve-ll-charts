@@ -216,9 +216,10 @@ const APRChart = ({ data, title, height = 400 }) => {
           textAlign: 'center',
           margin: '0 0 28px 0',
           fontSize: window.innerWidth <= 768 ? '16px' : '18px',
-          fontWeight: '500',
-          color: '#444',
+          fontWeight: '700',
+          color: '#000000',
           letterSpacing: '0.5px',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         }}
       >
         {title}
@@ -238,9 +239,9 @@ const APRChart = ({ data, title, height = 400 }) => {
           }}
         >
           <CartesianGrid
-            strokeDasharray="2 4"
-            stroke="#f5f5f5"
-            strokeOpacity={0.8}
+            strokeDasharray="none"
+            stroke="#000000"
+            strokeOpacity={0.2}
             vertical={false}
           />
           <XAxis
@@ -251,10 +252,11 @@ const APRChart = ({ data, title, height = 400 }) => {
             }}
             tick={{
               fontSize: window.innerWidth <= 768 ? 10 : 11,
-              fill: '#888',
+              fill: '#000000',
               fontWeight: '400',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             }}
-            axisLine={{ stroke: '#e0e0e0', strokeWidth: 1 }}
+            axisLine={{ stroke: '#000000', strokeWidth: 1 }}
             tickLine={false}
             tickMargin={window.innerWidth <= 768 ? 4 : 6}
             interval="preserveStartEnd"
@@ -266,10 +268,11 @@ const APRChart = ({ data, title, height = 400 }) => {
             tickFormatter={(value) => `${value.toFixed(1)}%`}
             tick={{
               fontSize: window.innerWidth <= 768 ? 10 : 11,
-              fill: '#888',
+              fill: '#000000',
               fontWeight: '400',
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             }}
-            axisLine={{ stroke: '#e0e0e0', strokeWidth: 1 }}
+            axisLine={{ stroke: '#000000', strokeWidth: 1 }}
             tickLine={false}
             tickMargin={window.innerWidth <= 768 ? 4 : 6}
             domain={[0, 'dataMax + 1']}

@@ -69,6 +69,41 @@ function toChecksumAddress(address) {
   return checksumAddress;
 }
 
+// Helper function to abbreviate addresses for display
+function abbreviateAddress(address) {
+  if (!address || typeof address !== 'string' || address.length < 10) {
+    return address;
+  }
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+// Protocol mapping for icons (same as APRChart)
+const protocolIcons = {
+  asdCRV: {
+    name: 'asdCRV',
+    iconUrl: 'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
+  },
+  yvyCRV: {
+    name: 'yvyCRV', 
+    iconUrl: 'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
+  },
+  ucvxCRV: {
+    name: 'ucvxCRV',
+    iconUrl: 'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
+  },
+};
+
+// Helper function to get protocol icon from provider name
+const getProtocolIcon = (providerName) => {
+  // Find matching protocol based on provider name
+  for (const [key, protocol] of Object.entries(protocolIcons)) {
+    if (providerName.toLowerCase().includes(key.toLowerCase())) {
+      return protocol;
+    }
+  }
+  return null;
+};
+
 const GaugeSearch = ({
   favorites,
   toggleFavorite,
@@ -250,7 +285,8 @@ const GaugeSearch = ({
       try {
         const apiBaseUrl =
           process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
-        const requestUrl = `${apiBaseUrl}api/crvlol/gauge_votes`;
+        const urlWithoutTrailingSlash = apiBaseUrl.replace(/\/$/, '');
+        const requestUrl = `${urlWithoutTrailingSlash}/api/crvlol/gauge_votes`;
 
         console.log(`Making vote data API request to: ${requestUrl}`);
         console.log(`With parameters:`, {
@@ -415,8 +451,6 @@ const GaugeSearch = ({
 
   return (
     <div className="gauge-search-container">
-      <h1 style={{ textAlign: 'center' }}>Curve Gauge Search</h1>
-
       <form onSubmit={handleSubmit} className="search-form">
         <input
           type="text"
@@ -430,7 +464,7 @@ const GaugeSearch = ({
           className="search-button"
           disabled={loading || !address}
         >
-          Search
+          Search for gauge
         </button>
       </form>
 
@@ -443,12 +477,21 @@ const GaugeSearch = ({
         onRemoveFavorite={removeFavorite}
       />
 
-      {loading && <div className="loading-centered">Loading gauge details...</div>}
+      {loading && (
+        <div className="loading-animated">
+          <div className="loading-spinner">
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
+          </div>
+          Loading gauge details...
+        </div>
+      )}
 
       {gaugeDetails && !loading && gaugeDetails.data && (
         <div className="gauge-details">
-          <h2 className="gauge-header">
-            <div className="gauge-header-left">
+          <div className="gauge-header-container">
+            <h2 className="gauge-title">
               <button
                 className={`favorite-button ${isFavorite(gaugeDetails.data.gauge_address) ? 'favorited' : ''}`}
                 onClick={() => toggleFavorite(gaugeDetails)}
@@ -459,92 +502,167 @@ const GaugeSearch = ({
                 }
               >
                 <i
-                  className={`fas fa-star ${isFavorite(gaugeDetails.data.gauge_address) ? 'filled' : ''}`}
+                  className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
                 ></i>
               </button>
-              <span
-                className={`verification-badge ${gaugeDetails.verification?.is_valid ? 'valid' : 'invalid'}`}
-              >
-                {gaugeDetails.verification?.is_valid ? '✓ Valid' : '✗ Invalid'}
-              </span>
-            </div>
-            <div className="gauge-header-center">
               {gaugeDetails.data.pool_name || 'Gauge Details'}
-            </div>
-            <div className="gauge-header-right"></div>
-          </h2>
+            </h2>
+          </div>
 
           <div className="details-grid">
-            <div className="detail-card basic-info">
-              <h3>Basic Information</h3>
-              <div className="detail-item">
-                <span className="label">Gauge:</span>
-                <span className="value">
-                  {toChecksumAddress(gaugeDetails.data.gauge_address)}
-                  <button
-                    className={`copy-button ${copiedText === gaugeDetails.data.gauge_address ? 'copied' : ''}`}
-                    onClick={() =>
-                      copyToClipboard(gaugeDetails.data.gauge_address)
-                    }
-                    title="Copy to clipboard"
-                  >
-                    <i
-                      className={`fas ${copiedText === gaugeDetails.data.gauge_address ? 'fa-check' : 'fa-copy'}`}
-                    ></i>
-                  </button>
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="label">Pool:</span>
-                <span className="value">
-                  {toChecksumAddress(gaugeDetails.data.pool_address)}
-                  <button
-                    className={`copy-button ${copiedText === gaugeDetails.data.pool_address ? 'copied' : ''}`}
-                    onClick={() =>
-                      copyToClipboard(gaugeDetails.data.pool_address)
-                    }
-                    title="Copy to clipboard"
-                  >
-                    <i
-                      className={`fas ${copiedText === gaugeDetails.data.pool_address ? 'fa-check' : 'fa-copy'}`}
-                    ></i>
-                  </button>
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="label">Network:</span>
-                <span className="value">{gaugeDetails.data.blockchain}</span>
-              </div>
-              <div className="detail-item">
-                <span className="label">Status:</span>
-                <span className="value">
-                  {gaugeDetails.data.is_killed ? 'Killed' : 'Active'}
-                  {gaugeDetails.data.has_no_crv ? ' (No CRV)' : ''}
-                </span>
-              </div>
-              <div className="detail-item">
-                <span className="label">Verification:</span>
-                <span
-                  className={`value ${gaugeDetails.verification?.is_valid ? 'valid-text' : 'invalid-text'}`}
-                >
-                  {gaugeDetails.verification?.message?.replace(
-                    'This is a verified factory deployed LP gauge.',
-                    'Verified factory deployed'
-                  )}
-                </span>
-              </div>
-              {gaugeDetails.data.pool_urls?.deposit && (
-                <div className="pool-link-container">
-                  <a
-                    href={gaugeDetails.data.pool_urls.deposit}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="curve-link"
-                  >
-                    <i className="fas fa-external-link-alt"></i>
-                  </a>
+            <div className="left-column">
+              <div className="detail-card basic-info">
+                <h3>Basic Information</h3>
+                <div className="detail-item">
+                  <span className="label">Gauge:</span>
+                  <span className="value">
+                    {abbreviateAddress(gaugeDetails.data.gauge_address)}
+                    <button
+                      className={`copy-button ${copiedText === gaugeDetails.data.gauge_address ? 'copied' : ''}`}
+                      onClick={() =>
+                        copyToClipboard(gaugeDetails.data.gauge_address)
+                      }
+                      title="Copy full address to clipboard"
+                    >
+                      <i
+                        className={`fas ${copiedText === gaugeDetails.data.gauge_address ? 'fa-check' : 'fa-copy'}`}
+                      ></i>
+                    </button>
+                  </span>
                 </div>
-              )}
+                <div className="detail-item">
+                  <span className="label">Pool:</span>
+                  <span className="value">
+                    {abbreviateAddress(gaugeDetails.data.pool_address)}
+                    <button
+                      className={`copy-button ${copiedText === gaugeDetails.data.pool_address ? 'copied' : ''}`}
+                      onClick={() =>
+                        copyToClipboard(gaugeDetails.data.pool_address)
+                      }
+                      title="Copy full address to clipboard"
+                    >
+                      <i
+                        className={`fas ${copiedText === gaugeDetails.data.pool_address ? 'fa-check' : 'fa-copy'}`}
+                      ></i>
+                    </button>
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Network:</span>
+                  <span className="value">{gaugeDetails.data.blockchain}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Status:</span>
+                  <span className="value">
+                    {gaugeDetails.data.is_killed ? 'Killed' : 'Active'}
+                    {gaugeDetails.data.has_no_crv ? ' (No CRV)' : ''}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Verified:</span>
+                  <span
+                    className={`value ${gaugeDetails.verification?.is_valid ? 'valid-text' : 'invalid-text'}`}
+                  >
+                    {gaugeDetails.verification?.is_valid ? 'Yes' : 'No'}
+                  </span>
+                </div>
+                {gaugeDetails.data.pool_urls?.deposit && (
+                  <div className="detail-item">
+                    <span className="label">Curve:</span>
+                    <span className="value">
+                      <a
+                        href={gaugeDetails.data.pool_urls.deposit}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="curve-link"
+                      >
+                        <i className="fas fa-external-link-alt"></i>
+                        View on Curve
+                      </a>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {gaugeDetails.data.provider_boosts &&
+                Object.keys(gaugeDetails.data.provider_boosts).length > 0 && (
+                  <div className="detail-card boosts">
+                    <h3>Boost Providers</h3>
+                    <div className="boost-providers">
+                      {Object.entries(gaugeDetails.data.provider_boosts)
+                        .sort(([, a], [, b]) => parseFloat(b.boost_formatted) - parseFloat(a.boost_formatted))
+                        .map(([provider, boostData]) => {
+                          const boostValue = parseFloat(boostData.boost_formatted);
+                          const fillPercentage = Math.max(0, Math.min(100, ((boostValue - 1.0) / (2.5 - 1.0)) * 100));
+                          
+                          // Color coding based on boost value ranges
+                          let meterColor;
+                          if (boostValue >= 2.0) {
+                            meterColor = '#4caf50'; // Green for 2.0x+
+                          } else if (boostValue >= 1.5) {
+                            meterColor = '#ffc107'; // Yellow for 1.5x-1.99x
+                          } else {
+                            meterColor = '#ff5722'; // Red for 1.0x-1.49x
+                          }
+                          
+                          return (
+                            <div className="boost-item" key={provider}>
+                              <div className="provider-name">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  {(() => {
+                                    const protocolIcon = getProtocolIcon(provider);
+                                    return protocolIcon && (
+                                      <img
+                                        src={protocolIcon.iconUrl}
+                                        alt={protocolIcon.name}
+                                        style={{
+                                          width: '16px',
+                                          height: '16px',
+                                          borderRadius: '50%',
+                                          border: '1px solid #e0e0e0',
+                                          objectFit: 'cover',
+                                          flexShrink: 0,
+                                        }}
+                                        onError={(e) => {
+                                          e.target.style.display = 'none';
+                                        }}
+                                      />
+                                    );
+                                  })()}
+                                  <span>
+                                    {provider}
+                                    {boostData.pct_of_total_supply && (
+                                      <span className="tooltip-container">
+                                        <span className="info-tooltip">i</span>
+                                        <span className="tooltip-text">
+                                          {boostData.pct_of_total_supply.toFixed(2)}% of
+                                          staked
+                                        </span>
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="boost-value-container">
+                                <div className="boost-meter">
+                                  <div 
+                                    className="boost-meter-fill"
+                                    style={{
+                                      width: `${fillPercentage}%`,
+                                      backgroundColor: meterColor
+                                    }}
+                                  ></div>
+                                </div>
+                                <span className="boost-value-text">
+                                  {boostData.boost_formatted}x
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
             </div>
 
             <div className="detail-card weights">
@@ -553,7 +671,7 @@ const GaugeSearch = ({
               <div className="weight-section">
                 <h4 className="section-header">Current</h4>
                 <div className="detail-item">
-                  <span className="label">Inflation:</span>
+                  <span className="label">Rate:</span>
                   <span className="value">
                     {calculateGaugeInflationRate(
                       gaugeDetails.data.gauge_controller?.gauge_relative_weight,
@@ -589,7 +707,7 @@ const GaugeSearch = ({
               <div className="weight-section">
                 <h4 className="section-header">Future</h4>
                 <div className="detail-item">
-                  <span className="label">Inflation:</span>
+                  <span className="label">Rate:</span>
                   <span className="value">
                     {calculateGaugeInflationRate(
                       gaugeDetails.data.gauge_controller
@@ -624,43 +742,6 @@ const GaugeSearch = ({
                 )}
               </div>
             </div>
-
-            {gaugeDetails.data.provider_boosts &&
-              Object.keys(gaugeDetails.data.provider_boosts).length > 0 && (
-                <div className="detail-card boosts">
-                  <h3>Boost Providers</h3>
-                  <div className="boost-providers">
-                    {Object.entries(gaugeDetails.data.provider_boosts).map(
-                      ([provider, boostData]) => (
-                        <div className="boost-item" key={provider}>
-                          <div className="provider-name">
-                            {provider}
-                            {boostData.pct_of_total_supply && (
-                              <span className="tooltip-container">
-                                <span className="info-tooltip">ℹ</span>
-                                <span className="tooltip-text">
-                                  {boostData.pct_of_total_supply.toFixed(2)}% of
-                                  staked
-                                </span>
-                              </span>
-                            )}
-                          </div>
-                          <div
-                            className="boost-value"
-                            style={{
-                              backgroundColor: getBoostColor(
-                                boostData.boost_formatted
-                              ),
-                            }}
-                          >
-                            {boostData.boost_formatted}x
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
           </div>
 
           <div className="votes-section">

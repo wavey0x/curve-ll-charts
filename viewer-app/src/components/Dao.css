@@ -1,122 +1,141 @@
+/* DAO Component Styles - Following Style Guide */
 .dao-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.dao-container h1 {
+
+.dao-description {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #000000;
+  margin-top: 24px;
   text-align: center;
-  margin-bottom: 30px;
 }
 
 /* Governance Votes Section */
 .governance-votes-section {
-  margin-bottom: 30px;
+  margin-bottom: 0;
 }
 
 .governance-votes-section h2 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 1.2rem;
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000000;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .governance-votes-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .governance-vote-item {
   display: flex;
   flex-direction: column;
-  padding: 10px 15px;
-  margin-bottom: 12px;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 2px solid #eee;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: background-color 0.1s ease;
+}
+
+.governance-vote-item:hover {
+  background-color: #f8f8f8;
 }
 
 .governance-vote-item.empty {
-  border: 2px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+  opacity: 0.7;
 }
 
 .governance-vote-item:not(.empty) {
-  border: 2px solid #e8f5e9;
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
-}
-
-.governance-vote-item:not(.empty):not(:has(.valid-emoji)) {
-  border: 2px solid #ffebee;
-  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.1);
+  border: 1px solid #e0e0e0;
 }
 
 .governance-vote-link {
-  color: #333;
-  text-decoration: none;
-  font-weight: 500;
+  color: #000000;
+  text-decoration: underline;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.1s ease;
 }
 
 .governance-vote-link:hover {
-  text-decoration: underline;
+  color: #666666;
 }
 
 .valid-emoji,
 .invalid-emoji {
-  font-size: 1.2rem;
-  margin-left: 10px;
+  font-size: 16px;
+  margin-left: 8px;
 }
 
 .loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
   text-align: center;
-  padding: 20px;
+  color: #000000;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .error {
+  color: #000000;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  background-color: #ffffff;
   text-align: center;
-  color: #d32f2f;
-  padding: 20px;
-  background-color: #ffebee;
-  border-radius: 4px;
-  margin: 10px 0;
+  font-size: 14px;
 }
 
 .proposal-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .gauges-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-  padding-left: 4px;
+  gap: 6px;
+  margin-top: 6px;
+  padding-left: 0;
+  align-items: center;
 }
 
 .gauges-label {
-  font-size: 0.85rem;
-  color: #666;
-  margin-right: 8px;
-  align-self: center;
+  font-size: 12px;
+  color: #000000;
+  margin-right: 6px;
+  font-weight: 600;
 }
 
 .gauge-link {
-  font-size: 0.85rem;
-  color: #666;
-  text-decoration: none;
-  padding: 2px 6px;
-  background-color: #f5f5f5;
-  border-radius: 3px;
-  transition: all 0.2s ease;
+  font-size: 11px;
+  color: #000000;
+  text-decoration: underline;
+  padding: 2px 4px;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  transition: all 0.1s ease;
+  border: 1px solid #e0e0e0;
 }
 
 .gauge-link:hover {
-  color: #333;
-  background-color: #e0e0e0;
-  text-decoration: none;
+  color: #666666;
+  background-color: #f0f0f0;
+  text-decoration: underline;
 }

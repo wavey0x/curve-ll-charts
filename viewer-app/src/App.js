@@ -15,17 +15,8 @@ import { useFavorites } from './hooks/useFavorites';
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
 
-// Force localhost in development, regardless of environment variables
-const getBaseURL = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_BASE_URL || '';
-  }
-  // In development, always use localhost:8000
-  return 'http://localhost:8000/';
-};
-
 const axiosInstance = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: 'https://api.wavey.info/',
 });
 
 // Navigation component
@@ -64,27 +55,44 @@ const Charts = () => {
   const [sinceData, setSinceData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchChartData = async (chartType) => {
+  const fetchChartData = async () => {
     try {
-      const url = `api/crvlol/chart-data/${chartType}/false`;
+      const url = `api/crvlol/info`;
       const response = await axiosInstance.get(url);
 
-      console.log(`${chartType} response:`, response.data);
+      console.log('Chart data:', response.data.chart_data);
 
-      // The response now contains clean data
-      const chartData = response.data
-        .map((item) => ({
-          date: new Date(item.date).getTime(),
-          asdCRV: item.asdCRV,
-          yvyCRV: item.yvyCRV,
-          ucvxCRV: item.ucvxCRV,
-        }))
-        .sort((a, b) => a.date - b.date); // Sort by date ascending (oldest to newest)
+      const chartData = response.data.chart_data;
+      
+      if (!chartData) {
+        console.log('No chart_data found in response');
+        return;
+      }
+      
+      // Process weekly_aprs data
+      if (chartData.weekly_aprs && Array.isArray(chartData.weekly_aprs)) {
+        const weeklyChartData = chartData.weekly_aprs
+          .map((item) => ({
+            date: new Date(item.date).getTime(),
+            asdCRV: item.asdCRV * 100,
+            yvyCRV: item.yvyCRV * 100,
+            ucvxCRV: item.ucvxCRV * 100,
+          }))
+          .sort((a, b) => a.date - b.date);
+        setWeeklyData(weeklyChartData);
+      }
 
-      if (chartType === 'Weekly_APRs') {
-        setWeeklyData(chartData);
-      } else {
-        setSinceData(chartData);
+      // Process apr_since data
+      if (chartData.apr_since && Array.isArray(chartData.apr_since)) {
+        const sinceChartData = chartData.apr_since
+          .map((item) => ({
+            date: new Date(item.date).getTime(),
+            asdCRV: item.asdCRV * 100,
+            yvyCRV: item.yvyCRV * 100,
+            ucvxCRV: item.ucvxCRV * 100,
+          }))
+          .sort((a, b) => a.date - b.date);
+        setSinceData(sinceChartData);
       }
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -94,10 +102,7 @@ const Charts = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchChartData('Weekly_APRs'),
-        fetchChartData('APR_Since'),
-      ]);
+      await fetchChartData();
       setLoading(false);
     };
     fetchAllData();

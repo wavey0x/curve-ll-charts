@@ -6,13 +6,46 @@
 .data-container .combined-table {
   width: auto;
   max-width: 100%;
-  margin: 0;
+  margin: 0 auto;
 }
 
 .data-container > div:first-child {
   margin-bottom: 24px;
   display: flex;
   justify-content: center;
+}
+
+/* Chart toggle styling */
+.chart-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  padding: 0 8px;
+}
+
+.toggle-btn {
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  color: #000000;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  border-radius: 4px;
+  position: relative;
+}
+
+.toggle-btn.active {
+  background: #ffffff;
+  border-color: #000000;
+  z-index: 1;
+}
+
+.toggle-btn:hover:not(.active) {
+  background: #f0f0f0;
 }
 
 /* Visual divider between chart and table */
@@ -25,21 +58,24 @@
 
 /* Combined table styling */
 
-.combined-table th:nth-child(1) { width: 25%; } /* Protocol */
-.combined-table th:nth-child(2),
+.combined-table th:nth-child(1) { width: 22%; } /* Protocol */
+.combined-table th:nth-child(2) { width: 12%; } /* Peg */
 .combined-table th:nth-child(3),
-.combined-table th:nth-child(4) { width: 20%; } /* APR columns - prioritized */
-.combined-table th:nth-child(5) { width: 15%; } /* TVL */
+.combined-table th:nth-child(4),
+.combined-table th:nth-child(5) { width: 15%; } /* APR columns - prioritized */
+.combined-table th:nth-child(6) { width: 14%; } /* TVL */
 
 /* Right-align numeric columns */
 .combined-table th:nth-child(2),
 .combined-table th:nth-child(3),
 .combined-table th:nth-child(4),
 .combined-table th:nth-child(5),
+.combined-table th:nth-child(6),
 .combined-table td:nth-child(2),
 .combined-table td:nth-child(3),
 .combined-table td:nth-child(4),
-.combined-table td:nth-child(5) {
+.combined-table td:nth-child(5),
+.combined-table td:nth-child(6) {
   text-align: right;
 }
 
@@ -150,12 +186,18 @@
     font-size: 11px;
   }
   
+  /* Hide peg column on mobile to preserve space for APR columns */
+  .combined-table th:nth-child(2), /* Peg */
+  .combined-table td:nth-child(2) {
+    display: none;
+  }
+  
   /* Adjust column widths for mobile */
   .combined-table th:nth-child(1) { width: 25%; } /* Protocol */
-  .combined-table th:nth-child(2) { width: 18%; } /* 30D APR */
-  .combined-table th:nth-child(3) { width: 18%; } /* 60D APR */
-  .combined-table th:nth-child(4) { width: 18%; } /* 90D APR */
-  .combined-table th:nth-child(5) { width: 21%; } /* TVL */
+  .combined-table th:nth-child(3) { width: 18%; } /* 30D APR */
+  .combined-table th:nth-child(4) { width: 18%; } /* 60D APR */
+  .combined-table th:nth-child(5) { width: 18%; } /* 90D APR */
+  .combined-table th:nth-child(6) { width: 21%; } /* TVL */
   
   /* Make table horizontally scrollable if still too wide */
   .data-container {
@@ -178,8 +220,8 @@
   
   /* Even more compact on very small screens */
   .combined-table th:nth-child(1) { width: 28%; } /* Protocol */
-  .combined-table th:nth-child(2) { width: 18%; } /* 30D APR */
-  .combined-table th:nth-child(3) { width: 18%; } /* 60D APR */
-  .combined-table th:nth-child(4) { width: 18%; } /* 90D APR */
-  .combined-table th:nth-child(5) { width: 18%; } /* TVL */
+  .combined-table th:nth-child(3) { width: 18%; } /* 30D APR */
+  .combined-table th:nth-child(4) { width: 18%; } /* 60D APR */
+  .combined-table th:nth-child(5) { width: 18%; } /* 90D APR */
+  .combined-table th:nth-child(6) { width: 18%; } /* TVL */
 }

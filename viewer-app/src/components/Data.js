@@ -11,22 +11,27 @@ const axiosInstance = axios.create({
 const Data = () => {
   const [data, setData] = useState(null);
   const [sinceData, setSinceData] = useState([]);
+  const [pegData, setPegData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [harvestsCollapsed, setHarvestsCollapsed] = useState(true);
+  const [chartMode, setChartMode] = useState('apr'); // 'apr' or 'peg'
 
   // Protocol mapping for icons (same as APRChart)
   const protocolIcons = {
     asdCRV: {
       name: 'asdCRV',
-      iconUrl: 'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
+      iconUrl:
+        'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
     },
     yvyCRV: {
-      name: 'yvyCRV', 
-      iconUrl: 'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
+      name: 'yvyCRV',
+      iconUrl:
+        'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
     },
     ucvxCRV: {
       name: 'ucvxCRV',
-      iconUrl: 'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
+      iconUrl:
+        'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
     },
   };
 
@@ -46,10 +51,15 @@ const Data = () => {
       try {
         const response = await axiosInstance.get('api/crvlol/info');
         setData(response.data.ll_data || {});
-        
+
         // Process chart data
         const chartData = response.data.chart_data;
-        if (chartData && chartData.apr_since && Array.isArray(chartData.apr_since)) {
+        if (
+          chartData &&
+          chartData.apr_since &&
+          Array.isArray(chartData.apr_since)
+        ) {
+          // APR chart data
           const sinceChartData = chartData.apr_since
             .map((item) => ({
               date: new Date(item.date).getTime(),
@@ -59,13 +69,27 @@ const Data = () => {
             }))
             .sort((a, b) => a.date - b.date);
           setSinceData(sinceChartData);
+
+          // PEG chart data - use weekly_aprs for time-varying peg data
+          if (chartData.weekly_aprs && Array.isArray(chartData.weekly_aprs)) {
+            const pegChartData = chartData.weekly_aprs
+              .map((item) => ({
+                date: new Date(item.date).getTime(),
+                asdCRV: (item.asdCRV_peg || 0) * 100,
+                yvyCRV: (item.yvyCRV_peg || 0) * 100,
+                ucvxCRV: (item.ucvxCRV_peg || 0) * 100,
+              }))
+              .sort((a, b) => a.date - b.date);
+            setPegData(pegChartData);
+          }
         }
-        
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching the data:', error);
         setData({});
         setSinceData([]);
+        setPegData([]);
         setLoading(false);
       }
     };
@@ -82,6 +106,7 @@ const Data = () => {
   }
 
   const formatPercentage = (value) => `${(value * 100).toFixed(2)}%`;
+  const formatPeg = (value) => `${(value * 100).toFixed(1)}%`;
   const formatCurrency = (value) => {
     const millions = value / 1000000;
     return `$${millions.toFixed(2)}M`;
@@ -107,6 +132,7 @@ const Data = () => {
         apr30: locker.aprs?.['30'] || 0,
         apr60: locker.aprs?.['60'] || 0,
         apr90: locker.aprs?.['90'] || 0,
+        peg: locker.peg || 0,
         tvl: locker.tvl || 0,
       };
     });
@@ -123,6 +149,7 @@ const Data = () => {
     const highest30 = findHighestValue(sortedRows.map((row) => row.apr30));
     const highest60 = findHighestValue(sortedRows.map((row) => row.apr60));
     const highest90 = findHighestValue(sortedRows.map((row) => row.apr90));
+    const highestPeg = findHighestValue(sortedRows.map((row) => row.peg));
     const highestTvl = findHighestValue(sortedRows.map((row) => row.tvl));
 
     return (
@@ -130,6 +157,7 @@ const Data = () => {
         <thead>
           <tr>
             <th>Protocol</th>
+            <th>Peg</th>
             <th>30D APR</th>
             <th>60D APR</th>
             <th>90D APR</th>
@@ -142,7 +170,13 @@ const Data = () => {
             return (
               <tr key={index}>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
                     {protocolIcon && (
                       <img
                         src={protocolIcon.iconUrl}
@@ -162,6 +196,9 @@ const Data = () => {
                     )}
                     {row.symbol}
                   </div>
+                </td>
+                <td className={getBoldClass(row.peg === highestPeg)}>
+                  {formatPeg(row.peg)}
                 </td>
                 <td className={getBoldClass(row.apr30 === highest30)}>
                   {formatPercentage(row.apr30)}
@@ -183,23 +220,44 @@ const Data = () => {
     );
   };
 
-
   return (
     <div className="data-container">
-      <APRChart data={sinceData} title="APR Since" height={400} />
-      
+      <div className="chart-toggle">
+        <button
+          className={`toggle-btn ${chartMode === 'apr' ? 'active' : ''}`}
+          onClick={() => setChartMode('apr')}
+          title="The chart values show the APR earned from any given date to the current date"
+        >
+          APR Since
+        </button>
+        <button
+          className={`toggle-btn ${chartMode === 'peg' ? 'active' : ''}`}
+          onClick={() => setChartMode('peg')}
+          title="The chart values show the peg ratio over time"
+        >
+          PEG
+        </button>
+      </div>
+      <APRChart
+        data={chartMode === 'apr' ? sinceData : pegData}
+        title=""
+        height={400}
+      />
+
       <div className="table-divider"></div>
-      
+
       {renderCombinedTable()}
-      
+
       <div className="harvest-section">
-        <div 
+        <div
           className="harvest-header"
           onClick={() => setHarvestsCollapsed(!harvestsCollapsed)}
         >
           <h3>
             Harvest History
-            <i className={`fas fa-chevron-down collapse-arrow ${harvestsCollapsed ? 'collapsed' : ''}`}></i>
+            <i
+              className={`fas fa-chevron-down collapse-arrow ${harvestsCollapsed ? 'collapsed' : ''}`}
+            ></i>
           </h3>
         </div>
         {!harvestsCollapsed && (

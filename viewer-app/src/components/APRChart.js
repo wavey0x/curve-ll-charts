@@ -92,7 +92,7 @@ const APRChart = ({ data, title, height = 400 }) => {
             height: '16px',
             borderRadius: '50%',
             border: '1px solid white',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.2)',
             display: 'block',
             margin: '1px',
             objectFit: 'cover',

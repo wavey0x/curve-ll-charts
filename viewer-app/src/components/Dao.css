@@ -31,10 +31,11 @@
 .governance-votes-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-width: 400px;
 }
 
 .governance-vote-item {

@@ -224,6 +224,8 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     if curve_gauge_data:
         # Filter out killed gauges and restructure data
         filtered_gauge_data = {}
+        curve_gauges_by_name = {}
+        
         for key, gauge_info in curve_gauge_data.items():
             if not gauge_info.get('is_killed', False):
                 # Add the original key as curve_key
@@ -232,11 +234,15 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
                 gauge_address = gauge_info.get('gauge')
                 if gauge_address:
                     filtered_gauge_data[gauge_address] = gauge_info
+                    # Add to name mapping
+                    curve_gauges_by_name[key] = gauge_address
                 else:
                     # Fallback to original key if no gauge address found
                     filtered_gauge_data[key] = gauge_info
+                    curve_gauges_by_name[key] = key
         
         cache_data['curve_gauge_data'] = filtered_gauge_data
+        cache_data['curve_gauges_by_name'] = curve_gauges_by_name
         cache_data['curve_gauge_data_last_updated'] = chain.time()
         print(f"Curve gauge data added to cache at {datetime.now()} (filtered out killed gauges)")
     

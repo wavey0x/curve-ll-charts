@@ -112,6 +112,13 @@ const GaugeSearch = ({
 }) => {
   const [address, setAddress] = useState('');
   const [gaugeDetails, setGaugeDetails] = useState(null);
+  const [verificationData, setVerificationData] = useState(null);
+  const [boostData, setBoostData] = useState(null);
+  const [loadingSteps, setLoadingSteps] = useState({
+    basic: false,
+    verification: false,
+    boosts: false
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showError, setShowError] = useState(false);
@@ -206,36 +213,75 @@ const GaugeSearch = ({
         setLoading(true);
         setError(null);
         setShowError(false);
+        setGaugeDetails(null);
+        setVerificationData(null);
+        setBoostData(null);
 
         // Use environment variable for API base URL, with a fallback
         let apiBaseUrl =
           process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
-
         const urlWithoutTrailingSlash = apiBaseUrl.replace(/\/$/, '');
-        const requestUrl = `${urlWithoutTrailingSlash}/api/gauge?gauge=${gaugeAddress}`;
 
-        // Call the API endpoint with retry mechanism
-        const response = await retryApiCall(() =>
-          axiosInstance.get(requestUrl)
+        // Step 1: Fetch basic gauge data (fastest ~100-300ms)
+        setLoadingSteps({ basic: true, verification: false, boosts: false });
+        
+        const basicUrl = `${urlWithoutTrailingSlash}/api/gauge/basic?gauge=${gaugeAddress}`;
+        const basicResponse = await retryApiCall(() =>
+          axiosInstance.get(basicUrl)
         );
 
         // Check if response contains valid gauge data
         if (
-          response.data &&
-          response.data.data &&
-          Object.keys(response.data.data).length > 0
+          basicResponse.data &&
+          basicResponse.data.data &&
+          Object.keys(basicResponse.data.data).length > 0
         ) {
-          setGaugeDetails(response.data);
+          setGaugeDetails(basicResponse.data);
+          setLoadingSteps(prev => ({ ...prev, basic: false }));
         } else {
-          // API returned successfully but no gauge data was found
           throw new Error('Not a valid gauge address');
         }
+
+        // Step 2: Fetch verification data (medium ~1-2s) - run in parallel
+        const verificationPromise = (async () => {
+          try {
+            setLoadingSteps(prev => ({ ...prev, verification: true }));
+            const verificationUrl = `${urlWithoutTrailingSlash}/api/gauge/verification?gauge=${gaugeAddress}`;
+            const verificationResponse = await retryApiCall(() =>
+              axiosInstance.get(verificationUrl)
+            );
+            setVerificationData(verificationResponse.data);
+          } catch (err) {
+            console.warn('Verification data fetch failed:', err.message);
+          } finally {
+            setLoadingSteps(prev => ({ ...prev, verification: false }));
+          }
+        })();
+
+        // Step 3: Fetch boost data (medium ~0.5-1s) - run in parallel
+        const boostPromise = (async () => {
+          try {
+            setLoadingSteps(prev => ({ ...prev, boosts: true }));
+            const boostUrl = `${urlWithoutTrailingSlash}/api/gauge/boosts?gauge=${gaugeAddress}`;
+            const boostResponse = await retryApiCall(() =>
+              axiosInstance.get(boostUrl)
+            );
+            setBoostData(boostResponse.data);
+          } catch (err) {
+            console.warn('Boost data fetch failed:', err.message);
+          } finally {
+            setLoadingSteps(prev => ({ ...prev, boosts: false }));
+          }
+        })();
+
+        // Wait for both verification and boost data to complete
+        await Promise.allSettled([verificationPromise, boostPromise]);
+
       } catch (err) {
         // Try alternate URLs if the main one fails
         try {
-          // Try a different URL structure as fallback
           const alternateBaseUrl = 'https://api.wavey.info';
-          const alternateUrl = `${alternateBaseUrl}/api/gauge?gauge=${gaugeAddress}`;
+          const alternateUrl = `${alternateBaseUrl}/api/gauge/basic?gauge=${gaugeAddress}`;
 
           const alternateResponse = await retryApiCall(() =>
             axiosInstance.get(alternateUrl)
@@ -247,6 +293,18 @@ const GaugeSearch = ({
             Object.keys(alternateResponse.data.data).length > 0
           ) {
             setGaugeDetails(alternateResponse.data);
+            setLoadingSteps({ basic: false, verification: false, boosts: false });
+            
+            // Also try alternate endpoints for verification and boost data
+            Promise.allSettled([
+              retryApiCall(() => axiosInstance.get(`${alternateBaseUrl}/api/gauge/verification?gauge=${gaugeAddress}`))
+                .then(res => setVerificationData(res.data))
+                .catch(err => console.warn('Alternate verification failed:', err.message)),
+              retryApiCall(() => axiosInstance.get(`${alternateBaseUrl}/api/gauge/boosts?gauge=${gaugeAddress}`))
+                .then(res => setBoostData(res.data))
+                .catch(err => console.warn('Alternate boost data failed:', err.message))
+            ]);
+            
             return; // Exit early if alternate URL works
           }
         } catch (alternateErr) {
@@ -258,6 +316,10 @@ const GaugeSearch = ({
             ? 'Not a valid gauge address'
             : `Failed to fetch gauge details: ${err.message}`;
 
+        setGaugeDetails(null);
+        setVerificationData(null);
+        setBoostData(null);
+        setLoadingSteps({ basic: false, verification: false, boosts: false });
         setError(errorMessage);
         setShowError(true);
       } finally {
@@ -479,7 +541,7 @@ const GaugeSearch = ({
 
       {showError && error && <div className="error">{error}</div>}
 
-      {loading && (
+      {loading && !gaugeDetails && (
         <div className="loading-animated">
           <div className="loading-spinner">
             <div className="loading-dot"></div>
@@ -490,7 +552,7 @@ const GaugeSearch = ({
         </div>
       )}
 
-      {gaugeDetails && !loading && gaugeDetails.data && (
+      {gaugeDetails && gaugeDetails.data && (
         <div className="gauge-details">
           <div className="gauge-header-container">
             <h2 className="gauge-title">
@@ -507,7 +569,7 @@ const GaugeSearch = ({
                   className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
                 ></i>
               </button>
-              {gaugeDetails.data.pool_name || 'Gauge Details'}
+              {gaugeDetails.data.curve_key || gaugeDetails.data.pool_name || 'Gauge Details'}
             </h2>
           </div>
 
@@ -563,9 +625,33 @@ const GaugeSearch = ({
                 <div className="detail-item">
                   <span className="label">Verified:</span>
                   <span
-                    className={`value ${gaugeDetails.verification?.is_valid ? 'valid-text' : 'invalid-text'}`}
+                    className={`value ${
+                      verificationData?.data?.verification?.is_valid ? 'valid-text' : 
+                      verificationData !== null ? 'invalid-text' : ''
+                    }`}
                   >
-                    {gaugeDetails.verification?.is_valid ? 'Yes' : 'No'}
+                    {verificationData === null 
+                      ? (loadingSteps.verification ? (
+                          <span style={{ color: '#666', fontSize: '12px' }}>
+                            <span className="loading-dots">Loading</span>
+                          </span>
+                        ) : 'Unknown')
+                      : verificationData.data?.verification?.is_valid ? (
+                          <span 
+                            style={{ fontWeight: 'bold', color: 'green' }}
+                            title={verificationData.data?.verification?.message || ''}
+                          >
+                            VERIFIED
+                          </span>
+                        ) : (
+                          <span 
+                            style={{ fontWeight: 'bold', color: 'red' }}
+                            title={verificationData.data?.verification?.message || ''}
+                          >
+                            NOT VERIFIED
+                          </span>
+                        )
+                    }
                   </span>
                 </div>
                 {gaugeDetails.data.pool_urls?.deposit && (
@@ -586,12 +672,22 @@ const GaugeSearch = ({
                 )}
               </div>
 
-              {gaugeDetails.data.provider_boosts &&
-                Object.keys(gaugeDetails.data.provider_boosts).length > 0 && (
+              {(boostData?.data?.provider_boosts &&
+                Object.keys(boostData.data.provider_boosts).length > 0) || loadingSteps.boosts ? (
                   <div className="detail-card boosts">
                     <h3>Boost Providers</h3>
                     <div className="boost-providers">
-                      {Object.entries(gaugeDetails.data.provider_boosts)
+                      {loadingSteps.boosts ? (
+                        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                          <div className="loading-spinner" style={{ margin: '0 auto 10px', transform: 'scale(0.8)' }}>
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                            <div className="loading-dot"></div>
+                          </div>
+                          Loading boost data...
+                        </div>
+                      ) : boostData?.data?.provider_boosts ? (
+                        Object.entries(boostData.data.provider_boosts)
                         .sort(([, a], [, b]) => parseFloat(b.boost_formatted) - parseFloat(a.boost_formatted))
                         .map(([provider, boostData]) => {
                           const boostValue = parseFloat(boostData.boost_formatted);
@@ -661,10 +757,15 @@ const GaugeSearch = ({
                               </div>
                             </div>
                           );
-                        })}
+                        })
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                          No boost data available
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                ) : null}
             </div>
 
             <div className="detail-card weights">

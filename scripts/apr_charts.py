@@ -243,7 +243,11 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
                         'inflation_rate': inflation_rate
                     }
                 else:
-                    # Fallback to original key if no gauge address found
+                    filtered_gauge_data[gauge_address] = gauge_info
+                    inflation_rate = gauge_info.get('gauge_controller', {}).get('inflation_rate', '0')
+                    gauge_weight = gauge_info.get('gauge_controller', {}).get('get_gauge_weight', '0')
+                    if gauge_weight == 0:
+                        inflation_rate = 0
                     filtered_gauge_data[key] = gauge_info
                     curve_gauges_by_name[key] = {
                         'gauge': key,

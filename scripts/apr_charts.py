@@ -234,12 +234,18 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
                 gauge_address = gauge_info.get('gauge')
                 if gauge_address:
                     filtered_gauge_data[gauge_address] = gauge_info
-                    # Add to name mapping
-                    curve_gauges_by_name[key] = gauge_address
+                    # Add to name mapping with more data
+                    curve_gauges_by_name[key] = {
+                        'gauge': gauge_address,
+                        'inflation_rate': gauge_info.get('gauge_data', {}).get('inflation_rate', '0')
+                    }
                 else:
                     # Fallback to original key if no gauge address found
                     filtered_gauge_data[key] = gauge_info
-                    curve_gauges_by_name[key] = key
+                    curve_gauges_by_name[key] = {
+                        'gauge': key,
+                        'inflation_rate': gauge_info.get('gauge_data', {}).get('inflation_rate', '0')
+                    }
         
         cache_data['curve_gauge_data'] = filtered_gauge_data
         cache_data['curve_gauges_by_name'] = curve_gauges_by_name

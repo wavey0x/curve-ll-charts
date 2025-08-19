@@ -77,6 +77,33 @@ function abbreviateAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+// Function to fetch search suggestions
+const fetchSearchSuggestions = async (query) => {
+  if (!query || query.length < 2) {
+    return {};
+  }
+  
+  // Check if it's already a gauge address format - if so, skip search API
+  if (query.match(/^0x[0-9a-fA-F]{40}$/i)) {
+    return {};
+  }
+  
+  try {
+    const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'https://api.wavey.info';
+    const urlWithoutTrailingSlash = apiBaseUrl.replace(/\/$/, '');
+    const searchUrl = `${urlWithoutTrailingSlash}/api/gauge/search?q=${encodeURIComponent(query)}`;
+    
+    const response = await retryApiCall(() =>
+      axiosInstance.get(searchUrl)
+    );
+    
+    return response.data || {};
+  } catch (error) {
+    console.warn('Search suggestions failed:', error.message);
+    return {};
+  }
+};
+
 // Protocol mapping for icons (same as APRChart)
 const protocolIcons = {
   asdCRV: {
@@ -124,6 +151,9 @@ const GaugeSearch = ({
   const [showError, setShowError] = useState(false);
   const initialLoadDone = useRef(false);
   const [copiedText, setCopiedText] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState({});
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -144,6 +174,27 @@ const GaugeSearch = ({
     setShowError(false);
     // Hide votes when changing address
     setShowVotes(false);
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Hide suggestions if empty or already a full address
+    if (!value || value.length < 2 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
+      setShowSuggestions(false);
+      setSearchSuggestions({});
+      return;
+    }
+    
+    // Debounce search API calls
+    const newTimeout = setTimeout(async () => {
+      const suggestions = await fetchSearchSuggestions(value);
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(Object.keys(suggestions).length > 0);
+    }, 300);
+    
+    setSearchTimeout(newTimeout);
   };
 
   // Calculate gauge inflation rate (CRV tokens per second)

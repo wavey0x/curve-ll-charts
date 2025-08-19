@@ -69,12 +69,19 @@ function toChecksumAddress(address) {
   return checksumAddress;
 }
 
-// Helper function to abbreviate addresses for display
+// Helper function to abbreviate addresses for display (without 0x prefix)
 function abbreviateAddress(address) {
   if (!address || typeof address !== 'string' || address.length < 10) {
     return address;
   }
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  
+  // Remove 0x prefix if present, then abbreviate
+  const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
+  if (cleanAddress.length < 8) {
+    return cleanAddress;
+  }
+  
+  return `${cleanAddress.slice(0, 4)}…${cleanAddress.slice(-4)}`;
 }
 
 // Function to fetch search suggestions
@@ -155,6 +162,8 @@ const GaugeSearch = ({
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [selectedGauge, setSelectedGauge] = useState(null); // Store selected gauge info
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -166,7 +175,13 @@ const GaugeSearch = ({
 
   // Validate Ethereum address format - wrapped in useCallback to avoid recreating on each render
   const isValidAddress = useCallback((value) => {
-    return /^0x[a-fA-F0-9]{40}$/.test(value);
+    if (!value || typeof value !== 'string') return false;
+    
+    // Clean the value first
+    const cleanValue = value.trim().toLowerCase();
+    
+    // Check if it matches the Ethereum address pattern (case insensitive)
+    return /^0x[a-f0-9]{40}$/.test(cleanValue);
   }, []);
 
   const handleInputChange = (e) => {
@@ -175,6 +190,11 @@ const GaugeSearch = ({
     setShowError(false);
     // Hide votes when changing address
     setShowVotes(false);
+    
+    // If user starts typing after selecting a gauge, clear the selection
+    if (selectedGauge && value !== selectedGauge.name) {
+      setSelectedGauge(null);
+    }
     
     // Clear existing timeout
     if (searchTimeout) {
@@ -185,6 +205,7 @@ const GaugeSearch = ({
     if (!value || value.length < 2 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
       setShowSuggestions(false);
       setSearchSuggestions([]);
+      setSelectedSuggestionIndex(-1);
       return;
     }
     
@@ -193,20 +214,81 @@ const GaugeSearch = ({
       const suggestions = await fetchSearchSuggestions(value);
       setSearchSuggestions(suggestions);
       setShowSuggestions(suggestions.length > 0);
+      setSelectedSuggestionIndex(-1); // Reset selection when new results come in
     }, 300);
     
     setSearchTimeout(newTimeout);
   };
 
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || searchSuggestions.length === 0) {
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev < searchSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : searchSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < searchSuggestions.length) {
+          const selectedResult = searchSuggestions[selectedSuggestionIndex];
+          handleSuggestionClick(selectedResult);
+        } else if (showSuggestions) {
+          // If suggestions are showing but none selected, don't submit form
+          return;
+        }
+        // If no suggestions showing, let the form submit naturally
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+        break;
+    }
+  };
+
   const handleSuggestionClick = (gaugeResult) => {
-    setAddress(gaugeResult.address);
+    // Clean and validate the address from API response
+    let cleanAddress = gaugeResult.gauge_address;
+    if (typeof cleanAddress === 'string') {
+      cleanAddress = cleanAddress.trim();
+      // Ensure it starts with 0x and is lowercase for consistency
+      if (!cleanAddress.startsWith('0x')) {
+        cleanAddress = '0x' + cleanAddress;
+      }
+      cleanAddress = cleanAddress.toLowerCase();
+    }
+    
+    
+    // Store the selected gauge info and show the gauge name in the input
+    setSelectedGauge({ name: gaugeResult.name, address: cleanAddress });
+    setAddress(gaugeResult.name); // Show the gauge name in the input field
     setShowSuggestions(false);
     setSearchSuggestions([]);
+    setSelectedSuggestionIndex(-1);
+    
     // Clear any pending search timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
       setSearchTimeout(null);
     }
+    
+    // Update URL with the gauge address
+    const url = new URL(window.location);
+    url.searchParams.set('gauge', cleanAddress);
+    window.history.pushState({}, '', url);
+    
+    // Immediately load the gauge data
+    fetchGaugeDetails(cleanAddress);
   };
 
   // Calculate gauge inflation rate (CRV tokens per second)
@@ -530,10 +612,14 @@ const GaugeSearch = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Determine the address to use - either from selected gauge or direct input
+    const addressToUse = selectedGauge ? selectedGauge.address : address;
+
+
     // Update URL with the gauge address
-    if (address) {
+    if (addressToUse) {
       const url = new URL(window.location);
-      url.searchParams.set('gauge', address);
+      url.searchParams.set('gauge', addressToUse);
       window.history.pushState({}, '', url);
     }
 
@@ -541,12 +627,13 @@ const GaugeSearch = ({
     setShowVotes(false);
     setVoteData([]);
 
-    await fetchGaugeDetails(address);
+    await fetchGaugeDetails(addressToUse);
   };
 
   // Handle gauge click from favorites table
   const handleGaugeClick = (gaugeAddress) => {
     setAddress(gaugeAddress);
+    setSelectedGauge(null); // Clear any selected gauge since this is a direct address
 
     // Update URL
     const url = new URL(window.location);
@@ -591,15 +678,39 @@ const GaugeSearch = ({
             type="text"
             value={address}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder="Enter gauge address (0x...) or gauge name"
             className="search-input"
+            title={selectedGauge ? `Selected: ${selectedGauge.name} (${abbreviateAddress(selectedGauge.address)})` : ''}
           />
+          {address && (
+            <button
+              type="button"
+              className="search-clear-button"
+              onClick={() => {
+                setAddress('');
+                setSelectedGauge(null);
+                setShowSuggestions(false);
+                setSearchSuggestions([]);
+                setSelectedSuggestionIndex(-1);
+                if (searchTimeout) {
+                  clearTimeout(searchTimeout);
+                  setSearchTimeout(null);
+                }
+              }}
+              title="Clear search"
+            >
+              ×
+            </button>
+          )}
           {showSuggestions && (
             <div className="search-suggestions">
-              {searchSuggestions.map((result) => (
+              {searchSuggestions.map((result, index) => (
                 <div
-                  key={result.address}
-                  className="search-suggestion-item"
+                  key={result.gauge_address}
+                  className={`search-suggestion-item ${
+                    index === selectedSuggestionIndex ? 'selected' : ''
+                  }`}
                   onClick={() => handleSuggestionClick(result)}
                 >
                   <span className="gauge-name">{result.name}</span>
@@ -621,12 +732,7 @@ const GaugeSearch = ({
 
       {loading && !gaugeDetails && (
         <div className="loading-animated">
-          <div className="loading-spinner">
-            <div className="loading-dot"></div>
-            <div className="loading-dot"></div>
-            <div className="loading-dot"></div>
-          </div>
-          Loading gauge details...
+          <div className="loading-spinner"></div>
         </div>
       )}
 
@@ -647,7 +753,24 @@ const GaugeSearch = ({
                   className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
                 ></i>
               </button>
-              {gaugeDetails.data.curve_key || gaugeDetails.data.pool_name || 'Gauge Details'}
+              {(() => {
+                const title = gaugeDetails.data.curve_key || gaugeDetails.data.pool_name || 'Gauge Details';
+                const parenIndex = title.indexOf('(');
+                
+                if (parenIndex === -1) {
+                  return title;
+                }
+                
+                const mainPart = title.substring(0, parenIndex).trim();
+                const parenPart = title.substring(parenIndex);
+                
+                return (
+                  <>
+                    {mainPart}{' '}
+                    <span className="gauge-title-address">{parenPart}</span>
+                  </>
+                );
+              })()}
             </h2>
           </div>
 
@@ -710,9 +833,7 @@ const GaugeSearch = ({
                   >
                     {verificationData === null 
                       ? (loadingSteps.verification ? (
-                          <span style={{ color: '#666', fontSize: '12px' }}>
-                            <span className="loading-dots">Loading</span>
-                          </span>
+                          <div className="loading-spinner" style={{ transform: 'scale(0.5)' }}></div>
                         ) : 'Unknown')
                       : verificationData.data?.verification?.is_valid ? (
                           <span 
@@ -757,28 +878,29 @@ const GaugeSearch = ({
                     <div className="boost-providers">
                       {loadingSteps.boosts ? (
                         <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                          <div className="loading-spinner" style={{ margin: '0 auto 10px', transform: 'scale(0.8)' }}>
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                            <div className="loading-dot"></div>
-                          </div>
-                          Loading boost data...
+                          <div className="loading-spinner"></div>
                         </div>
                       ) : boostData?.data?.provider_boosts ? (
                         Object.entries(boostData.data.provider_boosts)
                         .sort(([, a], [, b]) => parseFloat(b.boost_formatted) - parseFloat(a.boost_formatted))
                         .map(([provider, boostData]) => {
                           const boostValue = parseFloat(boostData.boost_formatted);
-                          const fillPercentage = Math.max(0, Math.min(100, ((boostValue - 1.0) / (2.5 - 1.0)) * 100));
+                          const isValidBoost = !isNaN(boostValue) && boostValue > 0 && boostData.boost_formatted !== 'N/A';
                           
-                          // Color coding based on boost value ranges
-                          let meterColor;
-                          if (boostValue >= 2.0) {
-                            meterColor = '#4caf50'; // Green for 2.0x+
-                          } else if (boostValue >= 1.5) {
-                            meterColor = '#ffc107'; // Yellow for 1.5x-1.99x
-                          } else {
-                            meterColor = '#ff5722'; // Red for 1.0x-1.49x
+                          // If boost is invalid/N/A or no emissions, show empty meter
+                          const fillPercentage = isValidBoost ? 
+                            Math.max(0, Math.min(100, ((boostValue - 1.0) / (2.5 - 1.0)) * 100)) : 0;
+                          
+                          // Color coding based on boost value ranges (only if valid)
+                          let meterColor = '#e0e0e0'; // Default light gray for empty/invalid
+                          if (isValidBoost) {
+                            if (boostValue >= 2.0) {
+                              meterColor = '#4caf50'; // Green for 2.0x+
+                            } else if (boostValue >= 1.5) {
+                              meterColor = '#ffc107'; // Yellow for 1.5x-1.99x
+                            } else {
+                              meterColor = '#ff5722'; // Red for 1.0x-1.49x
+                            }
                           }
                           
                           return (
@@ -830,7 +952,7 @@ const GaugeSearch = ({
                                   ></div>
                                 </div>
                                 <span className="boost-value-text">
-                                  {boostData.boost_formatted}x
+                                  {isValidBoost ? `${boostData.boost_formatted}x` : 'N/A'}
                                 </span>
                               </div>
                             </div>

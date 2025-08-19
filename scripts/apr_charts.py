@@ -235,7 +235,9 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
                 filtered_gauge_data[gauge_address] = gauge_info
                 inflation_rate = int(gauge_info.get('gauge_controller', {}).get('inflation_rate', 0))
                 gauge_weight = int(gauge_info.get('gauge_controller', {}).get('get_gauge_weight', 0))
-                if gauge_weight == 0:
+                working_supply = int(gauge_info.get('gauge_data', {}).get('working_supply', 0))
+                relative_weight = int(gauge_info.get('gauge_controller', {}).get('gauge_relative_weight', 0))
+                if gauge_weight == 0 or relative_weight == 0 or working_supply == 0:
                     inflation_rate = 0
                 curve_gauges_by_name[key] = {
                     'name': key,

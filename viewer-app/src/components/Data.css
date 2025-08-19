@@ -1,4 +1,28 @@
 /* Data Component Styles - Following Style Guide */
+
+.loading-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e0e0e0;
+  border-top: 2px solid #666666;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .data-container {
   max-width: 100%;
 }
@@ -33,9 +57,9 @@
 }
 
 .toggle-btn {
-  background: #f8f8f8;
-  border: 1px solid #000000;
-  color: #000000;
+  background: #f0f0f0;
+  border: 1px solid #cccccc;
+  color: #666666;
   padding: 6px 16px;
   font-size: 12px;
   font-weight: 600;
@@ -49,6 +73,7 @@
 .toggle-btn.active {
   background: #ffffff;
   border-color: #000000;
+  color: #000000;
   z-index: 1;
 }
 

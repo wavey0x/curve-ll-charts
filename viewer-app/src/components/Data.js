@@ -98,7 +98,11 @@ const Data = () => {
   }, []);
 
   if (loading) {
-    return <div className="loading-centered">Loading...</div>;
+    return (
+      <div className="loading-centered">
+        <div className="loading-spinner"></div>
+      </div>
+    );
   }
 
   if (!data || Object.keys(data).length === 0) {
@@ -231,14 +235,14 @@ const Data = () => {
             onClick={() => setChartMode('apr')}
             title="The chart values show the APR earned from any given date to the current date"
           >
-            APR Since
+            APR
           </button>
           <button
             className={`toggle-btn ${chartMode === 'peg' ? 'active' : ''}`}
             onClick={() => setChartMode('peg')}
             title="The chart values show the peg ratio over time"
           >
-            PEG
+            Peg
           </button>
         </div>
         <div className="chart-content">

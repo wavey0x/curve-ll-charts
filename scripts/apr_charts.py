@@ -1,5 +1,6 @@
 from brownie import Contract, chain
 import pandas as pd
+import requests
 from datetime import datetime, timedelta
 from compounders_info import CURVE_LIQUID_LOCKER_COMPOUNDERS
 import os
@@ -21,16 +22,48 @@ def main():
     if not os.path.exists('charts'):
         os.makedirs('charts')
 
+    # Fetch Curve gauge data
+    curve_gauge_data = fetch_curve_gauge_data()
+
     # Generate chart data
     aprs_weekly = weekly_apr()
     aprs_since = apr_since()
 
-    # Save raw chart data to ll_info.json
-    save_chart_data_to_cache(aprs_weekly, None, aprs_since, None)
+    # Save raw chart data and Curve gauge data to ll_info.json
+    save_chart_data_to_cache(aprs_weekly, None, aprs_since, None, curve_gauge_data)
 
     # Generate Altair charts (keeping existing functionality)
     # plot_aprs('Weekly_APRs_False', aprs_weekly)
     # plot_aprs('APR_Since_False', aprs_since[1:])
+
+
+def fetch_curve_gauge_data():
+    """
+    Fetch gauge data from Curve Finance API
+    Returns dict with gauge data or None if failed
+    """
+    try:
+        url = "https://api.curve.finance/api/getAllGauges"
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get('success'):
+            print(f"✅ Successfully fetched Curve gauge data at {datetime.now()}")
+            return data.get('data', {})
+        else:
+            print(f"❌ Curve API returned success=False")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Error fetching Curve gauge data: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"❌ Error parsing Curve API response: {e}")
+        return None
+    except Exception as e:
+        print(f"❌ Unexpected error fetching Curve gauge data: {e}")
+        return None
 
 
 def get_peg_data_for_block(block):
@@ -155,9 +188,9 @@ def get_pps(vault_address, block):
 
 
 
-def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg):
+def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg, curve_gauge_data=None):
     """
-    Save raw chart data to ll_info.json cache for use with Recharts
+    Save raw chart data and Curve gauge data to ll_info.json cache for use with Recharts
     """
     # Load existing cache
     cache_data = utils.load_from_json('data/ll_info.json')
@@ -186,6 +219,26 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     
     # Add chart data to cache
     cache_data['chart_data'] = chart_data
+    
+    # Add Curve gauge data to cache if available
+    if curve_gauge_data:
+        # Filter out killed gauges and restructure data
+        filtered_gauge_data = {}
+        for key, gauge_info in curve_gauge_data.items():
+            if not gauge_info.get('is_killed', False):
+                # Add the original key as curve_key
+                gauge_info['curve_key'] = key
+                # Use the gauge address as the new key
+                gauge_address = gauge_info.get('gauge')
+                if gauge_address:
+                    filtered_gauge_data[gauge_address] = gauge_info
+                else:
+                    # Fallback to original key if no gauge address found
+                    filtered_gauge_data[key] = gauge_info
+        
+        cache_data['curve_gauge_data'] = filtered_gauge_data
+        cache_data['curve_gauge_data_last_updated'] = chain.time()
+        print(f"Curve gauge data added to cache at {datetime.now()} (filtered out killed gauges)")
     
     # Save updated cache
     utils.cache_to_json('data/ll_info.json', cache_data)

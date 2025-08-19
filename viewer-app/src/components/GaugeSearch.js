@@ -80,12 +80,12 @@ function abbreviateAddress(address) {
 // Function to fetch search suggestions
 const fetchSearchSuggestions = async (query) => {
   if (!query || query.length < 2) {
-    return {};
+    return [];
   }
   
   // Check if it's already a gauge address format - if so, skip search API
   if (query.match(/^0x[0-9a-fA-F]{40}$/i)) {
-    return {};
+    return [];
   }
   
   try {
@@ -97,10 +97,11 @@ const fetchSearchSuggestions = async (query) => {
       axiosInstance.get(searchUrl)
     );
     
-    return response.data || {};
+    // Return the results array from the API response
+    return response.data?.data?.results || [];
   } catch (error) {
     console.warn('Search suggestions failed:', error.message);
-    return {};
+    return [];
   }
 };
 
@@ -151,7 +152,7 @@ const GaugeSearch = ({
   const [showError, setShowError] = useState(false);
   const initialLoadDone = useRef(false);
   const [copiedText, setCopiedText] = useState('');
-  const [searchSuggestions, setSearchSuggestions] = useState({});
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState(null);
 
@@ -183,7 +184,7 @@ const GaugeSearch = ({
     // Hide suggestions if empty or already a full address
     if (!value || value.length < 2 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
       setShowSuggestions(false);
-      setSearchSuggestions({});
+      setSearchSuggestions([]);
       return;
     }
     
@@ -191,10 +192,21 @@ const GaugeSearch = ({
     const newTimeout = setTimeout(async () => {
       const suggestions = await fetchSearchSuggestions(value);
       setSearchSuggestions(suggestions);
-      setShowSuggestions(Object.keys(suggestions).length > 0);
+      setShowSuggestions(suggestions.length > 0);
     }, 300);
     
     setSearchTimeout(newTimeout);
+  };
+
+  const handleSuggestionClick = (gaugeResult) => {
+    setAddress(gaugeResult.address);
+    setShowSuggestions(false);
+    setSearchSuggestions([]);
+    // Clear any pending search timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+      setSearchTimeout(null);
+    }
   };
 
   // Calculate gauge inflation rate (CRV tokens per second)
@@ -574,13 +586,28 @@ const GaugeSearch = ({
       <div className="search-divider"></div>
 
       <form onSubmit={handleSubmit} className="search-form">
-        <input
-          type="text"
-          value={address}
-          onChange={handleInputChange}
-          placeholder="Enter gauge address (0x...)"
-          className="search-input"
-        />
+        <div className="search-input-container">
+          <input
+            type="text"
+            value={address}
+            onChange={handleInputChange}
+            placeholder="Enter gauge address (0x...) or gauge name"
+            className="search-input"
+          />
+          {showSuggestions && (
+            <div className="search-suggestions">
+              {searchSuggestions.map((result) => (
+                <div
+                  key={result.address}
+                  className="search-suggestion-item"
+                  onClick={() => handleSuggestionClick(result)}
+                >
+                  <span className="gauge-name">{result.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           type="submit"
           className="search-button"

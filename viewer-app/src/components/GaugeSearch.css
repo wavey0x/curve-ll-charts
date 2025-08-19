@@ -41,7 +41,7 @@
 }
 
 .search-input {
-  flex: 1;
+  width: 100%;
   padding: 8px 12px;
   border: 1px solid #000000;
   border-radius: 4px;
@@ -49,6 +49,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   background: #ffffff;
   color: #000000;
+  box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -77,6 +78,50 @@
   background-color: #f0f0f0;
   color: #999999;
   cursor: not-allowed;
+}
+
+.search-input-container {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-suggestion-item {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.search-suggestion-item:hover {
+  background-color: #f8f8f8;
+}
+
+.search-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.gauge-name {
+  color: #000000;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .error {

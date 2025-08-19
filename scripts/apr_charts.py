@@ -232,27 +232,15 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
                 gauge_info['curve_key'] = key
                 # Use the gauge address as the new key
                 gauge_address = gauge_info.get('gauge')
-                if gauge_address:
-                    filtered_gauge_data[gauge_address] = gauge_info
-                    inflation_rate = gauge_info.get('gauge_controller', {}).get('inflation_rate', '0')
-                    gauge_weight = gauge_info.get('gauge_controller', {}).get('get_gauge_weight', '0')
-                    if gauge_weight == 0:
-                        inflation_rate = 0
-                    curve_gauges_by_name[key] = {
-                        'gauge': gauge_address,
-                        'inflation_rate': inflation_rate
-                    }
-                else:
-                    filtered_gauge_data[gauge_address] = gauge_info
-                    inflation_rate = gauge_info.get('gauge_controller', {}).get('inflation_rate', '0')
-                    gauge_weight = gauge_info.get('gauge_controller', {}).get('get_gauge_weight', '0')
-                    if gauge_weight == 0:
-                        inflation_rate = 0
-                    filtered_gauge_data[key] = gauge_info
-                    curve_gauges_by_name[key] = {
-                        'gauge': key,
-                        'inflation_rate': inflation_rate
-                    }
+                filtered_gauge_data[gauge_address] = gauge_info
+                inflation_rate = int(gauge_info.get('gauge_controller', {}).get('inflation_rate', 0))
+                gauge_weight = int(gauge_info.get('gauge_controller', {}).get('get_gauge_weight', 0))
+                if gauge_weight == 0:
+                    inflation_rate = 0
+                curve_gauges_by_name[key] = {
+                    'gauge': key,
+                    'inflation_rate': inflation_rate
+                }
         
         cache_data['curve_gauge_data'] = filtered_gauge_data
         cache_data['curve_gauges_by_name'] = curve_gauges_by_name

@@ -4,8 +4,8 @@
 }
 
 .data-container .combined-table {
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  max-width: 700px;
   margin: 0 auto;
 }
 
@@ -15,18 +15,26 @@
   justify-content: center;
 }
 
-/* Chart toggle styling */
+/* Unified chart container */
+.chart-section {
+  max-width: 700px;
+  margin: 16px auto 0 auto;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px 4px 4px 4px;
+  box-shadow: 0 0 0 1px #e0e0e0;
+}
+
 .chart-toggle {
   display: flex;
   justify-content: center;
   gap: 4px;
-  margin-bottom: 4px;
-  padding: 0 8px;
+  margin: 4px 0 8px 0;
 }
 
 .toggle-btn {
   background: #f8f8f8;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #000000;
   color: #000000;
   padding: 6px 16px;
   font-size: 12px;
@@ -46,6 +54,11 @@
 
 .toggle-btn:hover:not(.active) {
   background: #f0f0f0;
+}
+
+.chart-content {
+  background: #ffffff;
+  padding: 0;
 }
 
 /* Visual divider between chart and table */
@@ -90,8 +103,8 @@
 }
 
 .data-table {
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  max-width: 700px;
   border-collapse: collapse;
   margin: 0 auto 32px auto;
   font-size: 14px;
@@ -206,7 +219,8 @@
   
   .data-container .combined-table {
     min-width: 300px;
-    width: auto;
+    width: 100%;
+    max-width: 700px;
   }
 }
 

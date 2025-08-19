@@ -4,7 +4,8 @@
 }
 
 body {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
   font-variant-numeric: tabular-nums;
   margin: 0;
   padding: 0;
@@ -96,7 +97,6 @@ header {
 
 .chart-section {
   background: #ffffff;
-  border: 1px solid #000000;
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 24px;
@@ -202,7 +202,7 @@ header {
 }
 
 .about-content p {
-  font-family: Inter, Roboto, "SF Pro Text", system-ui, sans-serif;
+  font-family: Inter, Roboto, 'SF Pro Text', system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   color: #000000;
@@ -255,27 +255,26 @@ footer a i {
   .App {
     padding: 16px;
   }
-  
+
   .card,
   .chart-section,
   .data-section,
   .harvest-data-section {
     padding: 16px;
   }
-  
+
   .main-header {
     font-size: 24px;
   }
-  
+
   .sub-header {
     font-size: 14px;
   }
-  
+
   .nav-link {
     padding: 8px 16px;
     font-size: 13px;
   }
-  
 }
 
 /* Utility Classes */
@@ -288,9 +287,10 @@ footer a i {
 }
 
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
 }
 
 .font-sans {
-  font-family: Inter, Roboto, "SF Pro Text", system-ui, sans-serif;
+  font-family: Inter, Roboto, 'SF Pro Text', system-ui, sans-serif;
 }

@@ -222,31 +222,33 @@ const Data = () => {
 
   return (
     <div className="data-container">
-      <div className="chart-toggle">
-        <button
-          className={`toggle-btn ${chartMode === 'apr' ? 'active' : ''}`}
-          onClick={() => setChartMode('apr')}
-          title="The chart values show the APR earned from any given date to the current date"
-        >
-          APR Since
-        </button>
-        <button
-          className={`toggle-btn ${chartMode === 'peg' ? 'active' : ''}`}
-          onClick={() => setChartMode('peg')}
-          title="The chart values show the peg ratio over time"
-        >
-          PEG
-        </button>
-      </div>
-      <APRChart
-        data={chartMode === 'apr' ? sinceData : pegData}
-        title=""
-        height={400}
-      />
-
-      <div className="table-divider"></div>
-
       {renderCombinedTable()}
+      
+      <div className="chart-section">
+        <div className="chart-toggle">
+          <button
+            className={`toggle-btn ${chartMode === 'apr' ? 'active' : ''}`}
+            onClick={() => setChartMode('apr')}
+            title="The chart values show the APR earned from any given date to the current date"
+          >
+            APR Since
+          </button>
+          <button
+            className={`toggle-btn ${chartMode === 'peg' ? 'active' : ''}`}
+            onClick={() => setChartMode('peg')}
+            title="The chart values show the peg ratio over time"
+          >
+            PEG
+          </button>
+        </div>
+        <div className="chart-content">
+          <APRChart
+            data={chartMode === 'apr' ? sinceData : pegData}
+            title=""
+            height={400}
+          />
+        </div>
+      </div>
 
       <div className="harvest-section">
         <div

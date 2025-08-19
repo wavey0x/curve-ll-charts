@@ -8,10 +8,10 @@
 
 .harvest-table {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto 24px auto;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-variant-numeric: tabular-nums;
   table-layout: fixed;
@@ -26,6 +26,12 @@
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Right justify the Date column (4th column) */
+.harvest-table th:nth-child(4),
+.harvest-table td:nth-child(4) {
+  text-align: right;
 }
 
 .harvest-table th {

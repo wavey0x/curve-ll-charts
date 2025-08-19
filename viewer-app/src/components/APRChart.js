@@ -6,7 +6,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -161,47 +160,6 @@ const APRChart = ({ data, title, height = 400 }) => {
     return null;
   };
 
-  // Custom legend component
-  const CustomLegend = ({ payload }) => (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '32px',
-        marginTop: '20px',
-        flexWrap: 'wrap',
-      }}
-    >
-      {payload.map((entry, index) => {
-        const protocol = protocolIcons[entry.dataKey];
-        return (
-          <div
-            key={index}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '13px',
-              fontWeight: '500',
-              opacity: 0.8,
-            }}
-          >
-            <div
-              style={{
-                width: '16px',
-                height: '2px',
-                backgroundColor: entry.color,
-                borderRadius: '1px',
-              }}
-            />
-            <span style={{ color: '#555' }}>
-              {protocol ? protocol.name : entry.value}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
 
   return (
     <div
@@ -282,7 +240,6 @@ const APRChart = ({ data, title, height = 400 }) => {
             domain={[0, 'dataMax + 1']}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend content={<CustomLegend />} />
 
           {/* Elegant chart lines with refined styling */}
           <Line

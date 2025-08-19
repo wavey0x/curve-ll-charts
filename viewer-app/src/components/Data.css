@@ -25,27 +25,21 @@
 
 /* Combined table styling */
 
-.combined-table th:nth-child(1) { width: 18%; } /* Protocol */
+.combined-table th:nth-child(1) { width: 25%; } /* Protocol */
 .combined-table th:nth-child(2),
 .combined-table th:nth-child(3),
-.combined-table th:nth-child(4) { width: 15%; } /* APR columns - prioritized */
-.combined-table th:nth-child(5) { width: 12%; } /* TVL */
-.combined-table th:nth-child(6) { width: 8%; } /* Fee */
-.combined-table th:nth-child(7) { width: 9%; } /* PUP */
+.combined-table th:nth-child(4) { width: 20%; } /* APR columns - prioritized */
+.combined-table th:nth-child(5) { width: 15%; } /* TVL */
 
 /* Right-align numeric columns */
 .combined-table th:nth-child(2),
 .combined-table th:nth-child(3),
 .combined-table th:nth-child(4),
 .combined-table th:nth-child(5),
-.combined-table th:nth-child(6),
-.combined-table th:nth-child(7),
 .combined-table td:nth-child(2),
 .combined-table td:nth-child(3),
 .combined-table td:nth-child(4),
-.combined-table td:nth-child(5),
-.combined-table td:nth-child(6),
-.combined-table td:nth-child(7) {
+.combined-table td:nth-child(5) {
   text-align: right;
 }
 
@@ -156,15 +150,7 @@
     font-size: 11px;
   }
   
-  /* Hide less important columns on mobile */
-  .combined-table th:nth-child(6), /* Fee */
-  .combined-table td:nth-child(6),
-  .combined-table th:nth-child(7), /* PUP */
-  .combined-table td:nth-child(7) {
-    display: none;
-  }
-  
-  /* Adjust remaining column widths for mobile */
+  /* Adjust column widths for mobile */
   .combined-table th:nth-child(1) { width: 25%; } /* Protocol */
   .combined-table th:nth-child(2) { width: 18%; } /* 30D APR */
   .combined-table th:nth-child(3) { width: 18%; } /* 60D APR */

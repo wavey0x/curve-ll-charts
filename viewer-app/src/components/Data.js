@@ -108,8 +108,6 @@ const Data = () => {
         apr60: locker.aprs?.['60'] || 0,
         apr90: locker.aprs?.['90'] || 0,
         tvl: locker.tvl || 0,
-        fee: locker.fee_pct || 0,
-        pup: locker.profit_unlock_period || 0,
       };
     });
 
@@ -126,7 +124,6 @@ const Data = () => {
     const highest60 = findHighestValue(sortedRows.map((row) => row.apr60));
     const highest90 = findHighestValue(sortedRows.map((row) => row.apr90));
     const highestTvl = findHighestValue(sortedRows.map((row) => row.tvl));
-    const lowestFee = findLowestValue(sortedRows.map((row) => row.fee));
 
     return (
       <table className="data-table combined-table">
@@ -137,8 +134,6 @@ const Data = () => {
             <th>60D APR</th>
             <th>90D APR</th>
             <th>TVL</th>
-            <th>Fee</th>
-            <th>PUP (Hrs)</th>
           </tr>
         </thead>
         <tbody>
@@ -180,10 +175,6 @@ const Data = () => {
                 <td className={getBoldClass(row.tvl === highestTvl)}>
                   {formatCurrency(row.tvl)}
                 </td>
-                <td className={getBoldClass(row.fee === lowestFee)}>
-                  {formatPercentage(row.fee / 100)}
-                </td>
-                <td>{formatHours(row.pup)}</td>
               </tr>
             );
           })}

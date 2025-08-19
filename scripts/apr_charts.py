@@ -22,81 +22,124 @@ def main():
         os.makedirs('charts')
 
     # Generate chart data
-    aprs_weekly = weekly_apr(adjust_for_peg=False)
-    aprs_weekly_peg = weekly_apr(adjust_for_peg=True)
-    aprs_since = apr_since(adjust_for_peg=False)
-    aprs_since_peg = apr_since(adjust_for_peg=True)
+    aprs_weekly = weekly_apr()
+    aprs_since = apr_since()
 
     # Save raw chart data to ll_info.json
-    save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg)
+    save_chart_data_to_cache(aprs_weekly, None, aprs_since, None)
 
     # Generate Altair charts (keeping existing functionality)
-    plot_aprs('Weekly_APRs_False', aprs_weekly)
-    plot_aprs('Weekly_APRs_True', aprs_weekly_peg)
-    plot_aprs('APR_Since_False', aprs_since[1:])
-    plot_aprs('APR_Since_True', aprs_since_peg[1:])
+    # plot_aprs('Weekly_APRs_False', aprs_weekly)
+    # plot_aprs('APR_Since_False', aprs_since[1:])
 
-def weekly_apr(adjust_for_peg=False):
+
+def get_peg_data_for_block(block):
+    """
+    Get peg data for all pools at a specific block
+    Returns dict with pool symbols as keys and peg values as values
+    """
+    peg_data = {}
+    for address, data in CURVE_LIQUID_LOCKER_COMPOUNDERS.items():
+        peg_data[data['symbol']] = get_peg(data['pool'], block)
+    return peg_data
+
+
+def calculate_apr(start_pps, end_pps, time_period):
+    """
+    Calculate APR without peg adjustment
+    """
+    gain = end_pps - start_pps
+    apr = gain / start_pps / (time_period / YEAR)
+    return apr
+
+
+
+def weekly_apr():
     current_time = chain.time() - 5
     current_week = current_time // WEEK * WEEK
     aprs = []
-    peg = 1
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
+    
     for i in range(0, num_samples):
         week_end = current_week - (WEEK * i)
         end_block, _ = get_block_and_ts(week_end)
+        start_block = closest_block_before_timestamp(week_end - WEEK)
         end_date = datetime.fromtimestamp(week_end)
-        sample = {'date': end_date}
+        
+        # Get peg data for current block only
+        end_peg_data = get_peg_data_for_block(end_block)
+        
+        sample = {
+            'date': end_date,
+            'block': end_block,
+            'start_block': start_block
+        }
+        
+        # Add current peg data to sample
+        for symbol in CURVE_LIQUID_LOCKER_COMPOUNDERS.values():
+            sample[f"{symbol['symbol']}_peg"] = end_peg_data[symbol['symbol']]
+        
+        # Calculate APR for each compounder
         for address, data in CURVE_LIQUID_LOCKER_COMPOUNDERS.items():
             end_pps = get_pps(address, end_block)
-            start_block = closest_block_before_timestamp(week_end - WEEK)
             start_pps = get_pps(address, start_block)
-            gain = end_pps - start_pps
-            if adjust_for_peg:
-                peg = get_peg(data['pool'], end_block)
-                peg *= get_peg(data['pool'], start_block)
-            apr = gain / start_pps / (WEEK / YEAR)
-            apr *= peg
-            sample[data['symbol']] = apr * peg
+            
+            apr = calculate_apr(start_pps, end_pps, WEEK)
+            
+            sample[data['symbol']] = apr
+        
         aprs.append(sample)
+    
     return aprs
 
-def apr_since(adjust_for_peg=False):
-    current_week = chain.time() // WEEK * WEEK
+
+def apr_since():
     current_block, current_ts = get_block_and_ts(chain.time() - 1000)
     aprs = []
-    peg = 1
     sample_width = WEEK
     chart_width = QUARTER
     num_samples = int(chart_width // sample_width)
+    
     for i in range(0, num_samples):
         sample_block, sample_ts = get_block_and_ts(current_ts - (sample_width * i))
         elapsed_time = current_ts - sample_ts
-        sample = {}
+        
+        # Get peg data for current block only
+        current_peg_data = get_peg_data_for_block(current_block)
+        
         dt_object = datetime.fromtimestamp(sample_ts)
-        sample['ts'] = sample_ts
-        sample['block'] = sample_block
-        sample['date'] = dt_object
+        sample = {
+            'ts': sample_ts,
+            'block': sample_block,
+            'current_block': current_block,
+            'date': dt_object
+        }
+        
+        # Add current peg data to sample
+        for symbol in CURVE_LIQUID_LOCKER_COMPOUNDERS.values():
+            sample[f"{symbol['symbol']}_peg"] = current_peg_data[symbol['symbol']]
+        
+        # Calculate APR for each compounder
         for address, data in CURVE_LIQUID_LOCKER_COMPOUNDERS.items():
             start_pps = get_pps(address, sample_block)
             end_pps = get_pps(address, current_block)
-            gain = end_pps - start_pps
-            if adjust_for_peg:
-                peg = get_peg(data['pool'], sample_block)
-                peg *= get_peg(data['pool'], current_block)
-            apr = gain / start_pps / (elapsed_time / YEAR) 
-            apr *= peg
+            
+            apr = calculate_apr(start_pps, end_pps, elapsed_time)
+            
             sample[data['symbol']] = apr
+        
         aprs.append(sample)
 
     return aprs
+
 
 def get_peg(pool, block):
     pool = Contract(pool)
     amount = 10_000e18
     return pool.get_dy(1, 0, amount, block_identifier=block) / amount
+
 
 def get_pps(vault_address, block):
     vault = Contract(vault_address)
@@ -109,92 +152,8 @@ def get_pps(vault_address, block):
         ts = vault.totalSupply(block_identifier=block)
         total_underlying = vault.totalUnderlying(block_identifier=block)
         return total_underlying / ts
-    
 
-def plot_aprs(title, aprs):
-    threshold_date = datetime.now()
-    df = pd.DataFrame(aprs)
-    df['date'] = pd.to_datetime(df['date'])
 
-    # Filter data before the threshold date
-    df = df[df['date'] < threshold_date]
-
-    # Melt the dataframe for Altair
-    melted_df = df.melt(id_vars=['date'], value_vars=['asdCRV', 'yvyCRV', 'ucvxCRV'], var_name='symbol', value_name='apr')
-
-    # Adjust APR values by multiplying by 100
-    melted_df['apr'] = melted_df['apr'] * 100
-
-    # Define color mapping
-    color_scale = alt.Scale(domain=['ucvxCRV', 'yvyCRV', 'asdCRV'],
-                            range=['orange', '#4D8CC8', 'black'])
-
-    # Dynamically set Y-axis based on the maximum APR value, with a bit of padding
-    max_apr = melted_df['apr'].max()
-    y_scale = alt.Scale(domain=[0, max_apr * 1.1])  # Add 10% padding to the top
-
-    # Dynamically calculate the min and max dates for the X-axis domain
-    min_date = melted_df['date'].min()
-    max_date = melted_df['date'].max()
-    x_scale = alt.Scale(domain=[min_date, max_date])
-
-    # Create an Altair chart with smoothed lines using 'monotone' interpolation
-    chart = alt.Chart(melted_df).mark_line(point=True, interpolate='monotone').encode(
-        x=alt.X('date:T', title='Date', scale=x_scale, axis=alt.Axis(labelAngle=-45)),  # Apply dynamic X-scale
-        y=alt.Y('apr:Q', title='% APR', scale=y_scale),  # Apply dynamic Y-scale
-        color=alt.Color('symbol:N', scale=color_scale),
-        tooltip=['date:T', 'symbol:N', alt.Tooltip('apr:Q', format='.2f')]
-    ).properties(
-        title=title,
-        width='container',
-        height=400  # Fixed height for responsiveness
-    ).interactive(bind_x=False, bind_y=False)
-
-    vertical_lines = pd.DataFrame({
-        'date': [
-            datetime.utcfromtimestamp(1718236800), 
-            # datetime.utcfromtimestamp(1718841600)
-        ],
-        'label': [
-            'Yearn YBS launch; Reward pause', 
-            # 'YBS double rewards week start'
-        ]
-    })
-
-    vlines = alt.Chart(vertical_lines).mark_rule(
-        color='gray',
-        strokeDash=[5, 5],
-        size=2
-    ).encode(
-        x='date:T',
-        tooltip=[alt.Tooltip('label:N', title=None)]
-    )
-
-    final_chart = alt.layer(chart, vlines).configure_axis(
-        grid=True,
-        gridOpacity=0.2,
-        gridDash=[2, 2],
-        gridColor='lightgray'
-    ).configure_title(
-        fontSize=20,
-        font='Helvetica',
-        anchor='middle',
-        color='gray'
-    ).configure_legend(
-        titleFontSize=12,
-        labelFontSize=10,
-        symbolSize=100
-    ).configure_view(
-        strokeOpacity=0
-    ).interactive()
-
-    # Save chart as JSON with date
-    date_str = datetime.now().strftime('%Y-%m-%d')
-    filename = f"{title}_{date_str}.json"
-    final_chart.save(os.path.join('charts', filename))
-    print(os.path.join('charts', filename))
-    # Clean up old charts
-    # cleanup_old_charts(CLEAN_UP_CHARTS_OLDER_THAN_DAY)
 
 def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg):
     """
@@ -221,9 +180,7 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     # Prepare chart data
     chart_data = {
         'weekly_aprs': convert_data_for_json(aprs_weekly),
-        'weekly_aprs_peg': convert_data_for_json(aprs_weekly_peg),
         'apr_since': convert_data_for_json(aprs_since[1:] if len(aprs_since) > 1 else aprs_since),
-        'apr_since_peg': convert_data_for_json(aprs_since_peg[1:] if len(aprs_since_peg) > 1 else aprs_since_peg),
         'last_updated': chain.time()
     }
     
@@ -233,6 +190,7 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     # Save updated cache
     utils.cache_to_json('data/ll_info.json', cache_data)
     print(f"Chart data saved to ll_info.json at {datetime.now()}")
+
 
 def cleanup_old_charts(older_than_days):
     threshold_date = datetime.now() - timedelta(days=older_than_days)
@@ -253,8 +211,10 @@ def get_block_and_ts(ts):
     block = closest_block_before_timestamp(ts)
     return block, chain[block].timestamp
 
+
 def get_block_timestamp(height):
     return chain[height].timestamp
+
 
 def closest_block_before_timestamp(timestamp: int) -> int:
     height = chain.height
@@ -269,6 +229,7 @@ def closest_block_before_timestamp(timestamp: int) -> int:
         raise IndexError('timestamp is in the future')
 
     return hi
+
 
 if __name__ == "__main__":
     main()

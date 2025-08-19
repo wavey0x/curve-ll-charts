@@ -199,18 +199,18 @@
     font-size: 11px;
   }
   
-  /* Hide peg column on mobile to preserve space for APR columns */
-  .combined-table th:nth-child(2), /* Peg */
-  .combined-table td:nth-child(2) {
+  /* Hide TVL column on mobile to preserve space for APR columns and keep Peg */
+  .combined-table th:nth-child(6), /* TVL */
+  .combined-table td:nth-child(6) {
     display: none;
   }
   
   /* Adjust column widths for mobile */
   .combined-table th:nth-child(1) { width: 25%; } /* Protocol */
-  .combined-table th:nth-child(3) { width: 18%; } /* 30D APR */
-  .combined-table th:nth-child(4) { width: 18%; } /* 60D APR */
-  .combined-table th:nth-child(5) { width: 18%; } /* 90D APR */
-  .combined-table th:nth-child(6) { width: 21%; } /* TVL */
+  .combined-table th:nth-child(2) { width: 15%; } /* Peg */
+  .combined-table th:nth-child(3) { width: 20%; } /* 30D APR */
+  .combined-table th:nth-child(4) { width: 20%; } /* 60D APR */
+  .combined-table th:nth-child(5) { width: 20%; } /* 90D APR */
   
   /* Make table horizontally scrollable if still too wide */
   .data-container {
@@ -234,8 +234,8 @@
   
   /* Even more compact on very small screens */
   .combined-table th:nth-child(1) { width: 28%; } /* Protocol */
-  .combined-table th:nth-child(3) { width: 18%; } /* 30D APR */
-  .combined-table th:nth-child(4) { width: 18%; } /* 60D APR */
-  .combined-table th:nth-child(5) { width: 18%; } /* 90D APR */
-  .combined-table th:nth-child(6) { width: 18%; } /* TVL */
+  .combined-table th:nth-child(2) { width: 16%; } /* Peg */
+  .combined-table th:nth-child(3) { width: 18.5%; } /* 30D APR */
+  .combined-table th:nth-child(4) { width: 18.5%; } /* 60D APR */
+  .combined-table th:nth-child(5) { width: 19%; } /* 90D APR */
 }

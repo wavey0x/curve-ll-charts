@@ -33,6 +33,7 @@ export const useFavorites = () => {
       gauge_address: gaugeData.data.gauge_address,
       pool_address: gaugeData.data.pool_address,
       pool_name: gaugeData.data.pool_name || 'Unknown Pool',
+      curve_key: gaugeData.data.curve_key || gaugeData.data.pool_name || 'Unknown Pool',
       pool_url: gaugeData.data.pool_urls?.deposit || '',
       blockchain: gaugeData.data.blockchain || 'Ethereum',
       added_at: new Date().toISOString(),

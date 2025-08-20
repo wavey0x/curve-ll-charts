@@ -88,8 +88,8 @@ const FavoritesTable = ({ favorites, onGaugeClick, onRemoveFavorite }) => {
                         onClick={() => onGaugeClick(favorite.gauge_address)}
                         title="View gauge details"
                       >
-                        {favorite.pool_name.split(' (')[0] ||
-                          favorite.pool_name}
+                        {(favorite.curve_key || favorite.pool_name)?.split(' (')[0] ||
+                          favorite.curve_key || favorite.pool_name}
                       </button>
                     </td>
                     <td className="address-cell">

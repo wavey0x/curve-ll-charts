@@ -86,7 +86,7 @@ function abbreviateAddress(address) {
 
 // Function to fetch search suggestions
 const fetchSearchSuggestions = async (query) => {
-  if (!query || query.length < 2) {
+  if (!query || query.length < 3) {
     return [];
   }
   
@@ -202,8 +202,8 @@ const GaugeSearch = ({
       clearTimeout(searchTimeout);
     }
     
-    // Hide suggestions if empty or already a full address
-    if (!value || value.length < 2 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
+    // Hide suggestions if empty, less than 3 characters, or already a full address
+    if (!value || value.length < 3 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
       setShowSuggestions(false);
       setSearchSuggestions([]);
       setSelectedSuggestionIndex(-1);

@@ -164,6 +164,7 @@ const GaugeSearch = ({
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [selectedGauge, setSelectedGauge] = useState(null); // Store selected gauge info
+  const [showModal, setShowModal] = useState(false);
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -287,7 +288,8 @@ const GaugeSearch = ({
     url.searchParams.set('gauge', cleanAddress);
     window.history.pushState({}, '', url);
     
-    // Immediately load the gauge data
+    // Show modal immediately, then load the gauge data
+    setShowModal(true);
     fetchGaugeDetails(cleanAddress);
   };
 
@@ -627,6 +629,7 @@ const GaugeSearch = ({
     setShowVotes(false);
     setVoteData([]);
 
+    setShowModal(true);
     await fetchGaugeDetails(addressToUse);
   };
 
@@ -640,7 +643,8 @@ const GaugeSearch = ({
     url.searchParams.set('gauge', gaugeAddress);
     window.history.pushState({}, '', url);
 
-    // Fetch gauge details
+    // Show modal immediately, then fetch gauge details
+    setShowModal(true);
     fetchGaugeDetails(gaugeAddress);
   };
 
@@ -654,6 +658,7 @@ const GaugeSearch = ({
 
     if (gaugeAddress) {
       setAddress(gaugeAddress);
+      setShowModal(true);
       fetchGaugeDetails(gaugeAddress);
     }
 
@@ -663,15 +668,6 @@ const GaugeSearch = ({
 
   return (
     <div className="gauge-search-container">
-      {/* Favorites Table - moved to top */}
-      <FavoritesTable
-        favorites={favorites}
-        onGaugeClick={handleGaugeClick}
-        onRemoveFavorite={removeFavorite}
-      />
-
-      <div className="search-divider"></div>
-
       <form onSubmit={handleSubmit} className="search-form">
         <div className="search-input-container">
           <input
@@ -728,6 +724,13 @@ const GaugeSearch = ({
         </button>
       </form>
 
+      {/* Favorites Table */}
+      <FavoritesTable
+        favorites={favorites}
+        onGaugeClick={handleGaugeClick}
+        onRemoveFavorite={removeFavorite}
+      />
+
       {showError && error && <div className="error">{error}</div>}
 
       {loading && !gaugeDetails && (
@@ -736,9 +739,29 @@ const GaugeSearch = ({
         </div>
       )}
 
-      {gaugeDetails && gaugeDetails.data && (
-        <div className="gauge-details">
-          <div className="gauge-header-container">
+      {showModal && (
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowModal(false);
+          }
+        }}>
+          <div className="modal-content">
+            <button 
+              className="modal-close-button"
+              onClick={() => setShowModal(false)}
+              title="Close"
+            >
+              ×
+            </button>
+            <div className="gauge-details">
+              {loading && !gaugeDetails ? (
+                <div className="modal-loading">
+                  <div className="loading-spinner"></div>
+                  <p>Loading gauge details...</p>
+                </div>
+              ) : gaugeDetails && gaugeDetails.data ? (
+                <>
+                  <div className="gauge-header-container">
             <h2 className="gauge-title">
               <button
                 className={`favorite-button ${isFavorite(gaugeDetails.data.gauge_address) ? 'favorited' : ''}`}
@@ -952,7 +975,7 @@ const GaugeSearch = ({
                                   ></div>
                                 </div>
                                 <span className="boost-value-text">
-                                  {isValidBoost ? `${boostData.boost_formatted}x` : 'N/A'}
+                                  {isValidBoost ? `${parseFloat(boostData.boost_formatted).toFixed(3)}x` : 'N/A'}
                                 </span>
                               </div>
                             </div>
@@ -1130,6 +1153,14 @@ const GaugeSearch = ({
                 )}
               </div>
             )}
+          </div>
+                </>
+              ) : (
+                <div className="modal-error">
+                  <p>Error loading gauge details.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

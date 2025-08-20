@@ -776,7 +776,7 @@ const GaugeSearch = ({
                   className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
                 ></i>
               </button>
-              {(() => {
+{(() => {
                 const title = gaugeDetails.data.curve_key || gaugeDetails.data.pool_name || 'Gauge Details';
                 const parenIndex = title.indexOf('(');
                 
@@ -784,15 +784,7 @@ const GaugeSearch = ({
                   return title;
                 }
                 
-                const mainPart = title.substring(0, parenIndex).trim();
-                const parenPart = title.substring(parenIndex);
-                
-                return (
-                  <>
-                    {mainPart}{' '}
-                    <span className="gauge-title-address">{parenPart}</span>
-                  </>
-                );
+                return title.substring(0, parenIndex).trim();
               })()}
             </h2>
           </div>

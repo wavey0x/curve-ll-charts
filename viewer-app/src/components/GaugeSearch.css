@@ -173,7 +173,7 @@
 
 .gauge-title-address {
   font-weight: normal;
-  font-size: 0.8em;
+  font-size: 0.5em;
   color: #666666;
 }
 
@@ -196,6 +196,7 @@
   background: #ffffff;
   border-radius: 8px;
   max-width: 90vw;
+  min-width: 360px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;

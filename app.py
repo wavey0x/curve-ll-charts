@@ -150,6 +150,7 @@ def get_harvests():
     })
 
 @app.route('/info')
+@app.route('/api/crvlol/info')
 def ll_info():
     try:
         # Open the JSON file and load its contents

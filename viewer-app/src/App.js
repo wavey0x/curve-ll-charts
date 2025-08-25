@@ -5,10 +5,8 @@ import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import HarvestTable from './components/HarvestTable';
 import Data from './components/Data';
-import About from './components/About';
 import GaugeSearch from './components/GaugeSearch';
 import Dao from './components/Dao';
-import APRChart from './components/APRChart';
 import { useFavorites } from './hooks/useFavorites';
 
 // Debug: Log the environment variables
@@ -63,15 +61,6 @@ const Navigation = () => {
 };
 
 
-// Harvests component
-const Harvests = () => (
-  <div className="harvest-data-section extra-class">
-    <div>
-      <h1 style={{ textAlign: 'center' }}>Harvest History</h1>
-      <HarvestTable />
-    </div>
-  </div>
-);
 
 // Gauges component with favorites
 const Gauges = () => {
@@ -102,24 +91,108 @@ const Layout = ({ children }) => (
 );
 
 // Footer component
-const Footer = () => (
-  <footer>
-    <a
-      href="https://github.com/wavey0x/curve-ll-charts/"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <i className="fab fa-github"></i> Source
-    </a>
-    <a
-      href="https://twitter.com/wavey0x"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <i className="fab fa-twitter"></i> Contact
-    </a>
-  </footer>
-);
+const Footer = () => {
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [timeAgo, setTimeAgo] = useState('');
+  const [isStale, setIsStale] = useState(false);
+
+  // Function to calculate relative time
+  const getTimeAgo = (timestamp) => {
+    const now = Math.floor(Date.now() / 1000); // Current time in seconds
+    const diffInSeconds = now - timestamp;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 1) {
+      return 'just now';
+    } else if (diffInMinutes === 1) {
+      return '1 minute ago';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} minutes ago`;
+    } else if (diffInHours === 1) {
+      return '1 hour ago';
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    } else if (diffInDays === 1) {
+      return '1 day ago';
+    } else {
+      return `${diffInDays} days ago`;
+    }
+  };
+
+  // Fetch last updated time
+  useEffect(() => {
+    const fetchLastUpdated = async () => {
+      try {
+        const response = await axiosInstance.get('api/crvlol/info');
+        const timestamp = response.data.last_updated;
+        if (timestamp) {
+          setLastUpdated(timestamp);
+          const timeAgoText = getTimeAgo(timestamp);
+          setTimeAgo(timeAgoText);
+          
+          // Check if data is stale (60+ minutes old)
+          const now = Math.floor(Date.now() / 1000);
+          const diffInMinutes = Math.floor((now - timestamp) / 60);
+          setIsStale(diffInMinutes >= 60);
+        }
+      } catch (error) {
+        console.error('Error fetching last updated time:', error);
+      }
+    };
+
+    fetchLastUpdated();
+    
+    // Update time display every minute
+    const interval = setInterval(() => {
+      if (lastUpdated) {
+        const timeAgoText = getTimeAgo(lastUpdated);
+        setTimeAgo(timeAgoText);
+        
+        // Update stale status
+        const now = Math.floor(Date.now() / 1000);
+        const diffInMinutes = Math.floor((now - lastUpdated) / 60);
+        setIsStale(diffInMinutes >= 60);
+      }
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [lastUpdated]);
+
+  return (
+    <footer className={isStale ? 'footer-stale' : ''}>
+      <div className="footer-content">
+        {timeAgo && (
+          <div className="footer-updated">
+            <span className="last-updated">
+              Updated: {timeAgo}
+            </span>
+          </div>
+        )}
+        <div className="footer-separator"></div>
+        <div className="footer-icons">
+          <a
+            href="https://github.com/wavey0x/curve-ll-charts/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-icon"
+          >
+            <i className="fab fa-github"></i>
+          </a>
+          <a
+            href="https://twitter.com/wavey0x"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-icon"
+          >
+            <i className="fab fa-twitter"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+};
 
 function App() {
   return (

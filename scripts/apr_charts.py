@@ -22,8 +22,20 @@ def main():
     if not os.path.exists('charts'):
         os.makedirs('charts')
 
-    # Fetch Curve gauge data
+    # Fetch Curve gauge data with fallback to cached data
     curve_gauge_data = fetch_curve_gauge_data()
+    
+    if curve_gauge_data is None:
+        print("⚠️  Curve API call failed, attempting to use cached data...")
+        cached_gauge_data, cached_gauges_by_name = get_cached_curve_data()
+        
+        if cached_gauge_data and cached_gauges_by_name:
+            print("✅ Successfully loaded cached Curve data")
+            # Create a mock structure that save_chart_data_to_cache expects
+            curve_gauge_data = cached_gauge_data
+        else:
+            print("❌ No cached Curve data available, proceeding without Curve data")
+            curve_gauge_data = {}
 
     # Generate chart data
     aprs_weekly = weekly_apr()
@@ -64,6 +76,30 @@ def fetch_curve_gauge_data():
     except Exception as e:
         print(f"❌ Unexpected error fetching Curve gauge data: {e}")
         return None
+
+
+def get_cached_curve_data():
+    """
+    Get cached Curve gauge data from ll_info.json
+    Returns tuple of (gauge_data, gauges_by_name) or (None, None) if not available
+    """
+    try:
+        cache_data = utils.load_from_json('data/ll_info.json')
+        if cache_data and 'curve_gauge_data' in cache_data and 'curve_gauges_by_name' in cache_data:
+            gauge_data = cache_data.get('curve_gauge_data', {})
+            gauges_by_name = cache_data.get('curve_gauges_by_name', {})
+            last_updated = cache_data.get('curve_gauge_data_last_updated', 0)
+            
+            if gauge_data and gauges_by_name:
+                last_updated_dt = datetime.fromtimestamp(last_updated)
+                print(f"📋 Using cached Curve gauge data from {last_updated_dt}")
+                return gauge_data, gauges_by_name
+        
+        return None, None
+        
+    except Exception as e:
+        print(f"❌ Error loading cached Curve data: {e}")
+        return None, None
 
 
 def get_peg_data_for_block(block):
@@ -222,33 +258,39 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     
     # Add Curve gauge data to cache if available
     if curve_gauge_data:
-        # Filter out killed gauges and restructure data
-        filtered_gauge_data = {}
-        curve_gauges_by_name = {}
-        
-        for key, gauge_info in curve_gauge_data.items():
-            if not gauge_info.get('is_killed', False):
-                # Add the original key as curve_key
-                gauge_info['curve_key'] = key
-                # Use the gauge address as the new key
-                gauge_address = gauge_info.get('gauge')
-                filtered_gauge_data[gauge_address] = gauge_info
-                inflation_rate = int(gauge_info.get('gauge_controller', {}).get('inflation_rate', 0))
-                gauge_weight = int(gauge_info.get('gauge_controller', {}).get('get_gauge_weight', 0))
-                working_supply = int(gauge_info.get('gauge_data', {}).get('working_supply', 0))
-                relative_weight = int(gauge_info.get('gauge_controller', {}).get('gauge_relative_weight', 0))
-                if gauge_weight == 0 or relative_weight == 0 or working_supply == 0:
-                    inflation_rate = 0
-                curve_gauges_by_name[key] = {
-                    'name': key,
-                    'gauge_address': gauge_address,
-                    'inflation_rate': inflation_rate
-                }
-        
-        cache_data['curve_gauge_data'] = filtered_gauge_data
-        cache_data['curve_gauges_by_name'] = curve_gauges_by_name
-        cache_data['curve_gauge_data_last_updated'] = chain.time()
-        print(f"Curve gauge data added to cache at {datetime.now()} (filtered out killed gauges)")
+        # Check if this is fresh data from API (no 'curve_key' field) or cached data (already processed)
+        if not any('curve_key' in gauge_info for gauge_info in curve_gauge_data.values()):
+            # This is fresh data from API, process it
+            filtered_gauge_data = {}
+            curve_gauges_by_name = {}
+            
+            for key, gauge_info in curve_gauge_data.items():
+                if not gauge_info.get('is_killed', False):
+                    # Add the original key as curve_key
+                    gauge_info['curve_key'] = key
+                    # Use the gauge address as the new key
+                    gauge_address = gauge_info.get('gauge')
+                    filtered_gauge_data[gauge_address] = gauge_info
+                    inflation_rate = int(gauge_info.get('gauge_controller', {}).get('inflation_rate', 0))
+                    gauge_weight = int(gauge_info.get('gauge_controller', {}).get('get_gauge_weight', 0))
+                    working_supply = int(gauge_info.get('gauge_data', {}).get('working_supply', 0))
+                    relative_weight = int(gauge_info.get('gauge_controller', {}).get('gauge_relative_weight', 0))
+                    if gauge_weight == 0 or relative_weight == 0 or working_supply == 0:
+                        inflation_rate = 0
+                    curve_gauges_by_name[key] = {
+                        'name': key,
+                        'gauge_address': gauge_address,
+                        'inflation_rate': inflation_rate
+                    }
+            
+            cache_data['curve_gauge_data'] = filtered_gauge_data
+            cache_data['curve_gauges_by_name'] = curve_gauges_by_name
+            cache_data['curve_gauge_data_last_updated'] = chain.time()
+            print(f"Curve gauge data added to cache at {datetime.now()} (filtered out killed gauges)")
+        else:
+            # This is cached data, preserve existing timestamps and structure
+            print(f"📋 Preserving existing cached Curve gauge data")
+            # Don't update the timestamps since we're using old data
     
     # Save updated cache
     utils.cache_to_json('data/ll_info.json', cache_data)

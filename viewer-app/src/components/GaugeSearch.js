@@ -69,19 +69,26 @@ function toChecksumAddress(address) {
   return checksumAddress;
 }
 
-// Helper function to abbreviate addresses for display (without 0x prefix)
+// Helper function to abbreviate addresses for display (with 0x prefix)
 function abbreviateAddress(address) {
   if (!address || typeof address !== 'string' || address.length < 10) {
     return address;
   }
 
-  // Remove 0x prefix if present, then abbreviate
-  const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
-  if (cleanAddress.length < 8) {
-    return cleanAddress;
+  // Keep 0x prefix and abbreviate the rest
+  if (address.startsWith('0x')) {
+    const cleanAddress = address.slice(2);
+    if (cleanAddress.length < 8) {
+      return address; // Return full address if too short
+    }
+    return `0x${cleanAddress.slice(0, 4)}…${cleanAddress.slice(-4)}`;
+  } else {
+    // Handle case where address doesn't start with 0x
+    if (address.length < 8) {
+      return address;
+    }
+    return `${address.slice(0, 4)}…${address.slice(-4)}`;
   }
-
-  return `${cleanAddress.slice(0, 4)}…${cleanAddress.slice(-4)}`;
 }
 
 // Function to fetch search suggestions

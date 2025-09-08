@@ -74,13 +74,13 @@ function abbreviateAddress(address) {
   if (!address || typeof address !== 'string' || address.length < 10) {
     return address;
   }
-  
+
   // Remove 0x prefix if present, then abbreviate
   const cleanAddress = address.startsWith('0x') ? address.slice(2) : address;
   if (cleanAddress.length < 8) {
     return cleanAddress;
   }
-  
+
   return `${cleanAddress.slice(0, 4)}…${cleanAddress.slice(-4)}`;
 }
 
@@ -89,21 +89,20 @@ const fetchSearchSuggestions = async (query) => {
   if (!query || query.length < 3) {
     return [];
   }
-  
+
   // Check if it's already a gauge address format - if so, skip search API
   if (query.match(/^0x[0-9a-fA-F]{40}$/i)) {
     return [];
   }
-  
+
   try {
-    const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'https://api.wavey.info';
+    const apiBaseUrl =
+      process.env.REACT_APP_API_BASE_URL || 'https://api.wavey.info';
     const urlWithoutTrailingSlash = apiBaseUrl.replace(/\/$/, '');
     const searchUrl = `${urlWithoutTrailingSlash}/api/gauge/search?q=${encodeURIComponent(query)}`;
-    
-    const response = await retryApiCall(() =>
-      axiosInstance.get(searchUrl)
-    );
-    
+
+    const response = await retryApiCall(() => axiosInstance.get(searchUrl));
+
     // Return the results array from the API response
     return response.data?.data?.results || [];
   } catch (error) {
@@ -116,15 +115,18 @@ const fetchSearchSuggestions = async (query) => {
 const protocolIcons = {
   asdCRV: {
     name: 'asdCRV',
-    iconUrl: 'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
+    iconUrl:
+      'https://assets.coingecko.com/coins/images/13724/standard/stakedao_logo.jpg?1696513468',
   },
   yvyCRV: {
-    name: 'yvyCRV', 
-    iconUrl: 'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
+    name: 'yvyCRV',
+    iconUrl:
+      'https://assets.coingecko.com/coins/images/11849/standard/yearn.jpg?1696511720',
   },
   ucvxCRV: {
     name: 'ucvxCRV',
-    iconUrl: 'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
+    iconUrl:
+      'https://assets.coingecko.com/coins/images/15585/standard/convex.png?1696515221',
   },
 };
 
@@ -152,7 +154,7 @@ const GaugeSearch = ({
   const [loadingSteps, setLoadingSteps] = useState({
     basic: false,
     verification: false,
-    boosts: false
+    boosts: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -177,10 +179,10 @@ const GaugeSearch = ({
   // Validate Ethereum address format - wrapped in useCallback to avoid recreating on each render
   const isValidAddress = useCallback((value) => {
     if (!value || typeof value !== 'string') return false;
-    
+
     // Clean the value first
     const cleanValue = value.trim().toLowerCase();
-    
+
     // Check if it matches the Ethereum address pattern (case insensitive)
     return /^0x[a-f0-9]{40}$/.test(cleanValue);
   }, []);
@@ -191,17 +193,17 @@ const GaugeSearch = ({
     setShowError(false);
     // Hide votes when changing address
     setShowVotes(false);
-    
+
     // If user starts typing after selecting a gauge, clear the selection
     if (selectedGauge && value !== selectedGauge.name) {
       setSelectedGauge(null);
     }
-    
+
     // Clear existing timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
-    
+
     // Hide suggestions if empty, less than 3 characters, or already a full address
     if (!value || value.length < 3 || value.match(/^0x[0-9a-fA-F]{40}$/i)) {
       setShowSuggestions(false);
@@ -209,7 +211,7 @@ const GaugeSearch = ({
       setSelectedSuggestionIndex(-1);
       return;
     }
-    
+
     // Debounce search API calls
     const newTimeout = setTimeout(async () => {
       const suggestions = await fetchSearchSuggestions(value);
@@ -217,7 +219,7 @@ const GaugeSearch = ({
       setShowSuggestions(suggestions.length > 0);
       setSelectedSuggestionIndex(-1); // Reset selection when new results come in
     }, 300);
-    
+
     setSearchTimeout(newTimeout);
   };
 
@@ -229,19 +231,22 @@ const GaugeSearch = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
+        setSelectedSuggestionIndex((prev) =>
           prev < searchSuggestions.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
+        setSelectedSuggestionIndex((prev) =>
           prev > 0 ? prev - 1 : searchSuggestions.length - 1
         );
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedSuggestionIndex >= 0 && selectedSuggestionIndex < searchSuggestions.length) {
+        if (
+          selectedSuggestionIndex >= 0 &&
+          selectedSuggestionIndex < searchSuggestions.length
+        ) {
           const selectedResult = searchSuggestions[selectedSuggestionIndex];
           handleSuggestionClick(selectedResult);
         } else if (showSuggestions) {
@@ -268,26 +273,25 @@ const GaugeSearch = ({
       }
       cleanAddress = cleanAddress.toLowerCase();
     }
-    
-    
+
     // Store the selected gauge info and show the gauge name in the input
     setSelectedGauge({ name: gaugeResult.name, address: cleanAddress });
     setAddress(gaugeResult.name); // Show the gauge name in the input field
     setShowSuggestions(false);
     setSearchSuggestions([]);
     setSelectedSuggestionIndex(-1);
-    
+
     // Clear any pending search timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
       setSearchTimeout(null);
     }
-    
+
     // Update URL with the gauge address
     const url = new URL(window.location);
     url.searchParams.set('gauge', cleanAddress);
     window.history.pushState({}, '', url);
-    
+
     // Show modal immediately, then load the gauge data
     setShowModal(true);
     fetchGaugeDetails(cleanAddress);
@@ -371,7 +375,7 @@ const GaugeSearch = ({
 
         // Step 1: Fetch basic gauge data (fastest ~100-300ms)
         setLoadingSteps({ basic: true, verification: false, boosts: false });
-        
+
         const basicUrl = `${urlWithoutTrailingSlash}/api/gauge/basic?gauge=${gaugeAddress}`;
         const basicResponse = await retryApiCall(() =>
           axiosInstance.get(basicUrl)
@@ -384,7 +388,7 @@ const GaugeSearch = ({
           Object.keys(basicResponse.data.data).length > 0
         ) {
           setGaugeDetails(basicResponse.data);
-          setLoadingSteps(prev => ({ ...prev, basic: false }));
+          setLoadingSteps((prev) => ({ ...prev, basic: false }));
         } else {
           throw new Error('Not a valid gauge address');
         }
@@ -392,7 +396,7 @@ const GaugeSearch = ({
         // Step 2: Fetch verification data (medium ~1-2s) - run in parallel
         const verificationPromise = (async () => {
           try {
-            setLoadingSteps(prev => ({ ...prev, verification: true }));
+            setLoadingSteps((prev) => ({ ...prev, verification: true }));
             const verificationUrl = `${urlWithoutTrailingSlash}/api/gauge/verification?gauge=${gaugeAddress}`;
             const verificationResponse = await retryApiCall(() =>
               axiosInstance.get(verificationUrl)
@@ -401,14 +405,14 @@ const GaugeSearch = ({
           } catch (err) {
             console.warn('Verification data fetch failed:', err.message);
           } finally {
-            setLoadingSteps(prev => ({ ...prev, verification: false }));
+            setLoadingSteps((prev) => ({ ...prev, verification: false }));
           }
         })();
 
         // Step 3: Fetch boost data (medium ~0.5-1s) - run in parallel
         const boostPromise = (async () => {
           try {
-            setLoadingSteps(prev => ({ ...prev, boosts: true }));
+            setLoadingSteps((prev) => ({ ...prev, boosts: true }));
             const boostUrl = `${urlWithoutTrailingSlash}/api/gauge/boosts?gauge=${gaugeAddress}`;
             const boostResponse = await retryApiCall(() =>
               axiosInstance.get(boostUrl)
@@ -417,13 +421,12 @@ const GaugeSearch = ({
           } catch (err) {
             console.warn('Boost data fetch failed:', err.message);
           } finally {
-            setLoadingSteps(prev => ({ ...prev, boosts: false }));
+            setLoadingSteps((prev) => ({ ...prev, boosts: false }));
           }
         })();
 
         // Wait for both verification and boost data to complete
         await Promise.allSettled([verificationPromise, boostPromise]);
-
       } catch (err) {
         // Try alternate URLs if the main one fails
         try {
@@ -440,18 +443,34 @@ const GaugeSearch = ({
             Object.keys(alternateResponse.data.data).length > 0
           ) {
             setGaugeDetails(alternateResponse.data);
-            setLoadingSteps({ basic: false, verification: false, boosts: false });
-            
+            setLoadingSteps({
+              basic: false,
+              verification: false,
+              boosts: false,
+            });
+
             // Also try alternate endpoints for verification and boost data
             Promise.allSettled([
-              retryApiCall(() => axiosInstance.get(`${alternateBaseUrl}/api/gauge/verification?gauge=${gaugeAddress}`))
-                .then(res => setVerificationData(res.data))
-                .catch(err => console.warn('Alternate verification failed:', err.message)),
-              retryApiCall(() => axiosInstance.get(`${alternateBaseUrl}/api/gauge/boosts?gauge=${gaugeAddress}`))
-                .then(res => setBoostData(res.data))
-                .catch(err => console.warn('Alternate boost data failed:', err.message))
+              retryApiCall(() =>
+                axiosInstance.get(
+                  `${alternateBaseUrl}/api/gauge/verification?gauge=${gaugeAddress}`
+                )
+              )
+                .then((res) => setVerificationData(res.data))
+                .catch((err) =>
+                  console.warn('Alternate verification failed:', err.message)
+                ),
+              retryApiCall(() =>
+                axiosInstance.get(
+                  `${alternateBaseUrl}/api/gauge/boosts?gauge=${gaugeAddress}`
+                )
+              )
+                .then((res) => setBoostData(res.data))
+                .catch((err) =>
+                  console.warn('Alternate boost data failed:', err.message)
+                ),
             ]);
-            
+
             return; // Exit early if alternate URL works
           }
         } catch (alternateErr) {
@@ -617,7 +636,6 @@ const GaugeSearch = ({
     // Determine the address to use - either from selected gauge or direct input
     const addressToUse = selectedGauge ? selectedGauge.address : address;
 
-
     // Update URL with the gauge address
     if (addressToUse) {
       const url = new URL(window.location);
@@ -677,7 +695,11 @@ const GaugeSearch = ({
             onKeyDown={handleKeyDown}
             placeholder="Enter gauge address (0x...) or gauge name"
             className="search-input"
-            title={selectedGauge ? `Selected: ${selectedGauge.name} (${abbreviateAddress(selectedGauge.address)})` : ''}
+            title={
+              selectedGauge
+                ? `Selected: ${selectedGauge.name} (${abbreviateAddress(selectedGauge.address)})`
+                : ''
+            }
           />
           {address && (
             <button
@@ -740,13 +762,16 @@ const GaugeSearch = ({
       )}
 
       {showModal && (
-        <div className="modal-overlay" onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setShowModal(false);
-          }
-        }}>
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowModal(false);
+            }
+          }}
+        >
           <div className="modal-content">
-            <button 
+            <button
               className="modal-close-button"
               onClick={() => setShowModal(false)}
               title="Close"
@@ -762,390 +787,479 @@ const GaugeSearch = ({
               ) : gaugeDetails && gaugeDetails.data ? (
                 <>
                   <div className="gauge-header-container">
-            <h2 className="gauge-title">
-              <button
-                className={`favorite-button ${isFavorite(gaugeDetails.data.gauge_address) ? 'favorited' : ''}`}
-                onClick={() => toggleFavorite(gaugeDetails)}
-                title={
-                  isFavorite(gaugeDetails.data.gauge_address)
-                    ? 'Remove from favorites'
-                    : 'Add to favorites'
-                }
-              >
-                <i
-                  className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
-                ></i>
-              </button>
-{(() => {
-                const title = gaugeDetails.data.curve_key || gaugeDetails.data.pool_name || 'Gauge Details';
-                const parenIndex = title.indexOf('(');
-                
-                if (parenIndex === -1) {
-                  return title;
-                }
-                
-                return title.substring(0, parenIndex).trim();
-              })()}
-            </h2>
-          </div>
-
-          <div className="details-grid">
-            <div className="left-column">
-              <div className="detail-card basic-info">
-                <h3>Basic Information</h3>
-                <div className="detail-item">
-                  <span className="label">Gauge:</span>
-                  <span className="value">
-                    {abbreviateAddress(gaugeDetails.data.gauge_address)}
-                    <button
-                      className={`copy-button ${copiedText === gaugeDetails.data.gauge_address ? 'copied' : ''}`}
-                      onClick={() =>
-                        copyToClipboard(gaugeDetails.data.gauge_address)
-                      }
-                      title="Copy full address to clipboard"
-                    >
-                      <i
-                        className={`fas ${copiedText === gaugeDetails.data.gauge_address ? 'fa-check' : 'fa-copy'}`}
-                      ></i>
-                    </button>
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Pool:</span>
-                  <span className="value">
-                    {abbreviateAddress(gaugeDetails.data.pool_address)}
-                    <button
-                      className={`copy-button ${copiedText === gaugeDetails.data.pool_address ? 'copied' : ''}`}
-                      onClick={() =>
-                        copyToClipboard(gaugeDetails.data.pool_address)
-                      }
-                      title="Copy full address to clipboard"
-                    >
-                      <i
-                        className={`fas ${copiedText === gaugeDetails.data.pool_address ? 'fa-check' : 'fa-copy'}`}
-                      ></i>
-                    </button>
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Network:</span>
-                  <span className="value">{gaugeDetails.data.blockchain}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Status:</span>
-                  <span className="value">
-                    {gaugeDetails.data.is_killed ? 'Killed' : 'Active'}
-                    {gaugeDetails.data.has_no_crv ? ' (No CRV)' : ''}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Verified:</span>
-                  <span
-                    className={`value ${
-                      verificationData?.data?.verification?.is_valid ? 'valid-text' : 
-                      verificationData !== null ? 'invalid-text' : ''
-                    }`}
-                  >
-                    {verificationData === null 
-                      ? (loadingSteps.verification ? (
-                          <div className="loading-spinner" style={{ transform: 'scale(0.5)' }}></div>
-                        ) : 'Unknown')
-                      : verificationData.data?.verification?.is_valid ? (
-                          <span 
-                            style={{ fontWeight: 'bold', color: 'green' }}
-                            title={verificationData.data?.verification?.message || ''}
-                          >
-                            VERIFIED
-                          </span>
-                        ) : (
-                          <span 
-                            style={{ fontWeight: 'bold', color: 'red' }}
-                            title={verificationData.data?.verification?.message || ''}
-                          >
-                            NOT VERIFIED
-                          </span>
-                        )
-                    }
-                  </span>
-                </div>
-                {gaugeDetails.data.pool_urls?.deposit && (
-                  <div className="detail-item">
-                    <span className="label">Curve:</span>
-                    <span className="value">
-                      <a
-                        href={gaugeDetails.data.pool_urls.deposit}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="curve-link"
+                    <h2 className="gauge-title">
+                      <button
+                        className={`favorite-button ${isFavorite(gaugeDetails.data.gauge_address) ? 'favorited' : ''}`}
+                        onClick={() => toggleFavorite(gaugeDetails)}
+                        title={
+                          isFavorite(gaugeDetails.data.gauge_address)
+                            ? 'Remove from favorites'
+                            : 'Add to favorites'
+                        }
                       >
-                        <i className="fas fa-external-link-alt"></i>
-                        View on Curve
-                      </a>
-                    </span>
-                  </div>
-                )}
-              </div>
+                        <i
+                          className={`${isFavorite(gaugeDetails.data.gauge_address) ? 'fas' : 'far'} fa-star`}
+                        ></i>
+                      </button>
+                      {(() => {
+                        const title =
+                          gaugeDetails.data.curve_key ||
+                          gaugeDetails.data.pool_name ||
+                          'Gauge Details';
+                        const parenIndex = title.indexOf('(');
 
-              {(boostData?.data?.provider_boosts &&
-                Object.keys(boostData.data.provider_boosts).length > 0) || loadingSteps.boosts ? (
-                  <div className="detail-card boosts">
-                    <h3>Boost Providers</h3>
-                    <div className="boost-providers">
-                      {loadingSteps.boosts ? (
-                        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                          <div className="loading-spinner"></div>
+                        if (parenIndex === -1) {
+                          return title;
+                        }
+
+                        return title.substring(0, parenIndex).trim();
+                      })()}
+                    </h2>
+                  </div>
+
+                  <div className="details-grid">
+                    <div className="left-column">
+                      <div className="detail-card basic-info">
+                        <h3>Basic Information</h3>
+                        <div className="detail-item">
+                          <span className="label">Gauge:</span>
+                          <span className="value">
+                            {abbreviateAddress(gaugeDetails.data.gauge_address)}
+                            <button
+                              className={`copy-button ${copiedText === gaugeDetails.data.gauge_address ? 'copied' : ''}`}
+                              onClick={() =>
+                                copyToClipboard(gaugeDetails.data.gauge_address)
+                              }
+                              title="Copy full address to clipboard"
+                            >
+                              <i
+                                className={`fas ${copiedText === gaugeDetails.data.gauge_address ? 'fa-check' : 'fa-copy'}`}
+                              ></i>
+                            </button>
+                          </span>
                         </div>
-                      ) : boostData?.data?.provider_boosts ? (
-                        Object.entries(boostData.data.provider_boosts)
-                        .sort(([, a], [, b]) => parseFloat(b.boost_formatted) - parseFloat(a.boost_formatted))
-                        .map(([provider, boostData]) => {
-                          const boostValue = parseFloat(boostData.boost_formatted);
-                          const isValidBoost = !isNaN(boostValue) && boostValue > 0 && boostData.boost_formatted !== 'N/A';
-                          
-                          // If boost is invalid/N/A or no emissions, show empty meter
-                          const fillPercentage = isValidBoost ? 
-                            Math.max(0, Math.min(100, ((boostValue - 1.0) / (2.5 - 1.0)) * 100)) : 0;
-                          
-                          // Color coding based on boost value ranges (only if valid)
-                          let meterColor = '#e0e0e0'; // Default light gray for empty/invalid
-                          if (isValidBoost) {
-                            if (boostValue >= 2.0) {
-                              meterColor = '#4caf50'; // Green for 2.0x+
-                            } else if (boostValue >= 1.5) {
-                              meterColor = '#ffc107'; // Yellow for 1.5x-1.99x
-                            } else {
-                              meterColor = '#ff5722'; // Red for 1.0x-1.49x
-                            }
-                          }
-                          
-                          return (
-                            <div className="boost-item" key={provider}>
-                              <div className="provider-name">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  {(() => {
-                                    const protocolIcon = getProtocolIcon(provider);
-                                    return protocolIcon && (
-                                      <img
-                                        src={protocolIcon.iconUrl}
-                                        alt={protocolIcon.name}
-                                        style={{
-                                          width: '16px',
-                                          height: '16px',
-                                          borderRadius: '50%',
-                                          border: '1px solid #e0e0e0',
-                                          objectFit: 'cover',
-                                          flexShrink: 0,
-                                        }}
-                                        onError={(e) => {
-                                          e.target.style.display = 'none';
-                                        }}
-                                      />
-                                    );
-                                  })()}
-                                  <span>
-                                    {provider}
-                                    {boostData.pct_of_total_supply && (
-                                      <span className="tooltip-container">
-                                        <span className="info-tooltip">i</span>
-                                        <span className="tooltip-text">
-                                          {boostData.pct_of_total_supply.toFixed(2)}% of
-                                          staked
+                        <div className="detail-item">
+                          <span className="label">
+                            {gaugeDetails.data.lendingVaultAddress
+                              ? 'Vault:'
+                              : 'Pool:'}
+                          </span>
+                          <span className="value">
+                            {abbreviateAddress(
+                              gaugeDetails.data.lendingVaultAddress ||
+                                gaugeDetails.data.pool_address
+                            )}
+                            <button
+                              className={`copy-button ${copiedText === (gaugeDetails.data.lendingVaultAddress || gaugeDetails.data.pool_address) ? 'copied' : ''}`}
+                              onClick={() =>
+                                copyToClipboard(
+                                  gaugeDetails.data.lendingVaultAddress ||
+                                    gaugeDetails.data.pool_address
+                                )
+                              }
+                              title="Copy full address to clipboard"
+                            >
+                              <i
+                                className={`fas ${copiedText === (gaugeDetails.data.lendingVaultAddress || gaugeDetails.data.pool_address) ? 'fa-check' : 'fa-copy'}`}
+                              ></i>
+                            </button>
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="label">Network:</span>
+                          <span className="value">
+                            {gaugeDetails.data.blockchain}
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="label">Status:</span>
+                          <span className="value">
+                            {gaugeDetails.data.is_killed ? 'Killed' : 'Active'}
+                            {gaugeDetails.data.has_no_crv ? ' (No CRV)' : ''}
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="label">Verified:</span>
+                          <span
+                            className={`value ${
+                              verificationData?.data?.verification?.is_valid
+                                ? 'valid-text'
+                                : verificationData !== null
+                                  ? 'invalid-text'
+                                  : ''
+                            }`}
+                          >
+                            {verificationData === null ? (
+                              loadingSteps.verification ? (
+                                <div
+                                  className="loading-spinner"
+                                  style={{ transform: 'scale(0.5)' }}
+                                ></div>
+                              ) : (
+                                'Unknown'
+                              )
+                            ) : verificationData.data?.verification
+                                ?.is_valid ? (
+                              <span
+                                style={{ fontWeight: 'bold', color: 'green' }}
+                                title={
+                                  verificationData.data?.verification
+                                    ?.message || ''
+                                }
+                              >
+                                VERIFIED
+                              </span>
+                            ) : (
+                              <span
+                                style={{ fontWeight: 'bold', color: 'red' }}
+                                title={
+                                  verificationData.data?.verification
+                                    ?.message || ''
+                                }
+                              >
+                                NOT VERIFIED
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        {(gaugeDetails.data.lendingVaultUrls?.deposit ||
+                          gaugeDetails.data.pool_urls?.deposit) && (
+                          <div className="detail-item">
+                            <span className="label">Curve:</span>
+                            <span className="value">
+                              <a
+                                href={
+                                  gaugeDetails.data.lendingVaultUrls?.deposit ||
+                                  gaugeDetails.data.pool_urls.deposit
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="curve-link"
+                              >
+                                <i className="fas fa-external-link-alt"></i>
+                                View on Curve
+                              </a>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {(boostData?.data?.provider_boosts &&
+                        Object.keys(boostData.data.provider_boosts).length >
+                          0) ||
+                      loadingSteps.boosts ? (
+                        <div className="detail-card boosts">
+                          <h3>Boost Providers</h3>
+                          <div className="boost-providers">
+                            {loadingSteps.boosts ? (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '20px',
+                                  color: '#666',
+                                }}
+                              >
+                                <div className="loading-spinner"></div>
+                              </div>
+                            ) : boostData?.data?.provider_boosts ? (
+                              Object.entries(boostData.data.provider_boosts)
+                                .sort(
+                                  ([, a], [, b]) =>
+                                    parseFloat(b.boost_formatted) -
+                                    parseFloat(a.boost_formatted)
+                                )
+                                .map(([provider, boostData]) => {
+                                  const boostValue = parseFloat(
+                                    boostData.boost_formatted
+                                  );
+                                  const isValidBoost =
+                                    !isNaN(boostValue) &&
+                                    boostValue > 0 &&
+                                    boostData.boost_formatted !== 'N/A';
+
+                                  // If boost is invalid/N/A or no emissions, show empty meter
+                                  const fillPercentage = isValidBoost
+                                    ? Math.max(
+                                        0,
+                                        Math.min(
+                                          100,
+                                          ((boostValue - 1.0) / (2.5 - 1.0)) *
+                                            100
+                                        )
+                                      )
+                                    : 0;
+
+                                  // Color coding based on boost value ranges (only if valid)
+                                  let meterColor = '#e0e0e0'; // Default light gray for empty/invalid
+                                  if (isValidBoost) {
+                                    if (boostValue >= 2.0) {
+                                      meterColor = '#4caf50'; // Green for 2.0x+
+                                    } else if (boostValue >= 1.5) {
+                                      meterColor = '#ffc107'; // Yellow for 1.5x-1.99x
+                                    } else {
+                                      meterColor = '#ff5722'; // Red for 1.0x-1.49x
+                                    }
+                                  }
+
+                                  return (
+                                    <div className="boost-item" key={provider}>
+                                      <div className="provider-name">
+                                        <div
+                                          style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                          }}
+                                        >
+                                          {(() => {
+                                            const protocolIcon =
+                                              getProtocolIcon(provider);
+                                            return (
+                                              protocolIcon && (
+                                                <img
+                                                  src={protocolIcon.iconUrl}
+                                                  alt={protocolIcon.name}
+                                                  style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    borderRadius: '50%',
+                                                    border: '1px solid #e0e0e0',
+                                                    objectFit: 'cover',
+                                                    flexShrink: 0,
+                                                  }}
+                                                  onError={(e) => {
+                                                    e.target.style.display =
+                                                      'none';
+                                                  }}
+                                                />
+                                              )
+                                            );
+                                          })()}
+                                          <span>
+                                            {provider}
+                                            {boostData.pct_of_total_supply && (
+                                              <span className="tooltip-container">
+                                                <span className="info-tooltip">
+                                                  i
+                                                </span>
+                                                <span className="tooltip-text">
+                                                  {boostData.pct_of_total_supply.toFixed(
+                                                    2
+                                                  )}
+                                                  % of staked
+                                                </span>
+                                              </span>
+                                            )}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      <div className="boost-value-container">
+                                        <div className="boost-meter">
+                                          <div
+                                            className="boost-meter-fill"
+                                            style={{
+                                              width: `${fillPercentage}%`,
+                                              backgroundColor: meterColor,
+                                            }}
+                                          ></div>
+                                        </div>
+                                        <span className="boost-value-text">
+                                          {isValidBoost
+                                            ? `${parseFloat(boostData.boost_formatted).toFixed(3)}x`
+                                            : 'N/A'}
                                         </span>
-                                      </span>
-                                    )}
-                                  </span>
-                                </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                            ) : (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '20px',
+                                  color: '#666',
+                                }}
+                              >
+                                No boost data available
                               </div>
-                              <div className="boost-value-container">
-                                <div className="boost-meter">
-                                  <div 
-                                    className="boost-meter-fill"
-                                    style={{
-                                      width: `${fillPercentage}%`,
-                                      backgroundColor: meterColor
-                                    }}
-                                  ></div>
-                                </div>
-                                <span className="boost-value-text">
-                                  {isValidBoost ? `${parseFloat(boostData.boost_formatted).toFixed(3)}x` : 'N/A'}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                          No boost data available
+                            )}
+                          </div>
                         </div>
-                      )}
+                      ) : null}
+                    </div>
+
+                    <div className="detail-card weights">
+                      <h3>Emissions</h3>
+
+                      <div className="weight-section">
+                        <h4 className="section-header">Current</h4>
+                        <div className="detail-item">
+                          <span className="label">Rate:</span>
+                          <span className="value">
+                            {calculateGaugeInflationRate(
+                              gaugeDetails.data.gauge_controller
+                                ?.gauge_relative_weight,
+                              gaugeDetails.data.gauge_controller?.inflation_rate
+                            )}
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="label">Weight:</span>
+                          <span className="value">
+                            {formatPercentage(
+                              gaugeDetails.data.gauge_controller
+                                ?.gauge_relative_weight
+                            )}
+                          </span>
+                        </div>
+                        {gaugeDetails.data.apy_data?.gauge_crv_apy && (
+                          <div className="detail-item">
+                            <span className="label">APR:</span>
+                            <span className="value">
+                              {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
+                                2
+                              ) || '0.00'}
+                              % →{' '}
+                              {gaugeDetails.data.apy_data.gauge_crv_apy.max_boost?.toFixed(
+                                2
+                              ) || '0.00'}
+                              %
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="weight-section">
+                        <h4 className="section-header">Future</h4>
+                        <div className="detail-item">
+                          <span className="label">Rate:</span>
+                          <span className="value">
+                            {calculateGaugeInflationRate(
+                              gaugeDetails.data.gauge_controller
+                                ?.gauge_future_relative_weight,
+                              gaugeDetails.data.gauge_controller?.inflation_rate
+                            )}
+                          </span>
+                        </div>
+                        <div className="detail-item">
+                          <span className="label">Weight:</span>
+                          <span className="value">
+                            {formatPercentage(
+                              gaugeDetails.data.gauge_controller
+                                ?.gauge_future_relative_weight
+                            )}
+                          </span>
+                        </div>
+                        {gaugeDetails.data.apy_data?.gauge_future_crv_apy && (
+                          <div className="detail-item">
+                            <span className="label">APR:</span>
+                            <span className="value">
+                              {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
+                                2
+                              ) || '0.00'}
+                              % →{' '}
+                              {gaugeDetails.data.apy_data.gauge_future_crv_apy.max_boost?.toFixed(
+                                2
+                              ) || '0.00'}
+                              %
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                ) : null}
-            </div>
 
-            <div className="detail-card weights">
-              <h3>Emissions</h3>
+                  <div className="votes-section">
+                    <div style={{ textAlign: 'center' }}>
+                      <button
+                        onClick={toggleVoteData}
+                        className="votes-toggle-button"
+                      >
+                        <i className="fas fa-vote-yea"></i>{' '}
+                        {showVotes ? 'Hide Gauge Votes' : 'Show Gauge Votes'}
+                      </button>
+                    </div>
 
-              <div className="weight-section">
-                <h4 className="section-header">Current</h4>
-                <div className="detail-item">
-                  <span className="label">Rate:</span>
-                  <span className="value">
-                    {calculateGaugeInflationRate(
-                      gaugeDetails.data.gauge_controller?.gauge_relative_weight,
-                      gaugeDetails.data.gauge_controller?.inflation_rate
-                    )}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Weight:</span>
-                  <span className="value">
-                    {formatPercentage(
-                      gaugeDetails.data.gauge_controller?.gauge_relative_weight
-                    )}
-                  </span>
-                </div>
-                {gaugeDetails.data.apy_data?.gauge_crv_apy && (
-                  <div className="detail-item">
-                    <span className="label">APR:</span>
-                    <span className="value">
-                      {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
-                        2
-                      ) || '0.00'}
-                      % →{' '}
-                      {gaugeDetails.data.apy_data.gauge_crv_apy.max_boost?.toFixed(
-                        2
-                      ) || '0.00'}
-                      %
-                    </span>
-                  </div>
-                )}
-              </div>
+                    {showVotes && (
+                      <div className="votes-content">
+                        <h3>Gauge Votes</h3>
 
-              <div className="weight-section">
-                <h4 className="section-header">Future</h4>
-                <div className="detail-item">
-                  <span className="label">Rate:</span>
-                  <span className="value">
-                    {calculateGaugeInflationRate(
-                      gaugeDetails.data.gauge_controller
-                        ?.gauge_future_relative_weight,
-                      gaugeDetails.data.gauge_controller?.inflation_rate
-                    )}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="label">Weight:</span>
-                  <span className="value">
-                    {formatPercentage(
-                      gaugeDetails.data.gauge_controller
-                        ?.gauge_future_relative_weight
-                    )}
-                  </span>
-                </div>
-                {gaugeDetails.data.apy_data?.gauge_future_crv_apy && (
-                  <div className="detail-item">
-                    <span className="label">APR:</span>
-                    <span className="value">
-                      {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
-                        2
-                      ) || '0.00'}
-                      % →{' '}
-                      {gaugeDetails.data.apy_data.gauge_future_crv_apy.max_boost?.toFixed(
-                        2
-                      ) || '0.00'}
-                      %
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+                        {voteLoading ? (
+                          <div className="loading-centered">
+                            Loading vote data...
+                          </div>
+                        ) : voteError ? (
+                          <div className="error">{voteError}</div>
+                        ) : voteData.length > 0 ? (
+                          <>
+                            <div className="table-container">
+                              <table className="vote-table">
+                                <thead>
+                                  <tr>
+                                    <th>Account</th>
+                                    <th>Date</th>
+                                    <th className="weight-column">Weight</th>
+                                    <th className="amount-column">Amount</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {voteData.map((vote) => (
+                                    <tr key={vote.id}>
+                                      <td className="account-column">
+                                        <a
+                                          href={getEtherscanLink(vote.account)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="black-link"
+                                        >
+                                          {formatAddress(
+                                            vote.account_alias || vote.account
+                                          )}
+                                        </a>
+                                      </td>
+                                      <td>{formatDate(vote.date_str)}</td>
+                                      <td className="weight-column monospace">
+                                        {formatWeight(vote.weight)}
+                                      </td>
+                                      <td className="amount-column monospace">
+                                        {formatNumber(vote.amount)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
 
-          <div className="votes-section">
-            <div style={{ textAlign: 'center' }}>
-              <button onClick={toggleVoteData} className="votes-toggle-button">
-                <i className="fas fa-vote-yea"></i>{' '}
-                {showVotes ? 'Hide Gauge Votes' : 'Show Gauge Votes'}
-              </button>
-            </div>
-
-            {showVotes && (
-              <div className="votes-content">
-                <h3>Gauge Votes</h3>
-
-                {voteLoading ? (
-                  <div className="loading-centered">Loading vote data...</div>
-                ) : voteError ? (
-                  <div className="error">{voteError}</div>
-                ) : voteData.length > 0 ? (
-                  <>
-                    <div className="table-container">
-                      <table className="vote-table">
-                        <thead>
-                          <tr>
-                            <th>Account</th>
-                            <th>Date</th>
-                            <th className="weight-column">Weight</th>
-                            <th className="amount-column">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {voteData.map((vote) => (
-                            <tr key={vote.id}>
-                              <td className="account-column">
-                                <a
-                                  href={getEtherscanLink(vote.account)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="black-link"
+                            {totalPages > 1 && (
+                              <div className="pagination">
+                                <button
+                                  disabled={currentPage === 1}
+                                  onClick={() => fetchVoteData(currentPage - 1)}
+                                  className="page-button"
                                 >
-                                  {formatAddress(
-                                    vote.account_alias || vote.account
-                                  )}
-                                </a>
-                              </td>
-                              <td>{formatDate(vote.date_str)}</td>
-                              <td className="weight-column monospace">
-                                {formatWeight(vote.weight)}
-                              </td>
-                              <td className="amount-column monospace">
-                                {formatNumber(vote.amount)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {totalPages > 1 && (
-                      <div className="pagination">
-                        <button
-                          disabled={currentPage === 1}
-                          onClick={() => fetchVoteData(currentPage - 1)}
-                          className="page-button"
-                        >
-                          Previous
-                        </button>
-                        <span>
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <button
-                          disabled={currentPage === totalPages}
-                          onClick={() => fetchVoteData(currentPage + 1)}
-                          className="page-button"
-                        >
-                          Next
-                        </button>
+                                  Previous
+                                </button>
+                                <span>
+                                  Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                  disabled={currentPage === totalPages}
+                                  onClick={() => fetchVoteData(currentPage + 1)}
+                                  className="page-button"
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="no-votes">
+                            No votes found for this gauge.
+                          </div>
+                        )}
                       </div>
                     )}
-                  </>
-                ) : (
-                  <div className="no-votes">No votes found for this gauge.</div>
-                )}
-              </div>
-            )}
-          </div>
+                  </div>
                 </>
               ) : (
                 <div className="modal-error">

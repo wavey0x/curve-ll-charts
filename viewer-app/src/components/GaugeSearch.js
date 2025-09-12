@@ -12,8 +12,29 @@ const GAUGE_CONTROLLER_ABI = [
   'function gauge_types(address gauge) view returns (int128)'
 ];
 
-// Create ethers provider for mainnet - using Cloudflare's public endpoint
-const provider = new ethers.JsonRpcProvider('https://cloudflare-eth.com');
+// Create ethers provider for mainnet - using multiple fallback endpoints
+const createProvider = () => {
+  const rpcUrls = [
+    'https://ethereum.publicnode.com',
+    'https://rpc.ankr.com/eth',
+    'https://eth.llamarpc.com',
+    'https://cloudflare-eth.com'
+  ];
+  
+  // Try each RPC URL until one works
+  for (const url of rpcUrls) {
+    try {
+      return new ethers.JsonRpcProvider(url);
+    } catch (error) {
+      // Silent failure, try next URL
+    }
+  }
+  
+  // Fallback to default
+  return new ethers.JsonRpcProvider('https://ethereum.publicnode.com');
+};
+
+const provider = createProvider();
 
 // Configure axios with default settings for CORS
 const axiosInstance = axios.create({
@@ -368,12 +389,18 @@ const GaugeSearch = ({
         setGaugeStatus('Active');
       }
     } catch (error) {
-      console.warn('RPC call failed:', error.message);
-      // If the call reverts, the gauge is not in the controller (inactive)
-      // Only update status if current gauge is not killed
-      if (gaugeDetails?.data && !gaugeDetails.data.is_killed) {
+      // EXPLICIT CONTRACT REVERT: gauge_types() function exists but reverts for this address
+      // This means the gauge is NOT in the controller (should mark as Inactive)
+      const isContractRevert = error.code === 'CALL_EXCEPTION' && 
+                              error.reason && 
+                              error.reason !== 'missing revert data' &&
+                              !error.message.includes('failed to detect network') &&
+                              !error.message.includes('missing revert data');
+      
+      if (isContractRevert && gaugeDetails?.data && !gaugeDetails.data.is_killed) {
         setGaugeStatus('Inactive');
       }
+      // For network failures or unclear errors, keep the original status
     } finally {
       rpcCallInProgress.current = false;
       setStatusLoading(false);

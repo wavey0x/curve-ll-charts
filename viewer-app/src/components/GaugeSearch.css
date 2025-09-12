@@ -572,9 +572,19 @@
   border-radius: 4px;
   font-size: 10px;
   white-space: nowrap;
-  z-index: 1;
+  z-index: 1000;
   opacity: 0;
   transition: opacity 0.1s ease;
+}
+
+.tooltip-text-left {
+  left: 50%;
+  transform: translateX(-80%);
+}
+
+.tooltip-text-right {
+  left: 50%;
+  transform: translateX(-20%);
 }
 
 .tooltip-text::after {

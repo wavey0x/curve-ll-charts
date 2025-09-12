@@ -2,10 +2,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import './GaugeSearch.css';
-import sha3 from 'crypto-js/sha3';
-import Hex from 'crypto-js/enc-hex';
+import { ethers } from 'ethers';
 
 import FavoritesTable from './FavoritesTable';
+
+// Gauge Controller configuration
+const GAUGE_CONTROLLER_ADDRESS = '0x2f50d538606fa9edd2b11e2446beb18c9d5846bb';
+const GAUGE_CONTROLLER_ABI = [
+  'function gauge_types(address gauge) view returns (int128)'
+];
+
+// Create ethers provider for mainnet - using Cloudflare's public endpoint
+const provider = new ethers.JsonRpcProvider('https://cloudflare-eth.com');
 
 // Configure axios with default settings for CORS
 const axiosInstance = axios.create({
@@ -40,34 +48,6 @@ const retryApiCall = async (apiCall, maxRetries = 3, initialDelay = 1000) => {
   throw lastError;
 };
 
-// Add this utility function near the top of your file, outside of the component
-function toChecksumAddress(address) {
-  if (
-    !address ||
-    typeof address !== 'string' ||
-    !address.match(/^0x[0-9a-fA-F]{40}$/)
-  ) {
-    return address; // Return as is if invalid
-  }
-
-  address = address.toLowerCase();
-  const chars = address.substring(2).split('');
-
-  // Create a hash of the address using SHA3 (Keccak-256)
-  const hash = sha3(address.slice(2), { outputLength: 256 });
-  const addressHash = Hex.stringify(hash);
-
-  let checksumAddress = '0x';
-  for (let i = 0; i < chars.length; i++) {
-    if (parseInt(addressHash[i], 16) >= 8) {
-      checksumAddress += chars[i].toUpperCase();
-    } else {
-      checksumAddress += chars[i];
-    }
-  }
-
-  return checksumAddress;
-}
 
 // Helper function to abbreviate addresses for display (with 0x prefix)
 function abbreviateAddress(address) {
@@ -174,6 +154,11 @@ const GaugeSearch = ({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [selectedGauge, setSelectedGauge] = useState(null); // Store selected gauge info
   const [showModal, setShowModal] = useState(false);
+  
+  // Gauge status state
+  const [gaugeStatus, setGaugeStatus] = useState('');
+  const [statusLoading, setStatusLoading] = useState(false);
+  const rpcCallInProgress = useRef(false);
 
   // Voting data state
   const [showVotes, setShowVotes] = useState(false);
@@ -266,6 +251,9 @@ const GaugeSearch = ({
         setShowSuggestions(false);
         setSelectedSuggestionIndex(-1);
         break;
+      default:
+        // No action needed for other keys
+        break;
     }
   };
 
@@ -347,14 +335,50 @@ const GaugeSearch = ({
     return percentage.toFixed(2) + '%';
   };
 
-  // Determine color for boost value
-  const getBoostColor = (boostValue) => {
-    const boost = parseFloat(boostValue);
 
-    if (boost >= 2.0) return '#4caf50'; // Green for 2.0-2.5+
-    if (boost >= 1.5) return '#ffc107'; // Yellow for 1.5-2.0
-    return '#ff9800'; // Orange for 1.0-1.5
+  // Determine initial status based on API data
+  const getInitialStatus = (gaugeData) => {
+    if (gaugeData.is_killed) return 'Killed';
+    if (gaugeData.has_no_crv) return 'Inactive';
+    return 'Active';
   };
+
+  // Check gauge controller status via RPC
+  const checkGaugeControllerStatus = useCallback(async (gaugeAddress) => {
+    // Prevent concurrent RPC calls
+    if (rpcCallInProgress.current) {
+      return;
+    }
+
+    try {
+      rpcCallInProgress.current = true;
+      setStatusLoading(true);
+      
+      const contract = new ethers.Contract(
+        GAUGE_CONTROLLER_ADDRESS, 
+        GAUGE_CONTROLLER_ABI, 
+        provider
+      );
+      
+      await contract.gauge_types(gaugeAddress);
+      
+      // If the call succeeds and returns >= 0, gauge is active in controller
+      // Only update status if current gauge is not killed
+      if (gaugeDetails?.data && !gaugeDetails.data.is_killed) {
+        setGaugeStatus('Active');
+      }
+    } catch (error) {
+      console.warn('RPC call failed:', error.message);
+      // If the call reverts, the gauge is not in the controller (inactive)
+      // Only update status if current gauge is not killed
+      if (gaugeDetails?.data && !gaugeDetails.data.is_killed) {
+        setGaugeStatus('Inactive');
+      }
+    } finally {
+      rpcCallInProgress.current = false;
+      setStatusLoading(false);
+    }
+  }, [gaugeDetails]);
 
   // Function to fetch gauge details - wrapped in useCallback to prevent infinite re-renders
   const fetchGaugeDetails = useCallback(
@@ -374,6 +398,9 @@ const GaugeSearch = ({
         setGaugeDetails(null);
         setVerificationData(null);
         setBoostData(null);
+        setGaugeStatus('');
+        setStatusLoading(false);
+        rpcCallInProgress.current = false;
 
         // Use environment variable for API base URL, with a fallback
         let apiBaseUrl =
@@ -396,6 +423,15 @@ const GaugeSearch = ({
         ) {
           setGaugeDetails(basicResponse.data);
           setLoadingSteps((prev) => ({ ...prev, basic: false }));
+          
+          // Set initial status based on API data
+          const initialStatus = getInitialStatus(basicResponse.data.data);
+          setGaugeStatus(initialStatus);
+          
+          // If gauge is not killed, check controller status via RPC
+          if (!basicResponse.data.data.is_killed) {
+            checkGaugeControllerStatus(gaugeAddress);
+          }
         } else {
           throw new Error('Not a valid gauge address');
         }
@@ -456,6 +492,15 @@ const GaugeSearch = ({
               boosts: false,
             });
 
+            // Set initial status based on API data
+            const initialStatus = getInitialStatus(alternateResponse.data.data);
+            setGaugeStatus(initialStatus);
+            
+            // If gauge is not killed, check controller status via RPC
+            if (!alternateResponse.data.data.is_killed) {
+              checkGaugeControllerStatus(gaugeAddress);
+            }
+
             // Also try alternate endpoints for verification and boost data
             Promise.allSettled([
               retryApiCall(() =>
@@ -492,6 +537,9 @@ const GaugeSearch = ({
         setGaugeDetails(null);
         setVerificationData(null);
         setBoostData(null);
+        setGaugeStatus('');
+        setStatusLoading(false);
+        rpcCallInProgress.current = false;
         setLoadingSteps({ basic: false, verification: false, boosts: false });
         setError(errorMessage);
         setShowError(true);
@@ -499,7 +547,7 @@ const GaugeSearch = ({
         setLoading(false);
       }
     },
-    [isValidAddress]
+    [isValidAddress, checkGaugeControllerStatus]
   );
 
   // Function to fetch vote data for a gauge with retry mechanism
@@ -881,8 +929,25 @@ const GaugeSearch = ({
                         <div className="detail-item">
                           <span className="label">Status:</span>
                           <span className="value">
-                            {gaugeDetails.data.is_killed ? 'Killed' : 'Active'}
-                            {gaugeDetails.data.has_no_crv ? ' (No CRV)' : ''}
+                            {statusLoading ? (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                {gaugeStatus}
+                                <div
+                                  className="loading-spinner"
+                                  style={{ transform: 'scale(0.4)' }}
+                                ></div>
+                              </span>
+                            ) : (
+                              gaugeStatus
+                            )}
+                            <span className="tooltip-container">
+                              <span className="info-tooltip">i</span>
+                              <span className="tooltip-text tooltip-text-left">
+                                Active: Added to controller<br/>
+                                Inactive: Not added to controller<br/>
+                                Killed: Added, but ineligible for CRV
+                              </span>
+                            </span>
                           </span>
                         </div>
                         <div className="detail-item">
@@ -927,6 +992,12 @@ const GaugeSearch = ({
                                 NOT VERIFIED
                               </span>
                             )}
+                            <span className="tooltip-container">
+                              <span className="info-tooltip">i</span>
+                              <span className="tooltip-text tooltip-text-right">
+                                Verified means that this gauge was deployed from a trusted factory.
+                              </span>
+                            </span>
                           </span>
                         </div>
                         {(gaugeDetails.data.lendingVaultUrls?.deposit ||
@@ -954,7 +1025,8 @@ const GaugeSearch = ({
                       {(boostData?.data?.provider_boosts &&
                         Object.keys(boostData.data.provider_boosts).length >
                           0) ||
-                      loadingSteps.boosts ? (
+                      loadingSteps.boosts ||
+                      gaugeStatus === 'Inactive' ? (
                         <div className="detail-card boosts">
                           <h3>Boost Providers</h3>
                           <div className="boost-providers">
@@ -967,6 +1039,17 @@ const GaugeSearch = ({
                                 }}
                               >
                                 <div className="loading-spinner"></div>
+                              </div>
+                            ) : gaugeStatus === 'Inactive' ? (
+                              <div
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '20px',
+                                  color: '#666',
+                                  fontSize: '12px',
+                                }}
+                              >
+                                Not added to controller
                               </div>
                             ) : boostData?.data?.provider_boosts ? (
                               Object.entries(boostData.data.provider_boosts)
@@ -1021,8 +1104,7 @@ const GaugeSearch = ({
                                           {(() => {
                                             const protocolIcon =
                                               getProtocolIcon(provider);
-                                            return (
-                                              protocolIcon && (
+                                            return protocolIcon ? (
                                                 <img
                                                   src={protocolIcon.iconUrl}
                                                   alt={protocolIcon.name}
@@ -1039,12 +1121,11 @@ const GaugeSearch = ({
                                                       'none';
                                                   }}
                                                 />
-                                              )
-                                            );
+                                            ) : null;
                                           })()}
                                           <span>
                                             {provider}
-                                            {boostData.pct_of_total_supply && (
+                                            {boostData.pct_of_total_supply != null && boostData.pct_of_total_supply > 0 && (
                                               <span className="tooltip-container">
                                                 <span className="info-tooltip">
                                                   i
@@ -1098,81 +1179,96 @@ const GaugeSearch = ({
                     <div className="detail-card weights">
                       <h3>Emissions</h3>
 
-                      <div className="weight-section">
-                        <h4 className="section-header">Current</h4>
-                        <div className="detail-item">
-                          <span className="label">Rate:</span>
-                          <span className="value">
-                            {calculateGaugeInflationRate(
-                              gaugeDetails.data.gauge_controller
-                                ?.gauge_relative_weight,
-                              gaugeDetails.data.gauge_controller?.inflation_rate
-                            )}
-                          </span>
+                      {gaugeStatus === 'Inactive' ? (
+                        <div
+                          style={{
+                            textAlign: 'center',
+                            padding: '20px',
+                            color: '#666',
+                            fontSize: '12px',
+                          }}
+                        >
+                          Not added to controller
                         </div>
-                        <div className="detail-item">
-                          <span className="label">Weight:</span>
-                          <span className="value">
-                            {formatPercentage(
-                              gaugeDetails.data.gauge_controller
-                                ?.gauge_relative_weight
+                      ) : (
+                        <>
+                          <div className="weight-section">
+                            <h4 className="section-header">Current</h4>
+                            <div className="detail-item">
+                              <span className="label">Rate:</span>
+                              <span className="value">
+                                {calculateGaugeInflationRate(
+                                  gaugeDetails.data.gauge_controller
+                                    ?.gauge_relative_weight,
+                                  gaugeDetails.data.gauge_controller?.inflation_rate
+                                )}
+                              </span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="label">Weight:</span>
+                              <span className="value">
+                                {formatPercentage(
+                                  gaugeDetails.data.gauge_controller
+                                    ?.gauge_relative_weight
+                                )}
+                              </span>
+                            </div>
+                            {gaugeDetails.data.apy_data?.gauge_crv_apy && (
+                              <div className="detail-item">
+                                <span className="label">APR:</span>
+                                <span className="value">
+                                  {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
+                                    2
+                                  ) || '0.00'}
+                                  % →{' '}
+                                  {gaugeDetails.data.apy_data.gauge_crv_apy.max_boost?.toFixed(
+                                    2
+                                  ) || '0.00'}
+                                  %
+                                </span>
+                              </div>
                             )}
-                          </span>
-                        </div>
-                        {gaugeDetails.data.apy_data?.gauge_crv_apy && (
-                          <div className="detail-item">
-                            <span className="label">APR:</span>
-                            <span className="value">
-                              {gaugeDetails.data.apy_data.gauge_crv_apy.min_boost?.toFixed(
-                                2
-                              ) || '0.00'}
-                              % →{' '}
-                              {gaugeDetails.data.apy_data.gauge_crv_apy.max_boost?.toFixed(
-                                2
-                              ) || '0.00'}
-                              %
-                            </span>
                           </div>
-                        )}
-                      </div>
 
-                      <div className="weight-section">
-                        <h4 className="section-header">Future</h4>
-                        <div className="detail-item">
-                          <span className="label">Rate:</span>
-                          <span className="value">
-                            {calculateGaugeInflationRate(
-                              gaugeDetails.data.gauge_controller
-                                ?.gauge_future_relative_weight,
-                              gaugeDetails.data.gauge_controller?.inflation_rate
+                          <div className="weight-section">
+                            <h4 className="section-header">Future</h4>
+                            <div className="detail-item">
+                              <span className="label">Rate:</span>
+                              <span className="value">
+                                {calculateGaugeInflationRate(
+                                  gaugeDetails.data.gauge_controller
+                                    ?.gauge_future_relative_weight,
+                                  gaugeDetails.data.gauge_controller?.inflation_rate
+                                )}
+                              </span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="label">Weight:</span>
+                              <span className="value">
+                                {formatPercentage(
+                                  gaugeDetails.data.gauge_controller
+                                    ?.gauge_future_relative_weight
+                                )}
+                              </span>
+                            </div>
+                            {gaugeDetails.data.apy_data?.gauge_future_crv_apy && (
+                              <div className="detail-item">
+                                <span className="label">APR:</span>
+                                <span className="value">
+                                  {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
+                                    2
+                                  ) || '0.00'}
+                                  % →{' '}
+                                  {gaugeDetails.data.apy_data.gauge_future_crv_apy.max_boost?.toFixed(
+                                    2
+                                  ) || '0.00'}
+                                  %
+                                </span>
+                              </div>
                             )}
-                          </span>
-                        </div>
-                        <div className="detail-item">
-                          <span className="label">Weight:</span>
-                          <span className="value">
-                            {formatPercentage(
-                              gaugeDetails.data.gauge_controller
-                                ?.gauge_future_relative_weight
-                            )}
-                          </span>
-                        </div>
-                        {gaugeDetails.data.apy_data?.gauge_future_crv_apy && (
-                          <div className="detail-item">
-                            <span className="label">APR:</span>
-                            <span className="value">
-                              {gaugeDetails.data.apy_data.gauge_future_crv_apy.min_boost?.toFixed(
-                                2
-                              ) || '0.00'}
-                              % →{' '}
-                              {gaugeDetails.data.apy_data.gauge_future_crv_apy.max_boost?.toFixed(
-                                2
-                              ) || '0.00'}
-                              %
-                            </span>
                           </div>
-                        )}
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
 

@@ -35,6 +35,8 @@ const Dao = () => {
   const [governanceVotes, setGovernanceVotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [proposalTitles, setProposalTitles] = useState({});
+  const [titlesLoading, setTitlesLoading] = useState(true);
 
   const getEtherscanLink = (address) =>
     `https://etherscan.io/address/${address}`;
@@ -62,9 +64,51 @@ const Dao = () => {
     }
   }, []);
 
+  const fetchProposalTitles = useCallback(async () => {
+    setTitlesLoading(true);
+    try {
+      // Fetch multiple pages to get enough proposals
+      const pages = [1, 2, 3];
+      const results = await Promise.all(
+        pages.map((page) =>
+          retryApiCall(() =>
+            axiosInstance.get(
+              `https://prices.curve.finance/v1/dao/proposals?pagination=25&page=${page}&status_filter=all&type_filter=all`
+            )
+          ).catch(() => null)
+        )
+      );
+
+      const titlesMap = {};
+      results.forEach((response) => {
+        if (response?.data?.proposals) {
+          response.data.proposals.forEach((proposal) => {
+            if (proposal.vote_id && proposal.metadata) {
+              titlesMap[String(proposal.vote_id)] = proposal.metadata;
+            }
+          });
+        }
+      });
+      setProposalTitles(titlesMap);
+    } catch (err) {
+      console.error('Error fetching proposal titles:', err);
+    } finally {
+      setTitlesLoading(false);
+    }
+  }, []);
+
+  const truncateTitle = (title, maxLength = 65) => {
+    if (!title || title.length <= maxLength) return title;
+    return title.slice(0, maxLength).trim() + '…';
+  };
+
   useEffect(() => {
     fetchGovernanceVotes();
   }, [fetchGovernanceVotes]);
+
+  useEffect(() => {
+    fetchProposalTitles();
+  }, [fetchProposalTitles]);
 
   return (
     <div className="dao-container">
@@ -76,12 +120,9 @@ const Dao = () => {
           <div className="error">{error}</div>
         ) : (
           <ul className="governance-votes-list">
-            {governanceVotes.map((vote) => (
-              <li
-                key={vote.id}
-                className={`governance-vote-item ${vote.gauges.length === 0 ? 'empty' : ''}`}
-              >
-                <div className="proposal-main">
+            {governanceVotes.filter((vote) => vote.gauges.length > 0).map((vote) => (
+              <li key={vote.id} className="governance-vote-item">
+                <div className="proposal-header">
                   <a
                     href={`https://www.curve.finance/dao/ethereum/proposals/${vote.id}-ownership`}
                     target="_blank"
@@ -90,17 +131,21 @@ const Dao = () => {
                   >
                     #{vote.id}
                   </a>
-                  {vote.gauges.length > 0 ? (
-                    vote.isValid ? (
+                  <span className="proposal-title">
+                    {titlesLoading ? (
+                      <span className="title-skeleton" />
+                    ) : proposalTitles[String(vote.id)] ? (
+                      truncateTitle(proposalTitles[String(vote.id)])
+                    ) : null}
+                  </span>
+                </div>
+                {vote.gauges.length > 0 && (
+                  <div className="gauges-section">
+                    {vote.isValid ? (
                       <span className="valid-emoji">✅</span>
                     ) : (
                       <span className="invalid-emoji">❌</span>
-                    )
-                  ) : null}
-                </div>
-                {vote.gauges.length > 0 && (
-                  <div className="gauges-list">
-                    <div className="gauges-label">Gauges:</div>
+                    )}
                     {vote.gauges.map((gauge) => (
                       <a
                         key={gauge}

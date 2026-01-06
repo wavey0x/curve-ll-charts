@@ -34,14 +34,14 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   max-width: 400px;
 }
 
 .governance-vote-item {
   display: flex;
   flex-direction: column;
-  padding: 12px 16px;
+  padding: 8px 10px 6px;
   background-color: #ffffff;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
@@ -52,21 +52,13 @@
   background-color: #f8f8f8;
 }
 
-.governance-vote-item.empty {
-  border: 1px solid #e0e0e0;
-  opacity: 0.7;
-}
-
-.governance-vote-item:not(.empty) {
-  border: 1px solid #e0e0e0;
-}
-
 .governance-vote-link {
   color: #000000;
   text-decoration: underline;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 12px;
   transition: color 0.1s ease;
+  margin-right: 6px;
 }
 
 .governance-vote-link:hover {
@@ -75,8 +67,7 @@
 
 .valid-emoji,
 .invalid-emoji {
-  font-size: 16px;
-  margin-left: 8px;
+  font-size: 12px;
 }
 
 .loading {
@@ -101,27 +92,48 @@
   font-size: 14px;
 }
 
-.proposal-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
+.proposal-header {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.gauges-list {
+.proposal-title {
+  color: #666666;
+}
+
+.title-skeleton {
+  display: inline-block;
+  width: 200px;
+  height: 10px;
+  vertical-align: middle;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 3px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.gauges-section {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-  padding-left: 0;
+  gap: 5px;
   align-items: center;
-}
-
-.gauges-label {
-  font-size: 12px;
-  color: #000000;
-  margin-right: 6px;
-  font-weight: 600;
+  padding-top: 5px;
+  margin-top: 5px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .gauge-link {

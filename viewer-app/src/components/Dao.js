@@ -97,7 +97,7 @@ const Dao = () => {
     }
   }, []);
 
-  const truncateTitle = (title, maxLength = 65) => {
+  const truncateTitle = (title, maxLength = 80) => {
     if (!title || title.length <= maxLength) return title;
     return title.slice(0, maxLength).trim() + '…';
   };

@@ -221,22 +221,78 @@
 }
 
 @media (max-width: 768px) {
-  .treasury-header,
-  .treasury-wallet-header,
-  .treasury-asset-row {
-    flex-direction: column;
-    align-items: flex-start;
+  .treasury-container {
+    max-width: 100%;
   }
 
-  .treasury-meta,
-  .treasury-asset-values {
-    align-items: flex-start;
-    text-align: left;
+  .treasury-header {
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+  }
+
+  .treasury-wallets {
+    gap: 12px;
+  }
+
+  .treasury-wallet {
+    padding-top: 8px;
+  }
+
+  .treasury-wallet-header {
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 2px;
   }
 
   .treasury-wallet-title {
     align-items: baseline;
     gap: 4px;
+  }
+
+  .treasury-wallet-name {
+    font-size: 12px;
+  }
+
+  .treasury-wallet-address {
+    font-size: 9px;
+  }
+
+  .treasury-wallet-total {
+    font-size: 14px;
+  }
+
+  .treasury-asset-row {
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+
+  .treasury-asset-main {
+    gap: 8px;
+  }
+
+  .treasury-asset-label {
+    font-size: 11px;
+  }
+
+  .treasury-asset-note {
+    font-size: 9px;
+  }
+
+  .treasury-asset-values {
+    align-items: center;
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .treasury-asset-value {
+    font-size: 10px;
+  }
+
+  .treasury-footnotes {
+    margin-top: 12px;
+    font-size: 11px;
   }
 
   .treasury-total-value {

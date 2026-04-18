@@ -6,7 +6,6 @@ from config import Config
 
 app = Flask(__name__)
 LL_INFO_CACHE_PATH = './data/ll_info.json'
-TOKEN_LOGO_CACHE_ROOT = os.path.join('cache', 'token-logos')
 
 # Configuration for the database
 app.config.from_object(Config)
@@ -181,12 +180,6 @@ def treasury_balance_sheet():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@app.route('/api/crvlol/token-logos/<int:chain_id>/<path:filename>')
-def get_token_logo(chain_id, filename):
-    directory = os.path.join(TOKEN_LOGO_CACHE_ROOT, str(chain_id))
-    return send_from_directory(directory, filename)
-    
 # Serve the most recent chart JSON
 @app.route('/charts/<chart_name>/<peg>')
 def get_chart(chart_name, peg):

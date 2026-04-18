@@ -1,9 +1,7 @@
-import mimetypes
 import os
 from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
-from urllib.parse import urlparse
 
 import requests
 from brownie import chain, web3
@@ -19,7 +17,6 @@ SCRVUSD = "0x0655977FEb2f289A4aB78af67BAB0d17aAb84367"
 USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
 
 WAVEY_PRICE_API = "https://prices.wavey.info/v1/price"
-LOGO_CACHE_ROOT = Path("cache/token-logos")
 ENV_KEY_NAMES = (
     "TOKEN_PRICE_AGG_KEY",
     "TIDAL_DEPLOY_PRICE_API_KEY",
@@ -142,53 +139,6 @@ def get_wallet_token_data(wallet_address, token_address):
     }
 
 
-def infer_logo_extension(logo_url, response):
-    suffix = Path(urlparse(logo_url).path).suffix.lower()
-    if suffix:
-        return suffix
-
-    content_type = response.headers.get("Content-Type", "").split(";")[0].strip()
-    extension = mimetypes.guess_extension(content_type)
-    return extension or ".png"
-
-
-def get_cached_logo_filename(token_address, chain_id=1):
-    cache_dir = LOGO_CACHE_ROOT / str(chain_id)
-    if not cache_dir.exists():
-        return ""
-
-    token_key = web3.to_checksum_address(token_address).lower()
-    matches = sorted(cache_dir.glob(f"{token_key}.*"))
-    if not matches:
-        return ""
-    return matches[0].name
-
-
-def build_logo_path(chain_id, filename):
-    return f"/api/crvlol/token-logos/{chain_id}/{filename}"
-
-
-def cache_token_logo(token_address, logo_url, chain_id=1):
-    if not logo_url:
-        return ""
-
-    cached_filename = get_cached_logo_filename(token_address, chain_id=chain_id)
-    if cached_filename:
-        return build_logo_path(chain_id, cached_filename)
-
-    cache_dir = LOGO_CACHE_ROOT / str(chain_id)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-
-    response = requests.get(logo_url, timeout=30)
-    response.raise_for_status()
-
-    extension = infer_logo_extension(logo_url, response)
-    token_key = web3.to_checksum_address(token_address).lower()
-    filename = f"{token_key}{extension}"
-    (cache_dir / filename).write_bytes(response.content)
-    return build_logo_path(chain_id, filename)
-
-
 def fetch_price_snapshot(token_address, chain_id=1):
     headers = {}
     if TOKEN_PRICE_AGG_KEY:
@@ -208,15 +158,9 @@ def fetch_price_snapshot(token_address, chain_id=1):
         price = summary.get("median_price") or selected_price
         if price is not None:
             logo_url = (payload.get("token") or {}).get("logo_url") or ""
-            try:
-                logo_path = cache_token_logo(token_address, logo_url, chain_id=chain_id)
-            except (requests.RequestException, OSError):
-                logo_path = ""
-
             return {
                 "price": Decimal(str(price)),
                 "logo_url": logo_url,
-                "logo_path": logo_path,
             }
 
     raise ValueError(f"Price lookup failed for {token_address}: {payload}")
@@ -246,7 +190,6 @@ def build_balance_row(label, token_address, balance, price_snapshot, raw_balance
         "token_address": web3.to_checksum_address(token_address),
         "kind": kind,
         "logo_url": price_snapshot.get("logo_url", ""),
-        "logo_path": price_snapshot.get("logo_path", ""),
         "raw_balance": raw_balance,
         "balance": decimal_to_string(balance),
         "unit_price": decimal_to_string(unit_price),

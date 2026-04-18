@@ -31,19 +31,6 @@ const formatTimestamp = (timestamp) =>
 const shortenAddress = (address) =>
   address ? `${address.slice(0, 4)}...${address.slice(-3)}` : '';
 
-const resolveApiAssetUrl = (path) => {
-  if (!path) {
-    return '';
-  }
-
-  if (/^https?:\/\//.test(path)) {
-    return path;
-  }
-
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${normalizedApiBaseUrl}${normalizedPath}`;
-};
-
 const Treasury = () => {
   const [balanceSheet, setBalanceSheet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -139,10 +126,10 @@ const Treasury = () => {
                 >
                   <div className="treasury-asset-main">
                     <div className="treasury-token-logo-shell">
-                      {row.logo_path &&
+                      {row.logo_url &&
                       !failedLogos[`${wallet.address}-${row.label}`] ? (
                         <img
-                          src={resolveApiAssetUrl(row.logo_path)}
+                          src={row.logo_url}
                           alt=""
                           className="treasury-token-logo"
                           loading="lazy"

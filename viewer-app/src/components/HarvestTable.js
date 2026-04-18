@@ -38,13 +38,6 @@ const HarvestTable = () => {
 
   // Helper function to get protocol icon from harvest name
   const getProtocolIcon = (harvestName) => {
-    // Map harvest names to protocol keys
-    const nameMapping = {
-      'asdCRV': 'asdCRV',
-      'yvyCRV': 'yvyCRV', 
-      'ucvxCRV': 'ucvxCRV',
-    };
-    
     // Find matching protocol
     for (const [key, protocol] of Object.entries(protocolIcons)) {
       if (harvestName.toLowerCase().includes(key.toLowerCase())) {

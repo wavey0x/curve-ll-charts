@@ -115,17 +115,11 @@ const Data = () => {
     const millions = value / 1000000;
     return `$${millions.toFixed(2)}M`;
   };
-  const formatHours = (seconds) =>
-    seconds ? (seconds / 3600).toFixed(2) : '0';
 
   const getBoldClass = (isBold) => (isBold ? 'bold' : '');
 
   const findHighestValue = (values) => {
     return Math.max(...values);
-  };
-
-  const findLowestValue = (values) => {
-    return Math.min(...values);
   };
 
   const renderCombinedTable = () => {

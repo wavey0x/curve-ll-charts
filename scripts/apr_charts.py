@@ -7,6 +7,7 @@ import os
 import glob
 import json
 from scripts.compounder_info import update_info
+from scripts.treasury_balance_sheet import build_treasury_balance_sheet
 import utils.utils as utils
 
 DAY = 60 * 60 * 24
@@ -37,12 +38,27 @@ def main():
             print("❌ No cached Curve data available, proceeding without Curve data")
             curve_gauge_data = {}
 
+    treasury_balance_sheet = None
+    try:
+        treasury_balance_sheet = build_treasury_balance_sheet()
+        print("✅ Successfully captured treasury balance sheet")
+    except Exception as e:
+        print(f"❌ Error capturing treasury balance sheet: {e}")
+        print("📋 Preserving existing cached treasury balance sheet if available")
+
     # Generate chart data
     aprs_weekly = weekly_apr()
     aprs_since = apr_since()
 
     # Save raw chart data and Curve gauge data to ll_info.json
-    save_chart_data_to_cache(aprs_weekly, None, aprs_since, None, curve_gauge_data)
+    save_chart_data_to_cache(
+        aprs_weekly,
+        None,
+        aprs_since,
+        None,
+        curve_gauge_data,
+        treasury_balance_sheet,
+    )
 
     # Generate Altair charts (keeping existing functionality)
     # plot_aprs('Weekly_APRs_False', aprs_weekly)
@@ -224,7 +240,14 @@ def get_pps(vault_address, block):
 
 
 
-def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_since_peg, curve_gauge_data=None):
+def save_chart_data_to_cache(
+    aprs_weekly,
+    aprs_weekly_peg,
+    aprs_since,
+    aprs_since_peg,
+    curve_gauge_data=None,
+    treasury_balance_sheet=None,
+):
     """
     Save raw chart data and Curve gauge data to ll_info.json cache for use with Recharts
     """
@@ -255,7 +278,11 @@ def save_chart_data_to_cache(aprs_weekly, aprs_weekly_peg, aprs_since, aprs_sinc
     
     # Add chart data to cache
     cache_data['chart_data'] = chart_data
-    
+
+    if treasury_balance_sheet:
+        cache_data['treasury_balance_sheet'] = treasury_balance_sheet
+        print(f"Treasury balance sheet added to cache at {datetime.now()}")
+
     # Add Curve gauge data to cache if available
     if curve_gauge_data:
         # Check if this is fresh data from API (no 'curve_key' field) or cached data (already processed)

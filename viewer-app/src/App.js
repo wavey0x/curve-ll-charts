@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Link, useLocation, Navigate } f
 import axios from 'axios';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import HarvestTable from './components/HarvestTable';
 import Data from './components/Data';
+import Treasury from './components/Treasury';
 import GaugeSearch from './components/GaugeSearch';
 import Dao from './components/Dao';
 import { useFavorites } from './hooks/useFavorites';
@@ -38,6 +38,7 @@ const Navigation = () => {
   
   const navItems = [
     { path: '/', label: 'LL Data' },
+    { path: '/treasury', label: 'Treasury' },
     { path: '/gauges', label: 'Gauges' },
     { path: '/dao', label: 'DAO' },
   ];
@@ -200,6 +201,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<GaugeParamHandler />} />
+          <Route path="/treasury" element={<div className="data data-section"><Treasury /></div>} />
           <Route path="/dao" element={<div className="data data-section"><Dao /></div>} />
           <Route path="/gauges" element={<Gauges />} />
         </Routes>

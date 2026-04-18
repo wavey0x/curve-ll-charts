@@ -5,6 +5,8 @@ import os, json, glob
 from config import Config
 
 app = Flask(__name__)
+LL_INFO_CACHE_PATH = './data/ll_info.json'
+TOKEN_LOGO_CACHE_ROOT = os.path.join('cache', 'token-logos')
 
 # Configuration for the database
 app.config.from_object(Config)
@@ -82,6 +84,11 @@ class UserInfo(db.Model):
         }
 
 
+def load_ll_info_cache():
+    with open(LL_INFO_CACHE_PATH, 'r') as file:
+        return json.load(file)
+
+
 
 @app.route('/user_info', methods=['GET'])
 def get_user_info():
@@ -153,13 +160,32 @@ def get_harvests():
 @app.route('/api/crvlol/info')
 def ll_info():
     try:
-        # Open the JSON file and load its contents
-        with open('./data/ll_info.json', 'r') as file:
-            data = json.load(file)
-        # Return the JSON data as a response
+        data = load_ll_info_cache()
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/crvlol/treasury_balance_sheet')
+def treasury_balance_sheet():
+    try:
+        cache_data = load_ll_info_cache()
+        balance_sheet = cache_data.get('treasury_balance_sheet')
+
+        if not balance_sheet:
+            return jsonify({"error": "Treasury balance sheet not found in cache"}), 404
+
+        return jsonify(balance_sheet)
+    except FileNotFoundError:
+        return jsonify({"error": "Cache file not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/crvlol/token-logos/<int:chain_id>/<path:filename>')
+def get_token_logo(chain_id, filename):
+    directory = os.path.join(TOKEN_LOGO_CACHE_ROOT, str(chain_id))
+    return send_from_directory(directory, filename)
     
 # Serve the most recent chart JSON
 @app.route('/charts/<chart_name>/<peg>')
@@ -176,9 +202,7 @@ def get_chart(chart_name, peg):
 @app.route('/api/crvlol/chart-data/<chart_type>/<peg>')
 def get_chart_data(chart_type, peg):
     try:
-        # Load the cached data
-        with open('./data/ll_info.json', 'r') as file:
-            cache_data = json.load(file)
+        cache_data = load_ll_info_cache()
         
         if 'chart_data' not in cache_data:
             return jsonify({"error": "Chart data not found in cache"}), 404

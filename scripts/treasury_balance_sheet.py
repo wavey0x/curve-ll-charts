@@ -177,7 +177,9 @@ def get_treasury_crv_return_from_vest():
     available_limit = Decimal(
         vest_receiver.functions.available_limit().call()
     ) / Decimal(10**18)
-    return total_amount - available_limit
+    # Governance updates can raise the available limit to the full vest amount.
+    # Once that happens, nothing remains earmarked to return to the DAO.
+    return max(total_amount - available_limit, Decimal("0"))
 
 
 def build_balance_row(label, token_address, balance, price_snapshot, raw_balance, kind="token"):

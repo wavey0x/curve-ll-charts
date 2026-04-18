@@ -21,13 +21,6 @@ const formatBalance = (value) => {
   }).format(numericValue);
 };
 
-const formatTimestamp = (timestamp) =>
-  new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(new Date(timestamp * 1000));
-
 const shortenAddress = (address) =>
   address ? `${address.slice(0, 4)}...${address.slice(-3)}` : '';
 
@@ -73,14 +66,11 @@ const Treasury = () => {
   return (
     <div className="treasury-container">
       <div className="treasury-header">
-          <div className="treasury-total">
+        <div className="treasury-total">
           <div className="treasury-kicker">Total</div>
           <div className="treasury-total-value">
             {formatCurrency(balanceSheet.grand_total_usd)}
           </div>
-        </div>
-        <div className="treasury-meta">
-          <span>{formatTimestamp(balanceSheet.captured_at)} UTC</span>
         </div>
       </div>
 

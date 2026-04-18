@@ -1,183 +1,46 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import './Dao.css';
 
-// Configure axios with default settings for CORS
-const axiosInstance = axios.create({
-  timeout: 10000, // 10 seconds timeout
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-});
-
-// Helper function to retry API calls
-const retryApiCall = async (apiCall, maxRetries = 3, initialDelay = 1000) => {
-  let lastError = null;
-  let delay = initialDelay;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await apiCall();
-    } catch (error) {
-      lastError = error;
-      if (attempt < maxRetries) {
-        const currentDelay = delay;
-        await new Promise((resolve) => setTimeout(resolve, currentDelay));
-        delay *= 1.5; // Exponential backoff
-      }
-    }
-  }
-  throw lastError;
-};
-
 const Dao = () => {
-  const [governanceVotes, setGovernanceVotes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [proposalTitles, setProposalTitles] = useState({});
-  const [titlesLoading, setTitlesLoading] = useState(true);
-
-  const getEtherscanLink = (address) =>
-    `https://etherscan.io/address/${address}`;
-
-  const formatAddress = (address) => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
-
-  const fetchGovernanceVotes = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const apiBaseUrl =
-        process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
-      const response = await retryApiCall(() =>
-        axiosInstance.get(`${apiBaseUrl}/api/crvlol/gov_proposals`)
-      );
-      setGovernanceVotes(response.data.data);
-    } catch (err) {
-      setError('Failed to fetch governance votes');
-      console.error('Error fetching governance votes:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchProposalTitles = useCallback(async () => {
-    setTitlesLoading(true);
-    try {
-      // Fetch multiple pages to get enough proposals
-      const pages = [1, 2, 3];
-      const results = await Promise.all(
-        pages.map((page) =>
-          retryApiCall(() =>
-            axiosInstance.get(
-              `https://prices.curve.finance/v1/dao/proposals?pagination=25&page=${page}&status_filter=all&type_filter=all`
-            )
-          ).catch(() => null)
-        )
-      );
-
-      const titlesMap = {};
-      results.forEach((response) => {
-        if (response?.data?.proposals) {
-          response.data.proposals.forEach((proposal) => {
-            if (proposal.vote_id && proposal.metadata) {
-              titlesMap[String(proposal.vote_id)] = proposal.metadata;
-            }
-          });
-        }
-      });
-      setProposalTitles(titlesMap);
-    } catch (err) {
-      console.error('Error fetching proposal titles:', err);
-    } finally {
-      setTitlesLoading(false);
-    }
-  }, []);
-
-  const truncateTitle = (title, maxLength = 80) => {
-    if (!title || title.length <= maxLength) return title;
-    return title.slice(0, maxLength).trim() + '…';
-  };
-
-  useEffect(() => {
-    fetchGovernanceVotes();
-  }, [fetchGovernanceVotes]);
-
-  useEffect(() => {
-    fetchProposalTitles();
-  }, [fetchProposalTitles]);
+  const location = useLocation();
+  const isBalanceSheetView = location.pathname.endsWith('/balance-sheet');
 
   return (
     <div className="dao-container">
-      <div className="governance-votes-section">
-        <h2>Active Proposals</h2>
-        {loading ? (
-          <div className="loading">Loading active proposals...</div>
-        ) : error ? (
-          <div className="error">{error}</div>
-        ) : (
-          <ul className="governance-votes-list">
-            {governanceVotes.filter((vote) => vote.gauges.length > 0).map((vote) => (
-              <li key={vote.id} className="governance-vote-item">
-                <div className="proposal-header">
-                  <a
-                    href={`https://www.curve.finance/dao/ethereum/proposals/${vote.id}-ownership`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="governance-vote-link"
-                  >
-                    #{vote.id}
-                  </a>
-                  <span className="proposal-title">
-                    {titlesLoading ? (
-                      <span className="title-skeleton" />
-                    ) : proposalTitles[String(vote.id)] ? (
-                      truncateTitle(proposalTitles[String(vote.id)])
-                    ) : null}
-                  </span>
-                </div>
-                {vote.gauges.length > 0 && (
-                  <div className="gauges-section">
-                    {vote.isValid ? (
-                      <span className="valid-emoji">✅</span>
-                    ) : (
-                      <span className="invalid-emoji">❌</span>
-                    )}
-                    {vote.gauges.map((gauge) => (
-                      <a
-                        key={gauge}
-                        href={getEtherscanLink(gauge)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="gauge-link"
-                      >
-                        {formatAddress(gauge)}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="dao-header">
+        <h2>DAO</h2>
+        <p className="dao-header-copy">
+          Governance activity and treasury state for Curve-facing DAO workflows.
+        </p>
       </div>
-      <div className="dao-description">
-        This page shows all active Curve governance proposals. If a proposal
-        contains actions to add gauge(s) to the gauge controller, those addresses
-        are validated to ensure they've been deployed by a trusted factory. Data
-        is fetched on chain from my{' '}
-        <a
-          href="https://etherscan.io/address/0x60272833edd3f340f6436a8aaa83290c61524c44#code"
-          target="_blank"
-          rel="noopener noreferrer"
+
+      <div className="dao-view-switcher" role="tablist" aria-label="DAO views">
+        <NavLink
+          to="/dao/proposals"
+          className={({ isActive }) =>
+            `dao-view-link ${isActive ? 'active' : ''}`
+          }
         >
-          gauge validator
-        </a>{' '}
-        contract. It does not validate the LP token.
+          Proposals
+        </NavLink>
+        <NavLink
+          to="/dao/balance-sheet"
+          className={({ isActive }) =>
+            `dao-view-link ${isActive ? 'active' : ''}`
+          }
+        >
+          Balance Sheet
+        </NavLink>
       </div>
+
+      <div className="dao-view-copy">
+        {isBalanceSheetView
+          ? 'Current DAO-controlled wallet balances.'
+          : 'Active Curve governance proposals and gauge validations.'}
+      </div>
+
+      <Outlet />
     </div>
   );
 };

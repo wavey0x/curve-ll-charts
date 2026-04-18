@@ -7,6 +7,7 @@ import Data from './components/Data';
 import Treasury from './components/Treasury';
 import GaugeSearch from './components/GaugeSearch';
 import Dao from './components/Dao';
+import DaoProposals from './components/DaoProposals';
 import { useFavorites } from './hooks/useFavorites';
 
 // Debug: Log the environment variables
@@ -38,10 +39,19 @@ const Navigation = () => {
   
   const navItems = [
     { path: '/', label: 'LL Data' },
-    { path: '/treasury', label: 'Balance Sheet' },
     { path: '/gauges', label: 'Gauges' },
     { path: '/dao', label: 'DAO' },
   ];
+
+  const isActivePath = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+
+    return (
+      location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
+  };
 
   return (
     <nav className="navigation">
@@ -50,7 +60,7 @@ const Navigation = () => {
           <li key={item.path} className="nav-item">
             <Link 
               to={item.path} 
-              className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              className={`nav-link ${isActivePath(item.path) ? 'active' : ''}`}
             >
               {item.label}
             </Link>
@@ -201,8 +211,19 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<GaugeParamHandler />} />
-          <Route path="/treasury" element={<div className="data data-section"><Treasury /></div>} />
-          <Route path="/dao" element={<div className="data data-section"><Dao /></div>} />
+          <Route path="/treasury" element={<Navigate to="/dao/balance-sheet" replace />} />
+          <Route
+            path="/dao"
+            element={
+              <div className="data data-section">
+                <Dao />
+              </div>
+            }
+          >
+            <Route index element={<Navigate to="proposals" replace />} />
+            <Route path="proposals" element={<DaoProposals />} />
+            <Route path="balance-sheet" element={<Treasury />} />
+          </Route>
           <Route path="/gauges" element={<Gauges />} />
         </Routes>
       </Layout>

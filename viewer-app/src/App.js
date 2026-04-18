@@ -38,7 +38,7 @@ const Navigation = () => {
   
   const navItems = [
     { path: '/', label: 'LL Data' },
-    { path: '/treasury', label: 'Treasury' },
+    { path: '/treasury', label: 'Balance Sheet' },
     { path: '/gauges', label: 'Gauges' },
     { path: '/dao', label: 'DAO' },
   ];

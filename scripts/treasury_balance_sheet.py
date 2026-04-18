@@ -268,6 +268,7 @@ def build_treasury_balance_sheet():
 
     wallet_rows = []
     grand_total = Decimal("0")
+    vest_return_active = False
 
     for wallet_name, wallet_address in wallets:
         detail_rows = []
@@ -290,6 +291,7 @@ def build_treasury_balance_sheet():
         if wallet_name == "Community Fund":
             vest_return_balance = get_treasury_crv_return_from_vest()
             if vest_return_balance > 0:
+                vest_return_active = True
                 row, usd_value = build_balance_row(
                     label="*CRV (vest return)",
                     token_address=CRV,
@@ -314,6 +316,16 @@ def build_treasury_balance_sheet():
             }
         )
 
+    footnotes = []
+    if vest_return_active:
+        footnotes.append(
+            {
+                "label": "*",
+                "text": "To be returned to DAO at completion of vest",
+                "address": web3.to_checksum_address(TREASURY_RETURN_VEST),
+            }
+        )
+
     return {
         "title": "Treasury Wallet Balances",
         "currency": "USD",
@@ -323,12 +335,6 @@ def build_treasury_balance_sheet():
         "token_count": len(tokens),
         "wallets": wallet_rows,
         "grand_total_usd": decimal_to_string(grand_total),
-        "footnotes": [
-            {
-                "label": "*",
-                "text": "To be returned to DAO at completion of vest",
-                "address": web3.to_checksum_address(TREASURY_RETURN_VEST),
-            }
-        ],
+        "footnotes": footnotes,
         "last_updated": chain.time(),
     }

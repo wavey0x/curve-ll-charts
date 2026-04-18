@@ -12,8 +12,8 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #d9d9d9;
 }
 
@@ -39,7 +39,6 @@
 
 .treasury-meta {
   display: flex;
-  flex-direction: column;
   align-items: flex-end;
   gap: 4px;
   font-size: 12px;
@@ -50,27 +49,28 @@
 .treasury-wallets {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .treasury-wallet {
   border-top: 1px solid #111111;
-  padding-top: 12px;
+  padding-top: 10px;
 }
 
 .treasury-wallet-header {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
-.treasury-wallet-labels {
+.treasury-wallet-title {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
+  white-space: nowrap;
 }
 
 .treasury-wallet-name {
@@ -80,7 +80,7 @@
 
 .treasury-wallet-address,
 .treasury-footnote-link {
-  font-size: 12px;
+  font-size: 10px;
   color: #666666;
   text-decoration: none;
 }
@@ -102,12 +102,20 @@
 }
 
 .treasury-asset-row {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px 0;
+  padding: 8px 0;
   border-top: 1px solid #eeeeee;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
 }
 
 .treasury-asset-row-note {
@@ -125,14 +133,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
 .treasury-token-logo {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   display: block;
 }
@@ -141,48 +149,42 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: 1px solid #dcdcdc;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 9px;
   color: #666666;
 }
 
 .treasury-asset-label {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .treasury-asset-note {
-  font-size: 11px;
+  font-size: 10px;
   color: #777777;
 }
 
 .treasury-asset-values {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
   text-align: right;
   white-space: nowrap;
 }
 
-.treasury-asset-usd {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.treasury-asset-balance {
+.treasury-asset-value {
   font-size: 11px;
   color: #666666;
+  font-weight: 400;
 }
 
 .treasury-empty-row {
-  padding: 10px 0 2px;
+  padding: 8px 0 2px;
   font-size: 12px;
   color: #777777;
 }
@@ -230,6 +232,11 @@
   .treasury-asset-values {
     align-items: flex-start;
     text-align: left;
+  }
+
+  .treasury-wallet-title {
+    align-items: baseline;
+    gap: 4px;
   }
 
   .treasury-total-value {

@@ -29,7 +29,7 @@ const formatTimestamp = (timestamp) =>
   }).format(new Date(timestamp * 1000));
 
 const shortenAddress = (address) =>
-  address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
+  address ? `${address.slice(0, 4)}...${address.slice(-3)}` : '';
 
 const resolveApiAssetUrl = (path) => {
   if (!path) {
@@ -48,6 +48,8 @@ const Treasury = () => {
   const [balanceSheet, setBalanceSheet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [failedLogos, setFailedLogos] = useState({});
+  const [visibleBalances, setVisibleBalances] = useState({});
 
   useEffect(() => {
     const fetchBalanceSheet = async () => {
@@ -84,17 +86,14 @@ const Treasury = () => {
   return (
     <div className="treasury-container">
       <div className="treasury-header">
-        <div className="treasury-total">
-          <div className="treasury-kicker">Treasury</div>
+          <div className="treasury-total">
+          <div className="treasury-kicker">Total</div>
           <div className="treasury-total-value">
             {formatCurrency(balanceSheet.grand_total_usd)}
           </div>
         </div>
         <div className="treasury-meta">
           <span>{formatTimestamp(balanceSheet.captured_at)} UTC</span>
-          <span>
-            Block #{balanceSheet.captured_block?.toLocaleString('en-US')}
-          </span>
         </div>
       </div>
 
@@ -102,15 +101,15 @@ const Treasury = () => {
         {balanceSheet.wallets.map((wallet) => (
           <section key={wallet.address} className="treasury-wallet">
             <div className="treasury-wallet-header">
-              <div className="treasury-wallet-labels">
-                <div className="treasury-wallet-name">{wallet.name}</div>
+              <div className="treasury-wallet-title">
+                <span className="treasury-wallet-name">{wallet.name}</span>
                 <a
                   href={`https://etherscan.io/address/${wallet.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="treasury-wallet-address"
                 >
-                  {shortenAddress(wallet.address)}
+                  ({shortenAddress(wallet.address)})
                 </a>
               </div>
               <div className="treasury-wallet-total">
@@ -124,20 +123,35 @@ const Treasury = () => {
               )}
 
               {wallet.rows.map((row) => (
-                <div
+                <button
+                  type="button"
                   key={`${wallet.address}-${row.label}`}
                   className={`treasury-asset-row ${
                     row.kind === 'vest_return' ? 'treasury-asset-row-note' : ''
                   }`}
+                  onClick={() =>
+                    setVisibleBalances((current) => ({
+                      ...current,
+                      [`${wallet.address}-${row.label}`]:
+                        !current[`${wallet.address}-${row.label}`],
+                    }))
+                  }
                 >
                   <div className="treasury-asset-main">
                     <div className="treasury-token-logo-shell">
-                      {row.logo_path ? (
+                      {row.logo_path &&
+                      !failedLogos[`${wallet.address}-${row.label}`] ? (
                         <img
                           src={resolveApiAssetUrl(row.logo_path)}
                           alt=""
                           className="treasury-token-logo"
                           loading="lazy"
+                          onError={() =>
+                            setFailedLogos((current) => ({
+                              ...current,
+                              [`${wallet.address}-${row.label}`]: true,
+                            }))
+                          }
                         />
                       ) : (
                         <span className="treasury-token-fallback">
@@ -155,14 +169,13 @@ const Treasury = () => {
                     </div>
                   </div>
                   <div className="treasury-asset-values">
-                    <span className="treasury-asset-usd">
-                      {formatCurrency(row.usd_value)}
-                    </span>
-                    <span className="treasury-asset-balance">
-                      {formatBalance(row.balance)} {row.symbol}
+                    <span className="treasury-asset-value">
+                      {visibleBalances[`${wallet.address}-${row.label}`]
+                        ? `${formatBalance(row.balance)} ${row.symbol}`
+                        : formatCurrency(row.usd_value)}
                     </span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </section>

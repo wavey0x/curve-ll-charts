@@ -1,7 +1,8 @@
 /* DAO Component Styles - Following Style Guide */
 .dao-container {
   max-width: 100%;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
 }
 
 .dao-view-switcher {
@@ -29,7 +30,8 @@
 }
 
 .dao-description {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.5;
   color: #000000;
@@ -129,12 +131,7 @@
   width: 200px;
   height: 10px;
   vertical-align: middle;
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 0%,
-    #e0e0e0 50%,
-    #f0f0f0 100%
-  );
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 3px;
@@ -174,4 +171,10 @@
   color: #666666;
   background-color: #f0f0f0;
   text-decoration: underline;
+}
+
+.gauge-validation-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }

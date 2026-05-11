@@ -44,6 +44,13 @@ const DaoProposals = () => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  const getGaugeValidation = (vote, gauge) => {
+    if (!Array.isArray(vote.gaugeValidations)) return null;
+    return vote.gaugeValidations.find(
+      (validation) => validation.gauge.toLowerCase() === gauge.toLowerCase()
+    );
+  };
+
   const fetchGovernanceVotes = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -140,22 +147,34 @@ const DaoProposals = () => {
                   </div>
                   {vote.gauges.length > 0 && (
                     <div className="gauges-section">
-                      {vote.isValid ? (
+                      {!vote.gaugeValidations && vote.isValid ? (
                         <span className="valid-emoji">✅</span>
-                      ) : (
+                      ) : !vote.gaugeValidations ? (
                         <span className="invalid-emoji">❌</span>
-                      )}
-                      {vote.gauges.map((gauge) => (
-                        <a
-                          key={gauge}
-                          href={getEtherscanLink(gauge)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="gauge-link"
-                        >
-                          {formatAddress(gauge)}
-                        </a>
-                      ))}
+                      ) : null}
+                      {vote.gauges.map((gauge) => {
+                        const validation = getGaugeValidation(vote, gauge);
+
+                        return (
+                          <span key={gauge} className="gauge-validation-item">
+                            {validation ? (
+                              validation.valid ? (
+                                <span className="valid-emoji">✅</span>
+                              ) : (
+                                <span className="invalid-emoji">❌</span>
+                              )
+                            ) : null}
+                            <a
+                              href={getEtherscanLink(gauge)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="gauge-link"
+                            >
+                              {formatAddress(gauge)}
+                            </a>
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </li>
@@ -169,13 +188,14 @@ const DaoProposals = () => {
         addresses are validated to ensure they&apos;ve been deployed by a
         trusted factory. Data is fetched on chain from my{' '}
         <a
-          href="https://etherscan.io/address/0x60272833edd3f340f6436a8aaa83290c61524c44#code"
+          href="https://etherscan.io/address/0xd9B076a960B74ECc17ee4C76a29aa9AFff19F3C7#code"
           target="_blank"
           rel="noopener noreferrer"
         >
           gauge validator
         </a>{' '}
-        contract. It does not validate the LP token.
+        contract, which validates each parsed gauge against trusted Curve
+        factory lookup paths.
       </div>
     </div>
   );

@@ -56,8 +56,11 @@ const GaugeVotes = () => {
       }
 
       try {
+        const apiBaseUrl =
+          process.env.REACT_APP_API_BASE_URL || 'https://api.wavey.info';
+        const normalizedApiBaseUrl = apiBaseUrl.trim().replace(/\/+$/, '');
         const response = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL}/api/crvlol/gauge_votes`,
+          `${normalizedApiBaseUrl}/api/crvlol/gauge_votes`,
           {
             params: { gauge: gaugeAddress, page },
           }

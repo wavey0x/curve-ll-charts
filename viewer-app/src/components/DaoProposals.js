@@ -57,8 +57,9 @@ const DaoProposals = () => {
     try {
       const apiBaseUrl =
         process.env.REACT_APP_API_BASE_URL || 'http://192.168.1.87:8000';
+      const normalizedApiBaseUrl = apiBaseUrl.trim().replace(/\/+$/, '');
       const response = await retryApiCall(() =>
-        axiosInstance.get(`${apiBaseUrl}/api/crvlol/gov_proposals`)
+        axiosInstance.get(`${normalizedApiBaseUrl}/api/crvlol/gov_proposals`)
       );
       setGovernanceVotes(response.data.data);
     } catch (err) {
@@ -188,7 +189,7 @@ const DaoProposals = () => {
         addresses are validated to ensure they&apos;ve been deployed by a
         trusted factory. Data is fetched on chain from my{' '}
         <a
-          href="https://etherscan.io/address/0xd9B076a960B74ECc17ee4C76a29aa9AFff19F3C7#code"
+          href="https://etherscan.io/address/0x79746Fc3275E2ad36597AE0a721DE01DA6878A58#code"
           target="_blank"
           rel="noopener noreferrer"
         >

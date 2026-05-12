@@ -189,7 +189,7 @@ const DaoProposals = () => {
         addresses are validated to ensure they&apos;ve been deployed by a
         trusted factory. Data is fetched on chain from my{' '}
         <a
-          href="https://etherscan.io/address/0xF7Ff9B15F04c0bC3642f9614A777Eb48575B4018#code"
+          href="https://etherscan.io/address/0xbEF66C2c0Cd93C00C545938Ff3f5b50b2D91ccc6#code"
           target="_blank"
           rel="noopener noreferrer"
         >

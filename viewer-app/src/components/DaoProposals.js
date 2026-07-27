@@ -182,15 +182,14 @@ const DaoProposals = () => {
         addresses are validated to ensure they&apos;ve been deployed by a
         trusted factory. Data is fetched on chain from my{' '}
         <a
-          href="https://etherscan.io/address/0x999901cd8568Caafeb8888F18C1F5B870B58b7F2#code"
+          href="https://etherscan.io/address/0x999901076BB47Ae96d135C567610270d006B8684#code"
           target="_blank"
           rel="noopener noreferrer"
         >
           gauge validator
         </a>{' '}
-        system. Its current proposal module discovers every open ownership
-        proposal, while the stable validator checks each parsed gauge against
-        trusted Curve factory lookup paths.
+        system. The stable validator discovers every open ownership proposal and
+        checks each parsed gauge against trusted Curve factory lookup paths.
       </div>
     </div>
   );

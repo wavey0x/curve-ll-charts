@@ -44,13 +44,6 @@ const DaoProposals = () => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getGaugeValidation = (vote, gauge) => {
-    if (!Array.isArray(vote.gaugeValidations)) return null;
-    return vote.gaugeValidations.find(
-      (validation) => validation.gauge.toLowerCase() === gauge.toLowerCase()
-    );
-  };
-
   const fetchGovernanceVotes = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -107,6 +100,12 @@ const DaoProposals = () => {
     return title.slice(0, maxLength).trim() + '…';
   };
 
+  const gaugeStatusLabel = (status) => {
+    if (status === 'not_applicable') return 'No gauge additions';
+    if (status === 'unsupported') return 'Gauge analysis unsupported';
+    return null;
+  };
+
   useEffect(() => {
     fetchGovernanceVotes();
   }, [fetchGovernanceVotes]);
@@ -125,61 +124,55 @@ const DaoProposals = () => {
           <div className="error">{error}</div>
         ) : (
           <ul className="governance-votes-list">
-            {governanceVotes
-              .filter((vote) => vote.gauges.length > 0)
-              .map((vote) => (
-                <li key={vote.id} className="governance-vote-item">
-                  <div className="proposal-header">
-                    <a
-                      href={`https://www.curve.finance/dao/ethereum/proposals/${vote.id}-ownership`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="governance-vote-link"
-                    >
-                      #{vote.id}
-                    </a>
-                    <span className="proposal-title">
-                      {titlesLoading ? (
-                        <span className="title-skeleton" />
-                      ) : proposalTitles[String(vote.id)] ? (
-                        truncateTitle(proposalTitles[String(vote.id)])
-                      ) : null}
-                    </span>
+            {governanceVotes.map((vote) => (
+              <li key={vote.id} className="governance-vote-item">
+                <div className="proposal-header">
+                  <a
+                    href={`https://www.curve.finance/dao/ethereum/proposals/${vote.id}-ownership`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="governance-vote-link"
+                  >
+                    #{vote.id}
+                  </a>
+                  <span className="proposal-title">
+                    {titlesLoading ? (
+                      <span className="title-skeleton" />
+                    ) : proposalTitles[String(vote.id)] ? (
+                      truncateTitle(proposalTitles[String(vote.id)])
+                    ) : null}
+                  </span>
+                </div>
+                {vote.gaugeValidations.length > 0 ? (
+                  <div className="gauges-section">
+                    {vote.gaugeValidations.map((validation, index) => (
+                      <span
+                        key={`${validation.gauge}-${index}`}
+                        className="gauge-validation-item"
+                      >
+                        {validation.valid ? (
+                          <span className="valid-emoji">✅</span>
+                        ) : (
+                          <span className="invalid-emoji">❌</span>
+                        )}
+                        <a
+                          href={getEtherscanLink(validation.gauge)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="gauge-link"
+                        >
+                          {formatAddress(validation.gauge)}
+                        </a>
+                      </span>
+                    ))}
                   </div>
-                  {vote.gauges.length > 0 && (
-                    <div className="gauges-section">
-                      {!vote.gaugeValidations && vote.isValid ? (
-                        <span className="valid-emoji">✅</span>
-                      ) : !vote.gaugeValidations ? (
-                        <span className="invalid-emoji">❌</span>
-                      ) : null}
-                      {vote.gauges.map((gauge) => {
-                        const validation = getGaugeValidation(vote, gauge);
-
-                        return (
-                          <span key={gauge} className="gauge-validation-item">
-                            {validation ? (
-                              validation.valid ? (
-                                <span className="valid-emoji">✅</span>
-                              ) : (
-                                <span className="invalid-emoji">❌</span>
-                              )
-                            ) : null}
-                            <a
-                              href={getEtherscanLink(gauge)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="gauge-link"
-                            >
-                              {formatAddress(gauge)}
-                            </a>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </li>
-              ))}
+                ) : gaugeStatusLabel(vote.gaugeValidationStatus) ? (
+                  <div className="proposal-gauge-status">
+                    {gaugeStatusLabel(vote.gaugeValidationStatus)}
+                  </div>
+                ) : null}
+              </li>
+            ))}
           </ul>
         )}
       </div>
@@ -189,14 +182,15 @@ const DaoProposals = () => {
         addresses are validated to ensure they&apos;ve been deployed by a
         trusted factory. Data is fetched on chain from my{' '}
         <a
-          href="https://etherscan.io/address/0xbEF66C2c0Cd93C00C545938Ff3f5b50b2D91ccc6#code"
+          href="https://etherscan.io/address/0x999901cd8568Caafeb8888F18C1F5B870B58b7F2#code"
           target="_blank"
           rel="noopener noreferrer"
         >
           gauge validator
         </a>{' '}
-        contract, which validates each parsed gauge against trusted Curve
-        factory lookup paths.
+        system. Its current proposal module discovers every open ownership
+        proposal, while the stable validator checks each parsed gauge against
+        trusted Curve factory lookup paths.
       </div>
     </div>
   );

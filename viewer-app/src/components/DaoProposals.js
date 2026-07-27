@@ -101,7 +101,6 @@ const DaoProposals = () => {
   };
 
   const gaugeStatusLabel = (status) => {
-    if (status === 'not_applicable') return 'No gauge additions';
     if (status === 'unsupported') return 'Gauge analysis unsupported';
     return null;
   };

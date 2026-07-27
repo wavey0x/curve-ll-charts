@@ -46,11 +46,11 @@ afterEach(() => {
   apiGet.mockReset();
 });
 
-test('renders every active proposal and treats empty gauge analysis as not applicable', async () => {
+test('renders every active proposal without labeling proposals that have no gauges', async () => {
   render(<DaoProposals />);
 
   expect(await screen.findByText('#101')).toBeInTheDocument();
   expect(screen.getByText('#102')).toBeInTheDocument();
-  expect(screen.getByText('No gauge additions')).toBeInTheDocument();
+  expect(screen.queryByText('No gauge additions')).not.toBeInTheDocument();
   expect(screen.getByText('0xbe04...A14e')).toBeInTheDocument();
 });

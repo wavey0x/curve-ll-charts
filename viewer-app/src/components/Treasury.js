@@ -24,6 +24,9 @@ const formatBalance = (value) => {
 const shortenAddress = (address) =>
   address ? `${address.slice(0, 4)}...${address.slice(-3)}` : '';
 
+const getAssetRowKey = (wallet, row) =>
+  `${wallet.address}-${row.token_address}-${row.kind}`;
+
 const Treasury = () => {
   const [balanceSheet, setBalanceSheet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +70,11 @@ const Treasury = () => {
     <div className="treasury-container">
       <div className="treasury-header">
         <div className="treasury-total">
-          <div className="treasury-kicker">Total</div>
+          <div className="treasury-kicker">
+            {balanceSheet.totals_are_partial
+              ? 'Total (priced assets)'
+              : 'Total'}
+          </div>
           <div className="treasury-total-value">
             {formatCurrency(balanceSheet.grand_total_usd)}
           </div>
@@ -102,22 +109,22 @@ const Treasury = () => {
               {wallet.rows.map((row) => (
                 <button
                   type="button"
-                  key={`${wallet.address}-${row.label}`}
+                  key={getAssetRowKey(wallet, row)}
                   className={`treasury-asset-row ${
                     row.kind === 'vest_return' ? 'treasury-asset-row-note' : ''
                   }`}
                   onClick={() =>
                     setVisibleBalances((current) => ({
                       ...current,
-                      [`${wallet.address}-${row.label}`]:
-                        !current[`${wallet.address}-${row.label}`],
+                      [getAssetRowKey(wallet, row)]:
+                        !current[getAssetRowKey(wallet, row)],
                     }))
                   }
                 >
                   <div className="treasury-asset-main">
                     <div className="treasury-token-logo-shell">
                       {row.logo_url &&
-                      !failedLogos[`${wallet.address}-${row.label}`] ? (
+                      !failedLogos[getAssetRowKey(wallet, row)] ? (
                         <img
                           src={row.logo_url}
                           alt=""
@@ -126,7 +133,7 @@ const Treasury = () => {
                           onError={() =>
                             setFailedLogos((current) => ({
                               ...current,
-                              [`${wallet.address}-${row.label}`]: true,
+                              [getAssetRowKey(wallet, row)]: true,
                             }))
                           }
                         />
@@ -147,9 +154,11 @@ const Treasury = () => {
                   </div>
                   <div className="treasury-asset-values">
                     <span className="treasury-asset-value">
-                      {visibleBalances[`${wallet.address}-${row.label}`]
+                      {visibleBalances[getAssetRowKey(wallet, row)]
                         ? `${formatBalance(row.balance)} ${row.symbol}`
-                        : formatCurrency(row.usd_value)}
+                        : row.usd_value == null
+                          ? 'Unpriced'
+                          : formatCurrency(row.usd_value)}
                     </span>
                   </div>
                 </button>

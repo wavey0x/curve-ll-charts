@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import axios from 'axios';
 import Treasury from './Treasury';
 
@@ -27,6 +27,16 @@ beforeEach(() => {
               usd_value: null,
               pricing_status: 'unpriced',
             },
+            {
+              label: 'sfrxUSD',
+              symbol: 'sfrxUSD',
+              token_address: '0xcf62F905562626CfcDD2261162a51fd02Fc9c5b6',
+              kind: 'token',
+              logo_url: '',
+              balance: '20',
+              usd_value: '24',
+              pricing_status: 'priced',
+            },
           ],
         },
       ],
@@ -39,10 +49,27 @@ afterEach(() => {
   axios.get.mockReset();
 });
 
-test('renders dynamically discovered holdings even when a price is unavailable', async () => {
+test('toggles every row between USD values and symbol-free token amounts', async () => {
   render(<Treasury />);
 
   expect(await screen.findByText('sDOLA')).toBeInTheDocument();
   expect(screen.getByText('Unpriced')).toBeInTheDocument();
+  expect(screen.getByText('$24')).toBeInTheDocument();
   expect(screen.getByText('Total (priced assets)')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('sDOLA').closest('button'));
+
+  expect(screen.getByText('10')).toBeInTheDocument();
+  expect(screen.getByText('20')).toBeInTheDocument();
+  expect(screen.queryByText('10 sDOLA')).not.toBeInTheDocument();
+  expect(screen.queryByText('20 sfrxUSD')).not.toBeInTheDocument();
+  expect(screen.queryByText('Unpriced')).not.toBeInTheDocument();
+  expect(screen.queryByText('$24')).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('sfrxUSD').closest('button'));
+
+  expect(screen.getByText('Unpriced')).toBeInTheDocument();
+  expect(screen.getByText('$24')).toBeInTheDocument();
+  expect(screen.queryByText('10')).not.toBeInTheDocument();
+  expect(screen.queryByText('20')).not.toBeInTheDocument();
 });

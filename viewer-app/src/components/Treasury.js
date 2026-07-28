@@ -32,7 +32,7 @@ const Treasury = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [failedLogos, setFailedLogos] = useState({});
-  const [visibleBalances, setVisibleBalances] = useState({});
+  const [showTokenAmounts, setShowTokenAmounts] = useState(false);
 
   useEffect(() => {
     const fetchBalanceSheet = async () => {
@@ -113,13 +113,7 @@ const Treasury = () => {
                   className={`treasury-asset-row ${
                     row.kind === 'vest_return' ? 'treasury-asset-row-note' : ''
                   }`}
-                  onClick={() =>
-                    setVisibleBalances((current) => ({
-                      ...current,
-                      [getAssetRowKey(wallet, row)]:
-                        !current[getAssetRowKey(wallet, row)],
-                    }))
-                  }
+                  onClick={() => setShowTokenAmounts((current) => !current)}
                 >
                   <div className="treasury-asset-main">
                     <div className="treasury-token-logo-shell">
@@ -154,8 +148,8 @@ const Treasury = () => {
                   </div>
                   <div className="treasury-asset-values">
                     <span className="treasury-asset-value">
-                      {visibleBalances[getAssetRowKey(wallet, row)]
-                        ? `${formatBalance(row.balance)} ${row.symbol}`
+                      {showTokenAmounts
+                        ? formatBalance(row.balance)
                         : row.usd_value == null
                           ? 'Unpriced'
                           : formatCurrency(row.usd_value)}

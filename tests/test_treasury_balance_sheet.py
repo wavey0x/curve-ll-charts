@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from web3 import Web3
 
-from scripts import treasury_balance_sheet as balance_sheet
+from crv_lol import treasury as balance_sheet
 
 
 SDOLA = Web3.to_checksum_address("0xb45ad160634c528Cc3D2926d9807104FA3157305")

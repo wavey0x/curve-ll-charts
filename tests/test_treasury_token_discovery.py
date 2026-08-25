@@ -1,6 +1,6 @@
 from web3 import Web3
 
-from scripts import treasury_token_discovery as discovery
+from crv_lol import treasury_discovery as discovery
 
 
 SDOLA = "0xb45ad160634c528Cc3D2926d9807104FA3157305"

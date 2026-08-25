@@ -1,0 +1,338 @@
+/* FavoritesTable Component - Following Style Guide */
+.favorites-section {
+  background: #ffffff;
+  margin: 4px auto;
+  max-width: 600px;
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+}
+
+.favorites-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0;
+  background: #ffffff;
+  cursor: pointer;
+  transition: color 0.1s ease;
+}
+
+.favorites-header:hover {
+  color: #666666;
+}
+
+.favorites-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapse-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.collapse-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.favorites-content {
+  padding: 0;
+  overflow-x: auto;
+}
+
+.no-favorites {
+  padding: 20px 16px;
+  text-align: center;
+  color: #555555;
+  font-size: 13px;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.favorites-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #ffffff;
+  table-layout: auto;
+  min-width: 500px;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #e0e0e0;
+}
+
+.favorites-table th {
+  background: #ffffff;
+  padding: 4px 8px;
+  text-align: center;
+  font-weight: 700;
+  color: #000000;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.favorites-table th:nth-child(1) {
+  width: 45%;
+  min-width: 150px;
+}
+.favorites-table th:nth-child(2) {
+  width: 27%;
+  min-width: 110px;
+}
+.favorites-table th:nth-child(3) {
+  width: 26%;
+  min-width: 110px;
+}
+.favorites-table th:nth-child(4) {
+  width: 1%;
+  min-width: 20px;
+}
+.favorites-table th:nth-child(5) {
+  width: 1%;
+  min-width: 20px;
+}
+
+.favorites-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #000000;
+  text-align: left;
+}
+
+.favorites-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.favorite-row:hover {
+  background: #f8f8f8;
+}
+
+.gauge-name {
+  font-weight: 400;
+  color: #000000;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow: visible;
+}
+
+.gauge-link-button {
+  background: none;
+  border: none;
+  color: #000000;
+  cursor: pointer;
+  font-weight: 400;
+  text-decoration: underline;
+  padding: 0;
+  font-size: inherit;
+  transition: color 0.1s ease;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+}
+
+.gauge-link-button:hover {
+  color: #666666;
+}
+
+.address-cell {
+  font-size: 11px;
+  color: #000000;
+}
+
+.address-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.address-text {
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #000000;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  color: #555555;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px;
+  transition: color 0.1s ease;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-button:hover {
+  color: #666666;
+}
+
+.copy-button.copied {
+  color: #666666;
+}
+
+.link-cell {
+  text-align: center;
+  min-width: 20px;
+  padding: 4px 2px;
+  width: 20px;
+}
+
+.curve-link {
+  color: #000000;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.1s ease;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  line-height: 16px;
+}
+
+.curve-link:hover {
+  color: #666666;
+}
+
+.delete-cell {
+  text-align: center;
+  min-width: 20px;
+  padding: 4px 2px;
+  width: 20px;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #000000;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px;
+  transition: background-color 0.1s ease;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.delete-button:hover {
+  background: #f8f8f8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .favorites-table {
+    font-size: 10px;
+    min-width: 400px;
+  }
+
+  .favorites-table th,
+  .favorites-table td {
+    padding: 2px 4px;
+  }
+
+  .favorites-table th:nth-child(1) {
+    min-width: 140px;
+    width: 50%;
+  }
+  .favorites-table th:nth-child(2) {
+    min-width: 90px;
+    width: 25%;
+  }
+  .favorites-table th:nth-child(3) {
+    min-width: 90px;
+    width: 23%;
+  }
+  .favorites-table th:nth-child(4) {
+    min-width: 20px;
+    width: 1%;
+  }
+  .favorites-table th:nth-child(5) {
+    min-width: 20px;
+    width: 1%;
+  }
+
+  .address-text {
+    font-size: 9px;
+    width: 70px;
+  }
+
+  .gauge-link-button {
+    font-size: 10px;
+  }
+
+  .copy-button {
+    width: 12px;
+    height: 12px;
+    font-size: 9px;
+  }
+
+  .curve-link {
+    font-size: 10px;
+  }
+
+  .delete-button {
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorites-table {
+    min-width: 320px;
+    font-size: 9px;
+  }
+
+  .favorites-table th,
+  .favorites-table td {
+    padding: 2px 3px;
+  }
+
+  .favorites-table th:nth-child(1) {
+    width: 54%;
+    min-width: 120px;
+  }
+  .favorites-table th:nth-child(2) {
+    width: 23%;
+    min-width: 70px;
+  }
+  .favorites-table th:nth-child(3) {
+    width: 21%;
+    min-width: 70px;
+  }
+  .favorites-table th:nth-child(4),
+  .favorites-table th:nth-child(5) {
+    width: 1%;
+    min-width: 20px;
+  }
+
+  .address-text {
+    width: 55px;
+  }
+}

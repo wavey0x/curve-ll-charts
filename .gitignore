@@ -4,6 +4,4 @@ __pycache__
 .hypothesis/
 build/
 reports/
-charts/
-data
 cache/token-logos/

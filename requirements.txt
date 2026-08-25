@@ -1,4 +1,5 @@
 brownie
-altair
 pandas
 joblib
+requests
+pytest

@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh CRV.LOL snapshot every 10 minutes
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+Unit=crv-lol-refresh.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=Refresh CRV.LOL snapshot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=wavey
+Group=wavey
+WorkingDirectory=/home/wavey/crv-lol
+EnvironmentFile=/home/wavey/crv-lol/.env
+Environment=CRVLOL_SNAPSHOT_PATH=/var/lib/crv-lol/snapshot.json
+ExecStart=/home/wavey/crv-lol/venv/bin/brownie run refresh --network electro

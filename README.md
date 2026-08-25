@@ -20,6 +20,8 @@ brownie run refresh --network electro
 
 The refresh is assembled in memory and atomically replaces the snapshot only
 after validation. A failed refresh leaves the last-known-good snapshot intact.
+Production runs `deploy/systemd/crv-lol-refresh.service` from its timer; only
+the timer is enabled.
 
 ## Web application
 
